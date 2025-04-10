@@ -2,20 +2,27 @@
 <html lang="az">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Giriş Formu</title>
   <style>
     * {
       box-sizing: border-box;
+      padding: 0;
+      margin: 0;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     body {
-      background: #f2f2f2;
-      font-family: Arial, sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
+      padding: 0 20px;
     }
 
     form {
@@ -35,7 +42,7 @@
 
     input {
       width: 100%;
-      padding: 12px 15px;
+      padding: 14px 16px;
       margin-bottom: 15px;
       border-radius: 8px;
       border: 1px solid #ccc;
@@ -59,14 +66,18 @@
       background-color: #0056b3;
     }
 
-    @media (max-width: 480px) {
+    .back-btn {
+      background-color: #28a745;
+      margin-top: 15px;
+    }
+
+    .back-btn:hover {
+      background-color: #218838;
+    }
+
+    @media (max-height: 500px) {
       form {
         padding: 20px;
-      }
-
-      input, button {
-        font-size: 14px;
-        padding: 10px;
       }
     }
   </style>
@@ -79,7 +90,9 @@
   <input type="email" name="email" placeholder="Email" required>
   <input type="password" name="sifre" placeholder="Şifrə" required>
   <button type="submit">Göndər</button>
+  <button class="back-btn" type="button" onclick="window.location.href='https://mccleaurg-glionts-twaency.yolasite.com';">Əsas səhifəyə qayıt</button>
 </form>
 
 </body>
 </html>
+
