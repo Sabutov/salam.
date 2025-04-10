@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <title>Canlı Futbol Nəticələri</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f3f3f3;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    select {
+      display: block;
+      margin: 20px auto;
+      padding: 10px;
+      font-size: 16px;
+    }
+    h2 {
+      background-color: #0044cc;
+      color: white;
+      padding: 10px;
+      margin-top: 30px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      margin-bottom: 20px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+    .loading {
+      text-align: center;
+      font-size: 18px;
+      color: #888;
+    }
+    .team-logo, .league-logo {
+      vertical-align: middle;
+      width: 20px;
+      height: 20px;
+      margin-right: 5px;
+    }
+    .team-name {
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Canlı Futbol Nəticələri (Ölkələrə görə)</h1>
+
+  <select id="countryFilter">
+    <option value="all">Bütün Ölkələr</option>
+  </select>
+
+  <div id="loading" class="loading">Yüklənir...</div>
+  <div id="matchContainer"></div>
+
+  <script>
+    const apiKey = "3f426cce1b4e65b75820082203f38e09"; // Öz API açarını buraya yaz
+    const apiUrl = "https://v3.football.api-sports.io/fixtures?live=all";
+
+    async function fetchMatches() {
+      document.getElementById("loading").style.display = "block";
+      const container = document.getElementById("matchContainer");
+      const countryFilter = document.getElementById("countryFilter");
+      const selectedCountry = countryFilter.value;
+      container.innerHTML = "";
+
+      try {
+        const response = await fetch(apiUrl, {
+          method: "GET",
+          headers: {
+            "x-apisports-key": apiKey
+          }
+        });
+
+        const data = await response.json();
+        const matches = data.response;
+
+        const groupedByCountry = {};
+        const countryList = new Set();
+
+        matches.forEach(match => {
+          const country = match.league.country || "Bilinməyən";
+          countryList.add(country);
+          if (!groupedByCountry[country]) {
+            groupedByCountry[country] = [];
+          }
+          groupedByCountry[country].push(match);
+        });
+
+        // Dropdown siyahısını doldur (yalnız ilk dəfə)
+        if (countryFilter.options.length === 1) {
+          Array.from(countryList).sort().forEach(country => {
+            const option = document.createElement("option");
+            option.value = country;
+            option.textContent = country;
+            countryFilter.appendChild(option);
+          });
+        }
+
+        if (matches.length === 0) {
+          container.innerHTML = "<p style='text-align:center; color: gray;'>Hazırda canlı oyun yoxdur.</p>";
+        }
+
+        for (const country in groupedByCountry) {
+          if (selectedCountry !== "all" && country !== selectedCountry) continue;
+
+          const countryHeader = document.createElement("h2");
+          countryHeader.textContent = country;
+          container.appendChild(countryHeader);
+
+          const table = document.createElement("table");
+          table.innerHTML = `
+            <thead>
+              <tr>
+                <th>Tarix</th>
+                <th>Komandalar</th>
+                <th>Nəticə</th>
+                <th>Status</th>
+                <th>Turnir</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          `;
+
+          const tbody = table.querySelector("tbody");
+
+          groupedByCountry[country].forEach(match => {
+            const date = new Date(match.fixture.date).toLocaleString();
+            const homeTeam = `
+              <img class="team-logo" src="${match.teams.home.logo}" alt="${match.teams.home.name} loqosu">
+              <span class="team-name">${match.teams.home.name}</span>
+            `;
+            const awayTeam = `
+              <img class="team-logo" src="${match.teams.away.logo}" alt="${match.teams.away.name} loqosu">
+              <span class="team-name">${match.teams.away.name}</span>
+            `;
+            const score = `${match.goals.home} - ${match.goals.away}`;
+            const status = match.fixture.status.long;
+            const league = `
+              <img class="league-logo" src="${match.league.logo}" alt="${match.league.name}">
+              ${match.league.name}
+            `;
+
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${date}</td>
+              <td>${homeTeam} vs ${awayTeam}</td>
+              <td>${score}</td>
+              <td>${status}</td>
+              <td>${league}</td>
+            `;
+            tbody.appendChild(row);
+          });
+
+          container.appendChild(table);
+        }
+
+        document.getElementById("loading").style.display = "none";
+      } catch (error) {
+        console.error("Xəta:", error);
+        document.getElementById("loading").textContent = "Məlumat yüklənə bilmədi.";
+      }
+    }
+
+    // İlk dəfə yüklə
+    fetchMatches();
+
+    // Hər 30 saniyədə yenilə
+    setInterval(fetchMatches, 30000);
+
+    // Filtr dəyişdikdə yenidən yüklə
+    document.getElementById("countryFilter").addEventListener("change", fetchMatches);
+  </script>
+
+</body>
+</html>
