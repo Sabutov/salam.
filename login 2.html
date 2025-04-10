@@ -2,96 +2,187 @@
 <html lang="az">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Giriş Formu</title>
+  <title>Canlı Futbol Nəticələri</title>
   <style>
-    * {
-      box-sizing: border-box;
-      padding: 0;
-      margin: 0;
-    }
-
-    html, body {
-      height: 100%;
-      width: 100%;
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
     body {
-      padding: 0 20px;
+      font-family: sans-serif;
+      background-color: #f3f3f3;
+      padding: 20px;
     }
-
-    form {
-      background: #fff;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      width: 100%;
-      max-width: 400px;
-    }
-
-    h2 {
+    h1 {
       text-align: center;
-      margin-bottom: 20px;
-      color: #333;
     }
-
-    input {
-      width: 100%;
-      padding: 14px 16px;
-      margin-bottom: 15px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
+    select {
+      display: block;
+      margin: 20px auto;
+      padding: 10px;
       font-size: 16px;
     }
-
-    button {
-      background-color: #007BFF;
+    h2 {
+      background-color: #0044cc;
       color: white;
-      border: none;
-      padding: 14px;
+      padding: 10px;
+      margin-top: 30px;
+    }
+    table {
       width: 100%;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
+      border-collapse: collapse;
+      background: white;
+      margin-bottom: 20px;
     }
-
-    button:hover {
-      background-color: #0056b3;
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: center;
     }
-
-    .back-btn {
-      background-color: #28a745;
-      margin-top: 15px;
+    th {
+      background-color: #f0f0f0;
     }
-
-    .back-btn:hover {
-      background-color: #218838;
+    .loading {
+      text-align: center;
+      font-size: 18px;
+      color: #888;
     }
-
-    @media (max-height: 500px) {
-      form {
-        padding: 20px;
-      }
+    .team-logo, .league-logo {
+      vertical-align: middle;
+      width: 20px;
+      height: 20px;
+      margin-right: 5px;
+    }
+    .team-name {
+      vertical-align: middle;
     }
   </style>
 </head>
 <body>
 
-<form action="https://formspree.io/f/mpwpklyg" method="POST">
-  <h2>Giriş Formu</h2>
-  <input type="text" name="ad" placeholder="Adınız" required>
-  <input type="email" name="email" placeholder="Email" required>
-  <input type="password" name="sifre" placeholder="Şifrə" required>
-  <button type="submit">Göndər</button>
-  <button class="back-btn" type="button" onclick="window.location.href='index.html';">Əsas səhifəyə qayıt</button>
-</form>
+  <h1>Canlı Futbol Nəticələri (Ölkələrə görə)</h1>
+
+  <select id="countryFilter">
+    <option value="all">Bütün Ölkələr</option>
+  </select>
+
+  <div id="loading" class="loading">Yüklənir...</div>
+  <div id="matchContainer"></div>
+
+  <script>
+    const apiKey = "3f426cce1b4e65b75820082203f38e09"; // Öz API açarını buraya yaz
+    const apiUrl = "https://v3.football.api-sports.io/fixtures?live=all";
+
+    async function fetchMatches() {
+      document.getElementById("loading").style.display = "block";
+      const container = document.getElementById("matchContainer");
+      const countryFilter = document.getElementById("countryFilter");
+      const selectedCountry = countryFilter.value;
+      container.innerHTML = "";
+
+      try {
+        const response = await fetch(apiUrl, {
+          method: "GET",
+          headers: {
+            "x-apisports-key": apiKey
+          }
+        });
+
+        const data = await response.json();
+        const matches = data.response;
+
+        const groupedByCountry = {};
+        const countryList = new Set();
+
+        matches.forEach(match => {
+          const country = match.league.country || "Bilinməyən";
+          countryList.add(country);
+          if (!groupedByCountry[country]) {
+            groupedByCountry[country] = [];
+          }
+          groupedByCountry[country].push(match);
+        });
+
+        // Dropdown siyahısını doldur (yalnız ilk dəfə)
+        if (countryFilter.options.length === 1) {
+          Array.from(countryList).sort().forEach(country => {
+            const option = document.createElement("option");
+            option.value = country;
+            option.textContent = country;
+            countryFilter.appendChild(option);
+          });
+        }
+
+        if (matches.length === 0) {
+          container.innerHTML = "<p style='text-align:center; color: gray;'>Hazırda canlı oyun yoxdur.</p>";
+        }
+
+        for (const country in groupedByCountry) {
+          if (selectedCountry !== "all" && country !== selectedCountry) continue;
+
+          const countryHeader = document.createElement("h2");
+          countryHeader.textContent = country;
+          container.appendChild(countryHeader);
+
+          const table = document.createElement("table");
+          table.innerHTML = `
+            <thead>
+              <tr>
+                <th>Tarix</th>
+                <th>Komandalar</th>
+                <th>Nəticə</th>
+                <th>Status</th>
+                <th>Turnir</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          `;
+
+          const tbody = table.querySelector("tbody");
+
+          groupedByCountry[country].forEach(match => {
+            const date = new Date(match.fixture.date).toLocaleString();
+            const homeTeam = `
+              <img class="team-logo" src="${match.teams.home.logo}" alt="${match.teams.home.name} loqosu">
+              <span class="team-name">${match.teams.home.name}</span>
+            `;
+            const awayTeam = `
+              <img class="team-logo" src="${match.teams.away.logo}" alt="${match.teams.away.name} loqosu">
+              <span class="team-name">${match.teams.away.name}</span>
+            `;
+            const score = `${match.goals.home} - ${match.goals.away}`;
+            const status = match.fixture.status.long;
+            const league = `
+              <img class="league-logo" src="${match.league.logo}" alt="${match.league.name}">
+              ${match.league.name}
+            `;
+
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${date}</td>
+              <td>${homeTeam} vs ${awayTeam}</td>
+              <td>${score}</td>
+              <td>${status}</td>
+              <td>${league}</td>
+            `;
+            tbody.appendChild(row);
+          });
+
+          container.appendChild(table);
+        }
+
+        document.getElementById("loading").style.display = "none";
+      } catch (error) {
+        console.error("Xəta:", error);
+        document.getElementById("loading").textContent = "Məlumat yüklənə bilmədi.";
+      }
+    }
+
+    // İlk dəfə yüklə
+    fetchMatches();
+
+    // Hər 30 saniyədə yenilə
+    setInterval(fetchMatches, 30000);
+
+    // Filtr dəyişdikdə yenidən yüklə
+    document.getElementById("countryFilter").addEventListener("change", fetchMatches);
+  </script>
 
 </body>
 </html>
