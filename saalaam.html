@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <title>Futbol Nəticələri</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 10px;
+      background: linear-gradient(to right, #e0f7fa, #e0f2f1);
+      color: #333;
+    }
+    header {
+      background: #00796b;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    #goBackButton {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background-color: #00796b;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      z-index: 999;
+    }
+    #goBackButton:hover {
+      background-color: #004d40;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 20px 0;
+      justify-content: center;
+    }
+    input, select, button {
+      padding: 10px;
+      border: 1px solid #bbb;
+      border-radius: 5px;
+      font-size: 1em;
+      background: white;
+      min-width: 150px;
+    }
+    .match {
+      background: #fff;
+      padding: 20px;
+      margin: 10px auto;
+      max-width: 800px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .teams {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .team-logo {
+      width: 32px;
+      height: 32px;
+    }
+    .stat { margin-top: 10px; width: 100%; }
+    canvas { max-width: 100% !important; }
+    .stat-divider {
+      border-top: 2px solid #00796b;
+      width: 80%;
+      margin: 10px 0;
+    }
+    .squad {
+      margin-top: 15px;
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      gap: 20px;
+    }
+    .squad ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    .squad li {
+      margin: 5px 0;
+    }
+    @media(max-width: 768px) {
+      .controls { flex-direction: column; align-items: stretch; }
+    }
+    #backToTop {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #00796b;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 20px;
+      cursor: pointer;
+      display: none;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+
+  <button id="goBackButton" onclick="goBack()">← Geri Qayıt</button>
+
+  <header>
+    <h1>Oyun Nəticələri və keçiriləcək oyunlar</h1>
+  </header>
+
+  <div class="controls">
+    <input type="date" id="dateInput">
+    <input type="text" id="searchInput" placeholder="Komanda axtar...">
+    <select id="countryFilter">
+      <option value="">🌍 Bütün ölkələr</option>
+    </select>
+    <select id="leagueFilter">
+      <option value="">🏆 Bütün turnirlər</option>
+    </select>
+    <button onclick="fetchMatches()">🔄 Yenilə</button>
+  </div>
+
+  <h2>📜 Keçmiş Oyunlar</h2>
+  <div id="past-matches">Yüklənir...</div>
+
+  <h2>🗓️ Gələcək Oyunlar</h2>
+  <div id="upcoming-matches">Yüklənir...</div>
+
+  <button id="backToTop" onclick="scrollToTop()">↑</button>
+
+  <script>
+    const dateInput = document.getElementById('dateInput');
+    const searchInput = document.getElementById('searchInput');
+    const countryFilter = document.getElementById('countryFilter');
+    const leagueFilter = document.getElementById('leagueFilter');
+    dateInput.value = new Date().toISOString().split('T')[0];
+
+    let refreshInterval = setInterval(fetchMatches, 60000);
+
+    async function fetchMatches() {
+      const date = dateInput.value;
+      const search = searchInput.value.toLowerCase();
+      const selectedCountry = countryFilter.value;
+      const selectedLeague = leagueFilter.value;
+      try {
+        const res = await fetch(`https://api.sofascore.com/api/v1/sport/football/scheduled-events/${date}`);
+        const data = await res.json();
+        const events = data.events;
+
+        const countries = [...new Set(events.map(e => e.tournament.category.country.name))];
+        const leagues = [...new Set(events.map(e => e.tournament.name))];
+        countryFilter.innerHTML = '<option value="">🌍 Bütün ölkələr</option>' + countries.map(c => `<option value="${c}">${c}</option>`).join('');
+        leagueFilter.innerHTML = '<option value="">🏆 Bütün turnirlər</option>' + leagues.map(l => `<option value="${l}">${l}</option>`).join('');
+
+        const filtered = events.filter(e =>
+          (e.homeTeam.name.toLowerCase().includes(search) || e.awayTeam.name.toLowerCase().includes(search)) &&
+          (selectedCountry === '' || e.tournament.category.country.name === selectedCountry) &&
+          (selectedLeague === '' || e.tournament.name === selectedLeague)
+        );
+
+        const past = filtered.filter(e => e.status.type === "finished");
+        const upcoming = filtered.filter(e => e.status.type === "notstarted");
+
+        displayMatches(past, 'past-matches', true);
+        displayMatches(upcoming, 'upcoming-matches', false);
+
+      } catch (err) {
+        document.getElementById('past-matches').innerText = '❌ Xəta baş verdi.';
+        document.getElementById('upcoming-matches').innerText = '❌ Xəta baş verdi.';
+      }
+    }
+
+    async function displayMatches(matches, elementId, loadStats = false) {
+      const container = document.getElementById(elementId);
+      container.innerHTML = '';
+      if (matches.length === 0) {
+        container.innerText = '⚠️ Oyun tapılmadı.';
+        return;
+      }
+
+      for (const match of matches.slice(0, 5)) {
+        const logo1 = `https://api.sofascore.app/api/v1/team/${match.homeTeam.id}/image`;
+        const logo2 = `https://api.sofascore.app/api/v1/team/${match.awayTeam.id}/image`;
+
+        const div = document.createElement('div');
+        div.className = 'match';
+
+        div.innerHTML = `
+          <div class="teams">
+            <img class="team-logo" src="${logo1}" alt="logo">
+            <strong>${match.homeTeam.name}</strong>
+            <span>${match.homeScore.current ?? ''} - ${match.awayScore.current ?? ''}</span>
+            <strong>${match.awayTeam.name}</strong>
+            <img class="team-logo" src="${logo2}" alt="logo">
+          </div>
+          <div>
+            🗺️ Ölkə: ${match.tournament.category.country.name}<br>
+            🏆 Turnir: ${match.tournament.name}<br>
+            ⏰ Tarix: ${new Date(match.startTimestamp * 1000).toLocaleString()}
+          </div>
+        `;
+
+        if (loadStats) {
+          const statDiv = document.createElement('div');
+          statDiv.className = 'stat';
+          statDiv.innerText = '📊 Statistikalar yüklənir...';
+          div.appendChild(statDiv);
+
+          const divider = document.createElement('div');
+          divider.className = 'stat-divider';
+          div.appendChild(divider);
+
+          try {
+            const statsRes = await fetch(`https://api.sofascore.com/api/v1/event/${match.id}/statistics`);
+            const statData = await statsRes.json();
+            if (statData.statistics?.length > 0) {
+              const items = statData.statistics[0].groups.flatMap(g => g.statisticsItems);
+              const homeStats = items.filter(i => i.home !== undefined).map(i => i.home);
+              const awayStats = items.filter(i => i.away !== undefined).map(i => i.away);
+
+              statDiv.innerHTML = `
+                <p><strong>${match.homeTeam.name}</strong> - 🏆 Topa Sahip Olma: ${homeStats[0]}%</p>
+                <p><strong>${match.awayTeam.name}</strong> - 🏆 Topa Sahip Olma: ${awayStats[0]}%</p>
+                <p><strong>${match.homeTeam.name}</strong> - ⚽ Qollar: ${homeStats[1]}</p>
+                <p><strong>${match.awayTeam.name}</strong> - ⚽ Qollar: ${awayStats[1]}</p>
+              `;
+            } else {
+              statDiv.innerText = '⚠️ Statistikalar mövcud deyil.';
+            }
+
+            const squadDiv = document.createElement('div');
+            squadDiv.className = 'squad';
+            div.appendChild(squadDiv);
+
+            const homeSquadRes = await fetch(`https://api.sofascore.com/api/v1/event/${match.id}/lineups?teamId=${match.homeTeam.id}`);
+            const awaySquadRes = await fetch(`https://api.sofascore.com/api/v1/event/${match.id}/lineups?teamId=${match.awayTeam.id}`);
+            const homeSquadData = await homeSquadRes.json();
+            const awaySquadData = await awaySquadRes.json();
+
+            const homeSquad = homeSquadData.lineup.map(player => `<li>${player.player.name}</li>`).join('');
+            const awaySquad = awaySquadData.lineup.map(player => `<li>${player.player.name}</li>`).join('');
+
+            const homeSubs = homeSquadData.substitutes.map(sub => `<li>${sub.player.name}</li>`).join('');
+            const awaySubs = awaySquadData.substitutes.map(sub => `<li>${sub.player.name}</li>`).join('');
+
+            squadDiv.innerHTML = `
+              <div><strong>${match.homeTeam.name}</strong><ul>${homeSquad}</ul><p><em>Əvəzləmələr:</em><ul>${homeSubs}</ul></p></div>
+              <div><strong>${match.awayTeam.name}</strong><ul>${awaySquad}</ul><p><em>Əvəzləmələr:</em><ul>${awaySubs}</ul></p></div>
+            `;
+
+          } catch {
+            statDiv.innerText = '❌ Statistikalar tapılmadı.';
+          }
+        }
+
+        container.appendChild(div);
+      }
+    }
+
+    function goBack() {
+      window.history.back();
+    }
+
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    const backToTopBtn = document.getElementById("backToTop");
+    window.addEventListener("scroll", () => {
+      backToTopBtn.style.display = window.scrollY > 300 ? "block" : "none";
+    });
+
+    fetchMatches();
+  </script>
+</body>
+</html>
