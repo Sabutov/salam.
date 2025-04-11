@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <title>Canlı Futbol Oyunları</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            padding: 20px;
+            background: #eef1f5;
+            color: #333;
+        }
+        h1 {
+            color: #111;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        .controls {
+            margin-bottom: 25px;
+        }
+        input, select {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #bbb;
+            margin-right: 10px;
+            font-size: 15px;
+        }
+        .match {
+            background: #fff;
+            padding: 18px;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.07);
+        }
+        .teams {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 8px;
+        }
+        .team-logo {
+            height: 42px;
+        }
+        .info, .lineups, .score, .scorers, .cards, .penalties {
+            margin-top: 10px;
+            font-size: 14.5px;
+        }
+        .country-group {
+            margin-top: 40px;
+        }
+        .country-group h2 {
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 6px;
+            font-size: 20px;
+        }
+        .highlight {
+            font-weight: bold;
+            color: #d70000;
+        }
+
+        /* Pulse Effekt və Dəqiqə Nişanı */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.6);
+            }
+            70% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 10px rgba(46, 204, 113, 0);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(46, 204, 113, 0);
+            }
+        }
+        .minute-badge {
+            display: inline-block;
+            background-color: #2ecc71;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 13px;
+            margin-left: 10px;
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <h1>⚽ Canlı Futbol Oyunları</h1>
+
+    <div class="controls">
+        <input type="text" id="searchInput" placeholder="Komanda adı ilə axtar...">
+        <select id="countryFilter"><option value="">🌍 Bütün ölkələr</option></select>
+        <select id="leagueFilter"><option value="">🏆 Bütün liqalar</option></select>
+    </div>
+
+    <div id="matches">Yüklənir...</div>
+
+    <script>
+        const apiKey = '22c7cd63a57c0c3610d41007e1f3b0c9';
+        const apiUrl = 'https://v3.football.api-sports.io/fixtures?live=all';
+        let allMatches = [];
+
+        function fetchData() {
+            fetch(apiUrl, {
+                headers: { 'x-apisports-key': apiKey }
+            })
+            .then(res => res.json())
+            .then(data => {
+                allMatches = data.response || [];
+                populateCountryFilter();
+                populateLeagueFilter();
+                renderMatches();
+            })
+            .catch(() => {
+                document.getElementById('matches').innerText = 'Xəta baş verdi.';
+            });
+        }
+
+        function populateCountryFilter() {
+            const countries = new Set(allMatches.map(m => m.league.country));
+            const select = document.getElementById('countryFilter');
+            select.innerHTML = `<option value="">🌍 Bütün ölkələr</option>`;
+            countries.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c;
+                opt.textContent = c;
+                select.appendChild(opt);
+            });
+        }
+
+        function populateLeagueFilter() {
+            const leagues = new Set(allMatches.map(m => m.league.name));
+            const select = document.getElementById('leagueFilter');
+            select.innerHTML = `<option value="">🏆 Bütün liqalar</option>`;
+            leagues.forEach(l => {
+                const opt = document.createElement('option');
+                opt.value = l;
+                opt.textContent = l;
+                select.appendChild(opt);
+            });
+        }
+
+        function renderMatches() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const country = document.getElementById('countryFilter').value;
+            const league = document.getElementById('leagueFilter').value;
+
+            const grouped = {};
+
+            allMatches.forEach(match => {
+                const { teams, league: lg, fixture } = match;
+                const home = teams.home.name.toLowerCase();
+                const away = teams.away.name.toLowerCase();
+                if (
+                    (search && !home.includes(search) && !away.includes(search)) ||
+                    (country && lg.country !== country) ||
+                    (league && lg.name !== league)
+                ) return;
+
+                if (!grouped[lg.country]) grouped[lg.country] = [];
+                grouped[lg.country].push(match);
+            });
+
+            const container = document.getElementById('matches');
+            container.innerHTML = '';
+
+            if (Object.keys(grouped).length === 0) {
+                container.innerText = 'Heç bir uyğun oyun tapılmadı.';
+                return;
+            }
+
+            for (const [country, matches] of Object.entries(grouped)) {
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'country-group';
+                groupDiv.innerHTML = `<h2>${country}</h2>`;
+                matches.forEach(match => {
+                    const { fixture, teams, league, goals } = match;
+                    const matchDiv = document.createElement('div');
+                    matchDiv.className = 'match';
+
+                    const minute = fixture.status.elapsed ? `<span class="minute-badge">${fixture.status.elapsed}'</span>` : '';
+
+                    matchDiv.innerHTML = `
+                        <div class="teams">
+                            <img src="${teams.home.logo}" alt="${teams.home.name}" class="team-logo">
+                            <strong>${teams.home.name}</strong> vs <strong>${teams.away.name}</strong>
+                            <img src="${teams.away.logo}" alt="${teams.away.name}" class="team-logo">
+                            ${minute}
+                        </div>
+                        <div class="info">
+                            Turnir: ${league.name}<br>
+                            Tarix: ${new Date(fixture.date).toLocaleString()}<br>
+                            Status: ${fixture.status.long}
+                        </div>
+                        <div class="score">
+                            <strong>Hesab:</strong> ${goals.home} - ${goals.away}
+                        </div>
+                        <div class="lineups" id="lineups-${fixture.id}">🔄 Start heyətləri yüklənir...</div>
+                        <div class="scorers" id="scorers-${fixture.id}">🔄 Qol məlumatları yüklənir...</div>
+                        <div class="cards" id="cards-${fixture.id}">🔄 Kartlar yüklənir...</div>
+                        <div class="penalties" id="penalties-${fixture.id}">🔄 Penaltilər yüklənir...</div>
+                    `;
+                    groupDiv.appendChild(matchDiv);
+                    container.appendChild(groupDiv);
+
+                    // Lineups
+                    fetch(`https://v3.football.api-sports.io/fixtures/lineups?fixture=${fixture.id}`, {
+                        headers: { 'x-apisports-key': apiKey }
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        const div = document.getElementById(`lineups-${fixture.id}`);
+                        const homeLineup = data.response.find(t => t.team.id === teams.home.id);
+                        const awayLineup = data.response.find(t => t.team.id === teams.away.id);
+                        div.innerHTML = `
+                            <strong>${teams.home.name}:</strong> ${homeLineup?.startXI.map(p => p.player.name).join(', ') || 'Yoxdur'}<br>
+                            <strong>${teams.away.name}:</strong> ${awayLineup?.startXI.map(p => p.player.name).join(', ') || 'Yoxdur'}
+                        `;
+                    });
+
+                    // Events
+                    fetch(`https://v3.football.api-sports.io/fixtures/events?fixture=${fixture.id}`, {
+                        headers: { 'x-apisports-key': apiKey }
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        const events = data.response;
+                        const goals = events.filter(e => e.type === "Goal");
+                        const redCards = events.filter(e => e.detail === "Red Card");
+                        const penalties = events.filter(e => e.detail === "Penalty" || e.detail === "Penalty Missed");
+
+                        document.getElementById(`scorers-${fixture.id}`).innerHTML =
+                            `<strong>Qol vuranlar:</strong><br>` +
+                            (goals.length ? goals.map(g => `${g.team.name} - ${g.player.name} (${g.time.elapsed}')`).join('<br>') : 'Yoxdur.');
+
+                        document.getElementById(`cards-${fixture.id}`).innerHTML =
+                            `<strong class="highlight">Qırmızı kartlar:</strong><br>` +
+                            (redCards.length ? redCards.map(c => `${c.team.name} - ${c.player.name} (${c.time.elapsed}')`).join('<br>') : 'Yoxdur.');
+
+                        document.getElementById(`penalties-${fixture.id}`).innerHTML =
+                            `<strong>Penaltilər:</strong><br>` +
+                            (penalties.length ? penalties.map(p => `${p.team.name} - ${p.player.name} (${p.detail}, ${p.time.elapsed}')`).join('<br>') : 'Yoxdur.');
+                    });
+                });
+            }
+        }
+
+        document.getElementById('searchInput').addEventListener('input', renderMatches);
+        document.getElementById('countryFilter').addEventListener('change', renderMatches);
+        document.getElementById('leagueFilter').addEventListener('change', renderMatches);
+
+        fetchData();
+        setInterval(fetchData, 60000);
+    </script>
+</body>
+</html>
