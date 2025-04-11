@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hava Proqnozu + Xəritə</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      color: white;
+      background-color: #222;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      transition: background-image 1s ease-in-out;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    h1, h2 {
+      text-align: center;
+      color: #00ffff;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      font-size: 18px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      background-color: #333;
+      color: white;
+    }
+
+    canvas {
+      background: white;
+      border-radius: 10px;
+      padding: 10px;
+      margin-top: 30px;
+    }
+
+    .forecast-section {
+      margin-top: 30px;
+      font-size: 18px;
+    }
+
+    #map {
+      height: 350px;
+      border-radius: 10px;
+      margin-top: 40px;
+    }
+
+    .menu {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 10px;
+      border-radius: 5px;
+    }
+
+    .menu select {
+      background: #333;
+      color: white;
+      font-size: 16px;
+      padding: 8px;
+      border-radius: 5px;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 50px;
+      font-size: 14px;
+      color: white;
+      padding: 20px;
+      background-color: rgba(0, 0, 0, 0.7);
+      border-radius: 15px;
+    }
+
+    .hourly-forecast .hour {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    .hourly-forecast img {
+      width: 35px;
+      height: 35px;
+    }
+  </style>
+</head>
+<body>
+  <div class="menu">
+    <select id="languageSelect">
+      <option value="az">Azərbaycan</option>
+      <option value="en">English</option>
+      <option value="ru">Русский</option>
+    </select>
+  </div>
+
+  <div class="container">
+    <h1 id="title">🌦️ Hava Proqnozu</h1>
+    <input type="text" id="cityInput" placeholder="Şəhər adı daxil edin..." />
+    
+    <div class="forecast-section" id="forecastInfo">Şəhər seçin...</div>
+    
+    <h2 id="threeDayForecastTitle">📆 3 Günlük Proqnoz</h2>
+    <canvas id="forecastChart"></canvas>
+    
+    <h2 id="hourlyForecastTitle">🕒 Saatlıq Proqnoz (Bugün)</h2>
+    <canvas id="hourlyChart"></canvas>
+    
+    <div class="hourly-forecast" id="hourlyForecast"></div>
+
+    <h2 id="mapTitle">🗺️ Xəritədə Yer</h2>
+    <div id="map"></div>
+  </div>
+
+  <div class="footer">
+    <p id="aboutText">Bu sayt hava proqnozu təqdim etmək üçün hazırlanmışdır.</p>
+    <p id="versionText">Versiya: 1.0.0</p>
+    <p><a href="https://www.weatherapi.com/" target="_blank">Mənbə: WeatherAPI</a></p>
+  </div>
+
+  <script>
+    const apiKey = "dc631cc3288540ff93c204600251004";
+    let language = 'az';
+
+    document.getElementById("languageSelect").addEventListener("change", function (e) {
+      language = e.target.value;
+      updateContent();
+    });
+
+    function updateContent() {
+      const titles = {
+        az: {
+          title: "🌦️ Hava Proqnozu",
+          threeDayForecast: "📆 3 Günlük Proqnoz",
+          hourlyForecast: "🕒 Saatlıq Proqnoz (Bugün)",
+          mapTitle: "🗺️ Xəritədə Yer",
+          placeholder: "Şəhər adı daxil edin...",
+          citySelect: "Şəhər seçin...",
+          aboutText: "Bu sayt hava proqnozu təqdim etmək üçün hazırlanmışdır.",
+          versionText: "Versiya: 1.0.0"
+        },
+        en: {
+          title: "🌦️ Weather Forecast",
+          threeDayForecast: "📆 3-Day Forecast",
+          hourlyForecast: "🕒 Hourly Forecast (Today)",
+          mapTitle: "🗺️ Location on the Map",
+          placeholder: "Enter city name...",
+          citySelect: "Select a city...",
+          aboutText: "This website is designed to provide weather forecasts.",
+          versionText: "Version: 1.0.0"
+        },
+        ru: {
+          title: "🌦️ Прогноз погоды",
+          threeDayForecast: "📆 Прогноз на 3 дня",
+          hourlyForecast: "🕒 Почасовой прогноз (Сегодня)",
+          mapTitle: "🗺️ Местоположение на карте",
+          placeholder: "Введите название города...",
+          citySelect: "Выберите город...",
+          aboutText: "Этот сайт предназначен для предоставления прогнозов погоды.",
+          versionText: "Версия: 1.0.0"
+        }
+      };
+
+      const lang = titles[language];
+      document.getElementById("title").innerText = lang.title;
+      document.getElementById("threeDayForecastTitle").innerText = lang.threeDayForecast;
+      document.getElementById("hourlyForecastTitle").innerText = lang.hourlyForecast;
+      document.getElementById("mapTitle").innerText = lang.mapTitle;
+      document.getElementById("cityInput").placeholder = lang.placeholder;
+      document.getElementById("forecastInfo").innerText = lang.citySelect;
+      document.getElementById("aboutText").innerText = lang.aboutText;
+      document.getElementById("versionText").innerText = lang.versionText;
+    }
+
+    function setCityBackground(city) {
+      const cityFormatted = city.trim().replace(/\s+/g, '-');
+      const bgUrl = `https://source.unsplash.com/1600x900/?${cityFormatted},city`;
+      document.body.style.backgroundImage = `url('${bgUrl}')`;
+    }
+
+    function drawChart(labels, temps, chartId, labelText) {
+      const ctx = document.getElementById(chartId).getContext("2d");
+      if (window[chartId + "_chart"]) {
+        window[chartId + "_chart"].destroy();
+      }
+      window[chartId + "_chart"] = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: labels,
+          datasets: [{
+            label: labelText,
+            data: temps,
+            borderColor: "#00ffff",
+            backgroundColor: "rgba(0, 255, 255, 0.3)",
+            fill: true,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: false
+            }
+          }
+        }
+      });
+    }
+
+    function updateMap(lat, lon) {
+      if (window.map) {
+        window.map.setView([lat, lon], 10);
+        window.marker.setLatLng([lat, lon]);
+      } else {
+        window.map = L.map('map').setView([lat, lon], 10);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+        window.marker = L.marker([lat, lon]).addTo(map);
+      }
+    }
+
+    function displayHourlyForecast(hourlyData) {
+      const now = new Date();
+      const hourlyForecastContainer = document.getElementById("hourlyForecast");
+      hourlyForecastContainer.innerHTML = '';
+      hourlyData.forEach(hour => {
+        const hourTime = new Date(hour.time);
+        if (hourTime <= now) return;
+        const time = hour.time.split(" ")[1];
+        const temp = hour.temp_c;
+        const condition = hour.condition.text;
+        const icon = hour.condition.icon;
+        const hourElement = document.createElement("div");
+        hourElement.classList.add("hour");
+        hourElement.innerHTML = `
+          <span>${time}</span>
+          <span>${temp}°C</span>
+          <span>${condition}</span>
+          <img src="https:${icon}" alt="${condition}" />
+        `;
+        hourlyForecastContainer.appendChild(hourElement);
+      });
+    }
+
+    async function getWeather(city) {
+      const url = `https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${city}&days=3&aqi=no&alerts=no`;
+      const res = await fetch(url);
+      const data = await res.json();
+      updateWeatherUI(data);
+      setCityBackground(city);
+    }
+
+    async function getWeatherByCoords(lat, lon) {
+      const url = `https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${lat},${lon}&days=3&aqi=no&alerts=no`;
+      const res = await fetch(url);
+      const data = await res.json();
+      updateWeatherUI(data);
+      setCityBackground(data.location.name);
+    }
+
+    function updateWeatherUI(data) {
+      const now = new Date();
+      const currentDate = now.toISOString().split("T")[0];
+      const currentHour = now.getHours();
+
+      const forecastInfo = document.getElementById("forecastInfo");
+      forecastInfo.innerHTML = `<h2>${data.location.name}, ${data.location.country}</h2>`;
+
+      const dayLabels = [];
+      const dayTemps = [];
+
+      data.forecast.forecastday.forEach(day => {
+        if (day.date < currentDate) return;
+
+        forecastInfo.innerHTML += `
+          <div class="day-forecast">
+            <p><strong>Tarix:</strong> ${day.date}</p>
+            <p><strong>Orta temperatur:</strong> ${day.day.avgtemp_c}°C</p>
+            <p><strong>Hava:</strong> ${day.day.condition.text}</p>
+            <img src="https:${day.day.condition.icon}" alt="${day.day.condition.text}" />
+          </div>
+        `;
+
+        dayLabels.push(day.date);
+        dayTemps.push(day.day.avgtemp_c);
+      });
+
+      drawChart(dayLabels, dayTemps, "forecastChart", "Günlük Temperatur (°C)");
+
+      const todayHours = data.forecast.forecastday[0].hour.filter(h => {
+        const hourTime = new Date(h.time);
+        return hourTime.getHours() >= currentHour;
+      });
+
+      displayHourlyForecast(todayHours);
+      updateMap(data.location.lat, data.location.lon);
+    }
+
+    document.getElementById("cityInput").addEventListener("change", (e) => {
+      const city = e.target.value;
+      if (city) getWeather(city);
+    });
+
+    window.addEventListener("load", () => {
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            getWeatherByCoords(lat, lon);
+          },
+          (error) => {
+            console.warn("Lokasiya icazəsi rədd edildi.");
+          }
+        );
+      } else {
+        alert("Brauzeriniz lokasiya funksiyasını dəstəkləmir.");
+      }
+    });
+  </script>
+</body>
+</html>
