@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <title>Canlı Futbol Oyunları</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #eef1f5; color: #333; }
+    h1 { color: #111; font-size: 28px; margin-bottom: 20px; }
+    .controls input, .controls select { padding: 10px; margin: 5px 10px 15px 0; border-radius: 6px; border: 1px solid #bbb; font-size: 15px; }
+    .match { background: #fff; padding: 18px; margin-bottom: 25px; border-radius: 10px; box-shadow: 0 3px 8px rgba(0,0,0,0.07); }
+    .teams { display: flex; align-items: center; gap: 15px; margin-bottom: 8px; }
+    .team-logo { height: 42px; cursor: pointer; }
+    .info, .score { font-size: 14px; margin-top: 10px; }
+    .minute-badge { background-color: #2ecc71; color: #fff; padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: bold; animation: pulse 1.5s infinite; }
+    @keyframes pulse {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(46,204,113,0.6); }
+      70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(46,204,113,0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(46,204,113,0); }
+    }
+    .country-group { margin-top: 40px; }
+    .country-group h2 { border-bottom: 2px solid #ccc; padding-bottom: 6px; font-size: 20px; }
+    .team-info { background: #fff; padding: 20px; border-radius: 10px; margin-top: 30px; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .team-info h3 { margin-bottom: 10px; }
+    .player-list { list-style-type: none; padding: 0; }
+    .player-list li { margin: 5px 0; }
+  </style>
+</head>
+<body>
+  <h1>⚽ Canlı Futbol Oyunları</h1>
+
+  <div class="controls">
+    <input type="text" id="searchInput" placeholder="Komanda adı ilə axtar...">
+    <select id="countryFilter"><option value="">🌍 Bütün ölkələr</option></select>
+    <select id="leagueFilter"><option value="">🏆 Bütün liqalar</option></select>
+    <select id="tournamentFilter"><option value="">🏅 Bütün turnirlər</option></select>
+  </div>
+
+  <div id="matches">Yüklənir...</div>
+
+  <div id="teamInfo" class="team-info">
+    <h3>Komanda Məlumatı</h3>
+    <div id="teamDetails"></div>
+  </div>
+
+  <script>
+    const apiKey = '20e05ef2db2bc604e7bfd95569fa6d52';
+    const apiUrl = 'https://v3.football.api-sports.io/fixtures?live=all';
+    let allMatches = [];
+
+    function fetchData() {
+      fetch(apiUrl, { headers: { 'x-apisports-key': apiKey } })
+        .then(res => res.json())
+        .then(data => {
+          allMatches = data.response || [];
+          populateFilter('countryFilter', [...new Set(allMatches.map(m => m.league.country))], '🌍 Bütün ölkələr');
+          populateFilter('leagueFilter', [...new Set(allMatches.map(m => m.league.name))], '🏆 Bütün liqalar');
+          
+          renderMatches();
+        })
+        .catch(() => document.getElementById('matches').innerText = 'Xəta baş verdi.');
+    }
+
+    function populateFilter(id, items, defaultOption) {
+      const select = document.getElementById(id);
+      select.innerHTML = `<option value="">${defaultOption}</option>`;
+      items.forEach(i => {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = i;
+        select.appendChild(opt);
+      });
+    }
+
+    function renderMatches() {
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const country = document.getElementById('countryFilter').value;
+      const league = document.getElementById('leagueFilter').value;
+      const tournament = document.getElementById('tournamentFilter').value;
+      const container = document.getElementById('matches');
+      container.innerHTML = '';
+
+      const grouped = {};
+      allMatches.forEach(match => {
+        const { teams, league: lg, fixture, goals } = match;
+        const home = teams.home.name.toLowerCase(), away = teams.away.name.toLowerCase();
+
+        if ((search && !home.includes(search) && !away.includes(search)) ||
+            (country && lg.country !== country) ||
+            (league && lg.name !== league) ||
+            (tournament && lg.tournament !== tournament)) return;
+
+        if (!grouped[lg.country]) grouped[lg.country] = [];
+        grouped[lg.country].push(match);
+      });
+
+      if (Object.keys(grouped).length === 0) {
+        container.innerText = 'Heç bir uyğun oyun tapılmadı.';
+        return;
+      }
+
+      for (const [country, matches] of Object.entries(grouped)) {
+        const groupDiv = document.createElement('div');
+        groupDiv.className = 'country-group';
+        groupDiv.innerHTML = `<h2>${country}</h2>`;
+        matches.forEach(match => {
+          const { fixture, teams, league, goals } = match;
+          const minute = fixture.status.elapsed ? `<span class="minute-badge">${fixture.status.elapsed}'</span>` : '';
+          const matchDiv = document.createElement('div');
+          matchDiv.className = 'match';
+          matchDiv.innerHTML = `
+            <div class="teams">
+              <img src="${teams.home.logo}" class="team-logo" onclick="showTeamInfo(${teams.home.id})">
+              <strong>${teams.home.name}</strong> vs <strong>${teams.away.name}</strong>
+              <img src="${teams.away.logo}" class="team-logo" onclick="showTeamInfo(${teams.away.id})">
+              ${minute}
+            </div>
+            <div class="info">Turnir: ${league.name}<br>Tarix: ${new Date(fixture.date).toLocaleString()}<br>Status: ${fixture.status.long}</div>
+            <div class="score"><strong>Hesab:</strong> ${goals.home} - ${goals.away}</div>
+          `;
+          groupDiv.appendChild(matchDiv);
+        });
+        container.appendChild(groupDiv);
+      }
+    }
+
+    function showTeamInfo(teamId) {
+      const headers = { headers: { 'x-apisports-key': apiKey } };
+
+      Promise.all([
+        fetch(`https://v3.football.api-sports.io/teams?id=${teamId}`, headers).then(r => r.json()),
+        fetch(`https://v3.football.api-sports.io/fixtures?team=${teamId}&last=5`, headers).then(r => r.json()),
+        fetch(`https://v3.football.api-sports.io/fixtures?team=${teamId}&next=5`, headers).then(r => r.json()),
+        fetch(`https://v3.football.api-sports.io/coachs?team=${teamId}`, headers).then(r => r.json())
+      ]).then(([teamData, lastData, nextData, coachData]) => {
+        const team = teamData.response[0]?.team;
+        const venue = teamData.response[0]?.venue;
+        const coach = coachData.response[0];
+        const lastMatches = lastData.response;
+        const nextMatches = nextData.response;
+
+        let html = `
+          <strong>${team.name}</strong><br>
+          Ölkə: ${team.country}<br>
+          Quruluş: ${team.founded}<br>
+          Stadion: ${venue?.name || '-'} (${venue?.city || ''})<br>
+          Məşqçi: ${coach?.name || 'Məlumat yoxdur'}<br>
+          <img src="${team.logo}" style="margin-top:10px; height:50px;"><br><br>
+        `;
+
+        html += `<strong>Son 5 oyun:</strong><ul class="player-list">`;
+        lastMatches.forEach(m => {
+          html += `<li>${new Date(m.fixture.date).toLocaleDateString()} - ${m.teams.home.name} ${m.goals.home} - ${m.goals.away} ${m.teams.away.name}</li>`;
+        });
+        html += `</ul>`;
+
+        html += `<strong>Qarşıdakı 5 oyun:</strong><ul class="player-list">`;
+        nextMatches.forEach(m => {
+          html += `<li>${new Date(m.fixture.date).toLocaleDateString()} - ${m.teams.home.name} vs ${m.teams.away.name}</li>`;
+        });
+        html += `</ul>`;
+
+        html += `<br><button onclick="document.getElementById('teamInfo').style.display='none'">Bağla</button>`;
+
+        document.getElementById('teamDetails').innerHTML = html;
+        document.getElementById('teamInfo').style.display = 'block';
+      }).catch(() => {
+        document.getElementById('teamDetails').innerHTML = 'Məlumat yüklənə bilmədi.';
+        document.getElementById('teamInfo').style.display = 'block';
+      });
+    }
+
+    fetchData();
+    setInterval(fetchData, 60000); // hər 60 saniyədən bir yenilə
+  </script>
+</body>
+</html>
