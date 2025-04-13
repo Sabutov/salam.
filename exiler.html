@@ -5,6 +5,7 @@
   <title>Futbol Nəticələri</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Segoe+UI&display=swap">
   <style>
     :root {
       --primary-color: #00796b;
@@ -12,6 +13,9 @@
       --background-dark: #121212;
       --text-light: #333;
       --text-dark: #eee;
+    }
+    * {
+      box-sizing: border-box;
     }
     body {
       font-family: 'Segoe UI', sans-serif;
@@ -111,8 +115,16 @@
     .teams {
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
       gap: 10px;
+      flex-wrap: wrap;
+    }
+    .teams strong {
+      flex: 1;
+      text-align: center;
+    }
+    .teams span {
+      font-weight: bold;
     }
     .team-logo {
       width: 32px;
@@ -127,12 +139,11 @@
     @media(max-width: 768px) {
       html { font-size: 16px; }
       .controls { flex-direction: column; align-items: stretch; }
-      .teams { flex-direction: column; }
+      .teams { flex-direction: column; align-items: center; }
     }
   </style>
 </head>
 <body>
-
   <header>
     <button class="menu-toggle" onclick="toggleMenu()">☰</button>
     <h1 id="pageTitle">Futbol Oyunları</h1>
