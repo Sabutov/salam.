@@ -6,14 +6,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    :root { --primary-color: #00796b; }
+    :root {
+      --primary-color: #00796b;
+      --background-light: linear-gradient(to right, #e0f7fa, #e0f2f1);
+      --background-dark: #121212;
+      --text-light: #333;
+      --text-dark: #eee;
+    }
     body {
       font-family: 'Segoe UI', sans-serif;
       margin: 0;
       padding: 0;
-      background: linear-gradient(to right, #e0f7fa, #e0f2f1);
-      color: #333;
+      background: var(--background-light);
+      color: var(--text-light);
       font-size: 1rem;
+    }
+    body.dark {
+      background: var(--background-dark);
+      color: var(--text-dark);
     }
     header {
       background: var(--primary-color);
@@ -36,20 +46,32 @@
     .side-menu {
       position: fixed;
       top: 0;
-      left: -250px;
-      width: 250px;
+      left: -300px;
+      width: 300px;
       height: 100%;
       background: #004d40;
       padding-top: 60px;
       transition: 0.3s;
       z-index: 1000;
+      color: white;
     }
-    .side-menu a {
+    .side-menu a, .side-menu label, .side-menu select, .side-menu input {
       display: block;
-      padding: 15px 25px;
+      padding: 10px 25px;
       color: white;
       text-decoration: none;
-      font-size: 18px;
+      font-size: 16px;
+    }
+    .side-menu input[type="checkbox"] {
+      transform: scale(1.2);
+      margin-right: 10px;
+    }
+    .side-menu select, .side-menu input[type="text"] {
+      background: #00695c;
+      border: none;
+      color: white;
+      width: 80%;
+      margin: 0 auto 10px;
     }
     .side-menu a:hover {
       background-color: #00695c;
@@ -80,7 +102,12 @@
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       cursor: pointer;
     }
+    body.dark .match {
+      background: #1e1e1e;
+      color: #eee;
+    }
     .match:hover { background-color: #f1f1f1; }
+    body.dark .match:hover { background-color: #2a2a2a; }
     .teams {
       display: flex;
       align-items: center;
@@ -108,12 +135,19 @@
 
   <header>
     <button class="menu-toggle" onclick="toggleMenu()">☰</button>
-    <h1>Futbol Oyunları</h1>
+    <h1 id="pageTitle">Futbol Oyunları</h1>
   </header>
 
   <div class="side-menu" id="sideMenu">
-    <a href="https://mccleaurg-glionts-twaency.yolasite.com/" target="_blank">🏠 Yerli Futbol Xəbərləri</a>
-    <a href="https://mccleaurg-glionts-twaency.yolasite.com/xarici-futbol-x%C9%99b%C9%99rl%C9%99ri/" target="_blank">🌍 Xarici Futbol Xəbərləri</a>
+    <a href="https://mccleaurg-glionts-twaency.yolasite.com/" target="_blank" id="localNewsLink">🏠 Yerli Futbol Xəbərləri</a>
+    <a href="https://mccleaurg-glionts-twaency.yolasite.com/xarici-futbol-x%C9%99b%C9%99rl%C9%99ri/" target="_blank" id="internationalNewsLink">🌍 Xarici Futbol Xəbərləri</a>
+    <label><input type="checkbox" id="darkToggle"> 🌙 Qaranlıq rejim</label>
+    <label for="langSelect" id="langLabel">🌐 Dil seçimi:</label>
+    <select id="langSelect">
+      <option value="az">Azərbaycan</option>
+      <option value="en">English</option>
+      <option value="tr">Türkçe</option>
+    </select>
   </div>
 
   <div class="controls">
@@ -124,21 +158,95 @@
     <button onclick="fetchMatches()">🔄 Yenilə</button>
   </div>
 
-  <h2 style="text-align:center;">📅 Bugünkü Oyunlar</h2>
+  <h2 style="text-align:center;" id="matchesTitle">📅 Bugünkü Oyunlar</h2>
   <div id="past-matches">Yüklənir...</div>
   <div id="upcoming-matches"></div>
 
   <script>
+    const pageTitle = document.getElementById('pageTitle');
     const dateInput = document.getElementById('dateInput');
     const searchInput = document.getElementById('searchInput');
     const countryFilter = document.getElementById('countryFilter');
     const leagueFilter = document.getElementById('leagueFilter');
     const menu = document.getElementById('sideMenu');
+    const darkToggle = document.getElementById('darkToggle');
+    const langSelect = document.getElementById('langSelect');
+    const localNewsLink = document.getElementById('localNewsLink');
+    const internationalNewsLink = document.getElementById('internationalNewsLink');
+    const langLabel = document.getElementById('langLabel');
+    const matchesTitle = document.getElementById('matchesTitle');
 
     dateInput.value = new Date().toISOString().split('T')[0];
 
+    langSelect.addEventListener('change', () => {
+      changeLanguage(langSelect.value);
+    });
+
+    function changeLanguage(lang) {
+      const translations = {
+        az: {
+          pageTitle: "Futbol Oyunları",
+          matchesTitle: "Bugünkü Oyunlar",
+          localNews: "Yerli Futbol Xəbərləri",
+          internationalNews: "Xarici Futbol Xəbərləri",
+          langLabel: "Dil seçimi:",
+          searchPlaceholder: "Komanda axtar...",
+          refreshBtn: "Yenilə",
+          countryFilterPlaceholder: "Bütün ölkələr",
+          leagueFilterPlaceholder: "Bütün turnirlər",
+          darkMode: "Qaranlıq rejim",
+        },
+        en: {
+          pageTitle: "Football Matches",
+          matchesTitle: "Today's Matches",
+          localNews: "Local Football News",
+          internationalNews: "International Football News",
+          langLabel: "Language Selection:",
+          searchPlaceholder: "Search for team...",
+          refreshBtn: "Refresh",
+          countryFilterPlaceholder: "All countries",
+          leagueFilterPlaceholder: "All tournaments",
+          darkMode: "Dark mode",
+        },
+        tr: {
+          pageTitle: "Futbol Maçları",
+          matchesTitle: "Bugünkü Maçlar",
+          localNews: "Yerli Futbol Haberleri",
+          internationalNews: "Uluslararası Futbol Haberleri",
+          langLabel: "Dil Seçimi:",
+          searchPlaceholder: "Takım ara...",
+          refreshBtn: "Yenile",
+          countryFilterPlaceholder: "Tüm ülkeler",
+          leagueFilterPlaceholder: "Tüm turnuvalar",
+          darkMode: "Karanlık mod",
+        }
+      };
+
+      const t = translations[lang];
+      pageTitle.innerText = t.pageTitle;
+      matchesTitle.innerText = t.matchesTitle;
+      localNewsLink.innerText = t.localNews;
+      internationalNewsLink.innerText = t.internationalNews;
+      langLabel.innerText = t.langLabel;
+      searchInput.placeholder = t.searchPlaceholder;
+      countryFilter.innerHTML = `<option value="">${t.countryFilterPlaceholder}</option>`;
+      leagueFilter.innerHTML = `<option value="">${t.leagueFilterPlaceholder}</option>`;
+      document.querySelector('button').innerText = t.refreshBtn;
+      darkToggle.parentElement.querySelector('label').innerText = t.darkMode;
+    }
+
     function toggleMenu() {
       menu.classList.toggle('open');
+    }
+
+    darkToggle.addEventListener('change', () => {
+      document.body.classList.toggle('dark', darkToggle.checked);
+      localStorage.setItem('darkMode', darkToggle.checked);
+    });
+
+    if (localStorage.getItem('darkMode') === 'true') {
+      darkToggle.checked = true;
+      document.body.classList.add('dark');
     }
 
     async function fetchMatches() {
@@ -221,7 +329,8 @@
             <div>
               ${statusLabel}<br>
               🗓️ ${new Date(timestamp * 1000).toLocaleString()}<br>
-              🗺️ ${match.tournament.category.country.name}
+              🗺️ ${match.tournament.category.country.name}<br>
+              🏟️ ${match.venue?.name || 'N/A'}
               <div class="stats">${goals ? `<br><br><strong>Qollar:</strong><br>${goals}` : 'Statistika mövcud deyil.'}</div>
             </div>
           `;
