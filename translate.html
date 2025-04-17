@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Budilnik Proqramı</title>
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #fff;
+      color: #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .alarm-clock {
+      background-color: #f1f1f1;
+      padding: 30px;
+      border-radius: 25px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      position: relative;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .menu-icon {
+      cursor: pointer;
+      font-size: 30px;
+    }
+
+    .settings-menu {
+      display: none;
+      position: absolute;
+      top: 60px;
+      right: 0;
+      background-color: #fff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .settings-menu div {
+      padding: 10px;
+      cursor: pointer;
+    }
+
+    .settings-menu div:hover {
+      background-color: #f0f0f0;
+    }
+
+    input[type="time"] {
+      font-size: 20px;
+      padding: 12px;
+      border-radius: 12px;
+      background-color: #fff;
+      color: #333;
+      border: 1px solid #ddd;
+      width: 100%;
+      margin-bottom: 25px;
+    }
+
+    button {
+      padding: 12px 20px;
+      border-radius: 50px;
+      background-color: #0a84ff;
+      color: white;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+      transition: background-color 0.2s ease-in-out;
+    }
+
+    button:hover {
+      background-color: #006de1;
+    }
+
+    .message, .remaining-time, .alarm-status {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #777;
+    }
+
+    .saved-alarms {
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .saved-alarm {
+      margin-bottom: 15px;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .add-alarm-button {
+      background-color: #28a745;
+      padding: 15px;
+      font-size: 20px;
+      border-radius: 50%;
+      color: white;
+      cursor: pointer;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+      bottom: 30px;
+      right: 30px;
+    }
+
+    .add-alarm-button:hover {
+      background-color: #218838;
+    }
+
+    .menu-icon-container {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 28px;
+      margin-right: 10px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 2px;
+      left: 2px;
+      right: 2px;
+      bottom: 2px;
+      background-color: #ccc;
+      transition: 0.4s;
+      border-radius: 34px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 24px;
+      width: 24px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #4cd964;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+
+    .saved-alarm button.delete-btn {
+      font-size: 12px;
+      padding: 4px 10px;
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: none;
+      margin-left: 10px;
+    }
+
+    .saved-alarm button.delete-btn:hover {
+      background-color: #c82333;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="alarm-clock">
+    <div class="top-bar">
+      <h1>⏰ Budilnik</h1>
+      <div class="menu-icon-container">
+        <div class="menu-icon" onclick="toggleMenu()">&#8942;</div>
+        <div id="settingsMenu" class="settings-menu">
+          <div onclick="toggleSoundOptions()">Ses Seçenekleri</div>
+          <div onclick="toggleModes()">Rejimlər</div>
+        </div>
+      </div>
+    </div>
+
+    <input type="time" id="alarmTime">
+    <button onclick="setAlarm()">Alarm qur</button>
+    <div class="message" id="message"></div>
+    <div class="remaining-time" id="remainingTime"></div>
+
+    <div class="saved-alarms" id="savedAlarms"></div>
+
+    <div class="add-alarm-button" onclick="addNewAlarm()">+</div>
+  </div>
+
+  <!-- Yeni ses seçenekleri -->
+  <div id="soundOptions" class="settings-menu" style="display: none;">
+    <div onclick="changeSound('sound1')">Ses 1</div>
+    <div onclick="changeSound('sound2')">Ses 2</div>
+    <div onclick="changeSound('sound3')">Ses 3</div>
+    <div onclick="changeSound('sound4')">Ses 4</div>
+    <div onclick="changeSound('sound5')">Ses 5</div>
+  </div>
+
+  <script>
+    let alarms = JSON.parse(localStorage.getItem("alarms")) || [];
+
+    function saveAlarms() {
+      localStorage.setItem("alarms", JSON.stringify(alarms));
+    }
+
+    function toggleMenu() {
+      const settingsMenu = document.getElementById("settingsMenu");
+      settingsMenu.style.display = settingsMenu.style.display === "none" ? "block" : "none";
+    }
+
+    // Yeni 'Ses Seçenekleri' funksiyası
+    function toggleSoundOptions() {
+      const soundOptions = document.getElementById("soundOptions");
+      soundOptions.style.display = soundOptions.style.display === "none" ? "block" : "none";
+    }
+
+    // Ses dəyişdirmək funksiyası
+    function changeSound(sound) {
+      alert(`Seçdiyiniz ses: ${sound}`);
+      // Burada seçilən sesin tətbiq olunduğu kodu əlavə edə bilərsiniz
+    }
+
+    function addNewAlarm() {
+      const newAlarmTime = prompt("Saatı daxil edin (HH:MM):");
+      if (!newAlarmTime) {
+        alert("Zəhmət olmasa vaxtı düzgün daxil edin!");
+        return;
+      }
+
+      const [hours, minutes] = newAlarmTime.split(":").map(num => parseInt(num, 10));
+      if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+        alert("Saat yanlışdır!");
+        return;
+      }
+
+      alarms.push({ time: newAlarmTime, active: false });
+      saveAlarms();
+      updateSavedAlarms();
+    }
+
+    function updateSavedAlarms() {
+      const container = document.getElementById("savedAlarms");
+      container.innerHTML = "";
+
+      alarms.forEach((alarm, index) => {
+        const alarmElement = document.createElement("div");
+        alarmElement.className = "saved-alarm";
+        alarmElement.innerHTML = `
+          <div onclick="showDeleteButton(this)">
+            ${alarm.time}
+            <button class="delete-btn" onclick="event.stopPropagation(); deleteAlarm(${index})">Sil</button>
+          </div>
+          <div>
+            <label class="switch">
+              <input type="checkbox" ${alarm.active ? 'checked' : ''} onchange="toggleAlarm(${index})">
+              <span class="slider"></span>
+            </label>
+          </div>
+        `;
+        container.appendChild(alarmElement);
+      });
+    }
+
+    function showDeleteButton(el) {
+      const btn = el.querySelector('.delete-btn');
+      btn.style.display = btn.style.display === "none" ? "inline-block" : "none";
+    }
+
+    function toggleAlarm(index) {
+      alarms[index].active = !alarms[index].active;
+      saveAlarms();
+      updateSavedAlarms();
+    }
+
+    function deleteAlarm(index) {
+      if (confirm("Alarmı silmək istəyirsiniz?")) {
+        alarms.splice(index, 1);
+        saveAlarms();
+        updateSavedAlarms();
+      }
+    }
+
+    function setAlarm() {
+      const inputTime = document.getElementById("alarmTime").value;
+      if (!inputTime) {
+        alert("Zəhmət olmasa, alarm saatını daxil edin!");
+        return;
+      }
+
+      const now = new Date();
+      const [hours, minutes] = inputTime.split(":").map(Number);
+      const alarmDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, 0);
+      if (alarmDate < now) alarmDate.setDate(alarmDate.getDate() + 1);
+
+      const timeDifference = alarmDate - now;
+
+      document.getElementById("message").textContent = `Alarm ${inputTime}-də qurulub.`;
+      document.getElementById("remainingTime").textContent = `Qalan vaxt: ${formatTime(timeDifference)}`;
+
+      setTimeout(triggerAlarm, timeDifference);
+    }
+
+    function triggerAlarm() {
+      document.getElementById("message").textContent = "⏰ Alarm! Yuxudan oyan!";
+      if (Notification.permission === "granted") {
+        new Notification("⏰ Alarm! Yuxudan oyan!");
+      } else if (Notification.permission !== "denied") {
+        Notification.requestPermission().then(permission => {
+          if (permission === "granted") {
+            new Notification("⏰ Alarm! Yuxudan oyan!");
+          }
+        });
+      }
+    }
+
+    function formatTime(ms) {
+      const seconds = Math.floor(ms / 1000);
+      const minutes = Math.floor(seconds / 60);
+      const hours = Math.floor(minutes / 60);
+      const remMinutes = minutes % 60;
+      const remSeconds = seconds % 60;
+      return `${hours} saat ${remMinutes} dəqiqə ${remSeconds} saniyə`;
+    }
+
+    updateSavedAlarms();
+  </script>
+
+</body>
+</html>
