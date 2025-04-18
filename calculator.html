@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zəngli Saat və Kronometre</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f0f2f5;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      padding-bottom: 80px; /* Naviqasiya barına yer saxlamaq üçün */
+    }
+    /* Naviqasiya Barı */
+    nav {
+      background-color: #333;
+      color: white;
+      padding: 10px;
+      text-align: center;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      z-index: 999;
+    }
+    nav a {
+      color: white;
+      margin: 0 15px;
+      text-decoration: none;
+      font-size: 16px;
+      display: inline-block;
+      padding: 10px;
+    }
+    nav a:hover {
+      background-color: #575757;
+      border-radius: 5px;
+    }
+
+    /* Switch Dizaynı */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 34px;
+      height: 20px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 20px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 12px;
+      width: 12px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #28a745;
+    }
+    input:checked + .slider:before {
+      transform: translateX(14px);
+    }
+
+    /* Bölmələr */
+    .container {
+      display: none;
+      padding: 20px;
+    }
+    .active-section {
+      display: block;
+    }
+    .heading {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 24px;
+      color: #333;
+    }
+    .add-btn, .sound-btn, .nav-btn {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 8px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* Sayğac və kronometre dizaynı */
+    .counter, .stopwatch {
+      text-align: center;
+      font-size: 30px;
+      margin-top: 20px;
+    }
+
+    /* Sayğac / Alarm Listəsi */
+    .saved-alarm {
+      background: white;
+      padding: 10px;
+      margin: 10px auto;
+      max-width: 300px;
+      border-radius: 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Musiqi Seçimi */
+    #musicFile {
+      display: none;
+    }
+
+    /* Saygac / Alarm Text */
+    .counterDisplay, .stopwatchDisplay {
+      font-size: 24px;
+    }
+
+    /* Responsiv dizayn üçün */
+    @media (max-width: 768px) {
+      nav a {
+        font-size: 14px;
+        padding: 8px;
+      }
+      .heading {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Dünya Saati -->
+  <div id="worldClock" class="container">
+    <h2 class="heading">🌍 Dünya Saati</h2>
+    <div id="worldTime"></div>
+  </div>
+
+  <!-- Sayğac -->
+  <div id="counter" class="container">
+    <h2 class="heading">⏱ Sayğac</h2>
+    <div class="counter">
+      <button class="nav-btn" onclick="startCounter()">Başlat</button>
+      <button class="nav-btn" onclick="stopCounter()">Durdur</button>
+      <p id="counterDisplay">0</p>
+    </div>
+  </div>
+
+  <!-- Alarm -->
+  <div id="alarm" class="container">
+    <h2 class="heading">⏰ Alarm</h2>
+    <button class="add-btn" onclick="addAlarm()">➕ Yeni Alarm</button>
+    <button class="sound-btn" onclick="playSelectedSound()">🎵 Səs 2</button>
+    <input type="file" id="musicFile" accept="audio/*" onchange="handleMusicFile(event)" />
+    <button class="sound-btn" onclick="document.getElementById('musicFile').click()">📂 Musiqi seçin</button>
+    <div id="savedAlarms"></div>
+    <audio id="alarmAudio" loop></audio>
+  </div>
+
+  <!-- Kronometre -->
+  <div id="stopwatch" class="container">
+    <h2 class="heading">🕒 Kronometre</h2>
+    <div class="stopwatch">
+      <button class="nav-btn" onclick="startStopwatch()">Başlat</button>
+      <button class="nav-btn" onclick="stopStopwatch()">Durdur</button>
+      <p id="stopwatchDisplay">00:00:00</p>
+    </div>
+  </div>
+
+  <!-- Naviqasiya Barı -->
+  <nav>
+    <a href="javascript:void(0)" onclick="showSection('worldClock')">🌍 Dünya Saati</a>
+    <a href="javascript:void(0)" onclick="showSection('counter')">⏱ Sayğac</a>
+    <a href="javascript:void(0)" onclick="showSection('alarm')">⏰ Alarm</a>
+    <a href="javascript:void(0)" onclick="showSection('stopwatch')">🕒 Kronometre</a>
+  </nav>
+
+  <script>
+    let activeSection = "worldClock";
+
+    // Dünya Saati
+    function updateWorldClock() {
+      const now = new Date();
+      const options = { timeZoneName: 'short' };
+      document.getElementById("worldTime").textContent = now.toLocaleString('en-US', options);
+    }
+    setInterval(updateWorldClock, 1000);
+
+    // Naviqasiya barı ilə hissə dəyişdirilməsi
+    function showSection(sectionId) {
+      document.querySelectorAll('.container').forEach((section) => {
+        section.classList.remove('active-section');
+      });
+      document.getElementById(sectionId).classList.add('active-section');
+      activeSection = sectionId;
+    }
+
+    // Sayğac
+    let counterInterval;
+    let counterValue = 0;
+    function startCounter() {
+      counterInterval = setInterval(() => {
+        counterValue++;
+        document.getElementById("counterDisplay").textContent = counterValue;
+      }, 1000);
+    }
+    function stopCounter() {
+      clearInterval(counterInterval);
+    }
+
+    // Kronometre
+    let stopwatchInterval;
+    let stopwatchSeconds = 0;
+    function startStopwatch() {
+      stopwatchInterval = setInterval(() => {
+        stopwatchSeconds++;
+        const hours = String(Math.floor(stopwatchSeconds / 3600)).padStart(2, '0');
+        const minutes = String(Math.floor((stopwatchSeconds % 3600) / 60)).padStart(2, '0');
+        const seconds = String(stopwatchSeconds % 60).padStart(2, '0');
+        document.getElementById("stopwatchDisplay").textContent = `${hours}:${minutes}:${seconds}`;
+      }, 1000);
+    }
+    function stopStopwatch() {
+      clearInterval(stopwatchInterval);
+    }
+
+    // Alarm
+    let alarms = JSON.parse(localStorage.getItem("alarms")) || [];
+    let musicFileURL = localStorage.getItem("musicFileURL") || null;
+    const alarmAudio = document.getElementById("alarmAudio");
+
+    function saveAlarms() {
+      localStorage.setItem("alarms", JSON.stringify(alarms));
+    }
+
+    function renderAlarms() {
+      const container = document.getElementById("savedAlarms");
+      container.innerHTML = "";
+      alarms.forEach((alarm, index) => {
+        const div = document.createElement("div");
+        div.className = "saved-alarm";
+        div.innerHTML = `
+          <span>${alarm.time}</span>
+          <label class="switch">
+            <input type="checkbox" ${alarm.active ? "checked" : ""} onchange="toggleAlarm(${index})">
+            <span class="slider"></span>
+          </label>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function addAlarm() {
+      const now = new Date();
+      const hour = String(now.getHours()).padStart(2, '0');
+      const minute = String(now.getMinutes()).padStart(2, '0');
+      const input = prompt("Alarm vaxtını daxil et (HH:MM)", `${hour}:${minute}`);
+      if (input && input.match(/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/)) {
+        alarms.push({ time: input, active: true });
+        saveAlarms();
+        renderAlarms();
+      } else if (input) {
+        alert("Yanlış format! Doğru format: HH:MM");
+      }
+    }
+
+    function toggleAlarm(index) {
+      alarms[index].active = !alarms[index].active;
+      saveAlarms();
+      renderAlarms();
+    }
+
+    function handleMusicFile(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          musicFileURL = e.target.result;
+          localStorage.setItem("musicFileURL", musicFileURL);
+          alert("Musiqi seçildi və yadda saxlanıldı.");
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function playSelectedSound() {
+      if (musicFileURL) {
+        alarmAudio.src = musicFileURL;
+        alarmAudio.play();
+      } else {
+        alert("Əvvəlcə bir musiqi seçin.");
+      }
+    }
+
+    renderAlarms();
+  </script>
+</body>
+</html>
