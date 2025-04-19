@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Canlı Hava Məlumatı</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-size: cover;
+      background-position: center;
+      transition: background-image 0.5s ease;
+    }
+
+    #container {
+      background-color: rgba(0,0,0,0.4);
+      padding: 1rem;
+      color: white;
+    }
+
+    #map {
+      height: 400px;
+      margin-top: 10px;
+    }
+
+    .info {
+      font-size: 1.2rem;
+    }
+
+    .forecast {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .forecast-day {
+      background-color: rgba(255, 255, 255, 0.2);
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    #search-bar {
+      margin-bottom: 10px;
+    }
+
+    #search-bar input {
+      padding: 8px;
+      width: 200px;
+      font-size: 1rem;
+      border-radius: 5px;
+      border: none;
+      margin-right: 5px;
+    }
+
+    #search-bar button {
+      padding: 8px 12px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 5px;
+      background-color: #3f9;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <div id="search-bar">
+      <input type="text" id="search-input" placeholder="Şəhər və ya ölkə adı daxil et" />
+      <button onclick="searchLocation()">Axtar</button>
+    </div>
+
+    <h2 id="location">Yüklənir...</h2>
+    <div class="info">
+      <p id="temp"></p>
+      <p id="condition"></p>
+      <p id="humidity"></p>
+      <p id="wind"></p>
+    </div>
+    <div class="forecast" id="forecast"></div>
+    <div id="map"></div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    let map;
+    let marker;
+
+    function updateWeatherUI(data) {
+      document.getElementById("location").innerText = `${data.location.name}, ${data.location.country}`;
+      document.getElementById("temp").innerText = `İndiki Temperatur: ${data.current.temp_c}°C`;
+      document.getElementById("condition").innerText = `Hava: ${data.current.condition.text}`;
+      document.getElementById("humidity").innerText = `Rütubət: ${data.current.humidity}%`;
+      document.getElementById("wind").innerText = `Külək: ${data.current.wind_kph} km/s`;
+
+      const forecastContainer = document.getElementById("forecast");
+      forecastContainer.innerHTML = "";
+      data.forecast.forecastday.forEach(day => {
+        const el = document.createElement("div");
+        el.className = "forecast-day";
+        el.innerHTML = `
+          <strong>${day.date}</strong><br>
+          ${day.day.condition.text}<br>
+          Max: ${day.day.maxtemp_c}°C<br>
+          Min: ${day.day.mintemp_c}°C
+        `;
+        forecastContainer.appendChild(el);
+      });
+    }
+
+    function setCityBackground(city) {
+      const images = {
+        "Baku": "https://source.unsplash.com/1600x900/?baku",
+        "London": "https://source.unsplash.com/1600x900/?london",
+        "Paris": "https://source.unsplash.com/1600x900/?paris",
+        "New York": "https://source.unsplash.com/1600x900/?new-york",
+        "Tokyo": "https://source.unsplash.com/1600x900/?tokyo",
+        "Moscow": "https://source.unsplash.com/1600x900/?moscow"
+      };
+      document.body.style.backgroundImage = `url("${images[city] || 'https://source.unsplash.com/1600x900/?nature'}")`;
+    }
+
+    async function getWeatherByCoords(lat, lon) {
+      const res = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=dc631cc3288540ff93c204600251004&q=${lat},${lon}&days=3&aqi=no&alerts=no`);
+      const data = await res.json();
+      updateWeatherUI(data);
+      setCityBackground(data.location.name);
+      if (marker) marker.bindPopup(`${data.location.name}<br>${data.current.temp_c}°C`).openPopup();
+    }
+
+    async function searchLocation() {
+      const query = document.getElementById("search-input").value.trim();
+      if (!query) return;
+
+      const res = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=dc631cc3288540ff93c204600251004&q=${encodeURIComponent(query)}&days=3`);
+      const data = await res.json();
+
+      const lat = data.location.lat;
+      const lon = data.location.lon;
+
+      updateWeatherUI(data);
+      setCityBackground(data.location.name);
+      if (!map) initMap(lat, lon);
+      else {
+        map.setView([lat, lon], 8);
+        if (marker) map.removeLayer(marker);
+        marker = L.marker([lat, lon]).addTo(map)
+          .bindPopup(`${data.location.name}<br>${data.current.temp_c}°C`).openPopup();
+      }
+    }
+
+    function initMap(lat, lon) {
+      map = L.map('map').setView([lat, lon], 8);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(map);
+
+      const apiKey = "b6907d289e10d714a6e88b30761fae22";
+      const cloudLayer = L.tileLayer(`https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=${apiKey}`, { opacity: 0.5 });
+      const rainLayer = L.tileLayer(`https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=${apiKey}`, { opacity: 0.5 });
+
+      L.control.layers(null, {
+        "Buludlar": cloudLayer,
+        "Yağış": rainLayer
+      }).addTo(map);
+
+      cloudLayer.addTo(map);
+
+      marker = L.marker([lat, lon]).addTo(map).bindPopup("Buradasınız").openPopup();
+
+      map.on('click', function (e) {
+        const { lat, lng } = e.latlng;
+        if (marker) map.removeLayer(marker);
+        marker = L.marker([lat, lng]).addTo(map)
+          .bindPopup("Yüklənir...").openPopup();
+        getWeatherByCoords(lat, lng);
+      });
+    }
+
+    window.addEventListener("load", () => {
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          const { latitude, longitude } = position.coords;
+          getWeatherByCoords(latitude, longitude);
+          initMap(latitude, longitude);
+        }, () => {
+          const fallbackLat = 40.4093;
+          const fallbackLon = 49.8671;
+          getWeatherByCoords(fallbackLat, fallbackLon);
+          initMap(fallbackLat, fallbackLon);
+        });
+      }
+    });
+  </script>
+</body>
+</html>
