@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <title>Zəngli Saat</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background-color: #f0f2f5;
+      text-align: center;
+      margin-bottom: 80px;
+    }
+
+    nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background-color: #333;
+      color: white;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px;
+      z-index: 1000;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-size: 16px;
+      padding: 10px;
+      display: block;
+      text-align: center;
+    }
+
+    nav a:hover {
+      background-color: #575757;
+      border-radius: 5px;
+    }
+
+    .section {
+      display: none;
+      margin-top: 20px;
+    }
+
+    .active-section {
+      display: block;
+    }
+
+    .add-btn, .sound-btn {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 8px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .saved-alarm {
+      background: white;
+      padding: 10px;
+      margin: 10px auto;
+      max-width: 300px;
+      border-radius: 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 34px;
+      height: 20px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 20px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 12px;
+      width: 12px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #28a745;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(14px);
+    }
+
+    #alarmSection {
+      display: block;
+    }
+
+    #counter, #stopwatch, #worldClock {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    #stopOverlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    #stopOverlay button {
+      font-size: 24px;
+      padding: 20px 40px;
+      background-color: #ff4d4f;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="alarmSection" class="section active-section">
+    <h1>⏰ Zəngli Saat</h1>
+    <button class="add-btn" onclick="addAlarm()">➕ Yeni Alarm</button>
+    <button class="sound-btn" onclick="playSelectedSound()">🎵 Səs 2</button>
+    <input type="file" id="musicFile" accept="audio/*" style="display:none" onchange="handleMusicFile(event)" />
+    <button class="sound-btn" onclick="document.getElementById('musicFile').click()">📂 Musiqi seçin</button>
+    <div id="savedAlarms"></div>
+  </div>
+
+  <div id="counterSection" class="section">
+    <h2>⏱ Sayğac</h2>
+    <p id="counterDisplay">0</p>
+    <button onclick="startCounter()">Başlat</button>
+    <button onclick="stopCounter()">Dayandır</button>
+  </div>
+
+  <div id="stopwatchSection" class="section">
+    <h2>🕒 Kronometre</h2>
+    <p id="stopwatchDisplay">0</p>
+    <button onclick="startStopwatch()">Başlat</button>
+    <button onclick="stopStopwatch()">Dayandır</button>
+    <button onclick="resetStopwatch()">Sıfırla</button>
+  </div>
+
+  <div id="worldClockSection" class="section">
+    <h2>🌍 Dünya Saatı</h2>
+    <p id="worldClock"></p>
+  </div>
+
+  <nav>
+    <a href="javascript:void(0)" onclick="showSection('alarmSection')">⏰ Alarm</a>
+    <a href="javascript:void(0)" onclick="showSection('counterSection')">⏱ Sayğac</a>
+    <a href="javascript:void(0)" onclick="showSection('stopwatchSection')">🕒 Kronometre</a>
+    <a href="javascript:void(0)" onclick="showSection('worldClockSection')">🌍 Dünya Saatı</a>
+  </nav>
+
+  <audio id="alarmAudio" loop></audio>
+
+  <script>
+    let alarms = JSON.parse(localStorage.getItem("alarms")) || [];
+    let musicFileURL = localStorage.getItem("musicFileURL") || null;
+    let activeAlarms = new Set();
+    let stopTimeout = null;
+
+    const alarmAudio = document.getElementById("alarmAudio");
+
+    function saveAlarms() {
+      localStorage.setItem("alarms", JSON.stringify(alarms));
+    }
+
+    function renderAlarms() {
+      const container = document.getElementById("savedAlarms");
+      container.innerHTML = "";
+      alarms.forEach((alarm, index) => {
+        const div = document.createElement("div");
+        div.className = "saved-alarm";
+        div.innerHTML = `
+          <span>${alarm.time}</span>
+          <label class="switch">
+            <input type="checkbox" ${alarm.active ? "checked" : ""} onchange="toggleAlarm(${index})">
+            <span class="slider"></span>
+          </label>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function addAlarm() {
+      const now = new Date();
+      const hour = String(now.getHours()).padStart(2, '0');
+      const minute = String(now.getMinutes()).padStart(2, '0');
+      const input = prompt("Alarm vaxtını daxil et (HH:MM)", `${hour}:${minute}`);
+      if (input && input.match(/^([0-1][0-9]|2[0-3]):[0-5][0-9]$/)) {
+        alarms.push({ time: input, active: true });
+        saveAlarms();
+        renderAlarms();
+      } else if (input) {
+        alert("Yanlış format! Doğru format: HH:MM");
+      }
+    }
+
+    function toggleAlarm(index) {
+      alarms[index].active = !alarms[index].active;
+      saveAlarms();
+      renderAlarms();
+    }
+
+    function checkAlarms() {
+      const now = new Date();
+      const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+      alarms.forEach((alarm, index) => {
+        if (alarm.active && alarm.time === currentTime && !activeAlarms.has(alarm.time)) {
+          activeAlarms.add(alarm.time);
+          triggerAlarm();
+          setTimeout(() => activeAlarms.delete(alarm.time), 60000);
+        }
+      });
+    }
+
+    function triggerAlarm() {
+      if (musicFileURL) {
+        alarmAudio.src = musicFileURL;
+        alarmAudio.loop = true;
+        alarmAudio.play();
+      }
+
+      if ("vibrate" in navigator) {
+        navigator.vibrate([500, 300, 500]);
+      }
+
+      showStopOverlay();
+
+      stopTimeout = setTimeout(() => {
+        alert("Alarmı dayandırmaq üçün butona basın.");
+      }, 300000); // 5 dəqiqə
+    }
+
+    function stopAlarm() {
+      alarmAudio.pause();
+      alarmAudio.currentTime = 0;
+      hideStopOverlay();
+      clearTimeout(stopTimeout);
+    }
+
+    function showStopOverlay() {
+      const overlay = document.createElement("div");
+      overlay.id = "stopOverlay";
+      overlay.innerHTML = `
+        <button onclick="stopAlarm()">BAMBILI DUR!</button>
+      `;
+      document.body.appendChild(overlay);
+    }
+
+    function hideStopOverlay() {
+      const overlay = document.getElementById("stopOverlay");
+      if (overlay) overlay.remove();
+    }
+
+    function showSection(sectionId) {
+      document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active-section');
+      });
+      document.getElementById(sectionId).classList.add('active-section');
+    }
+
+    function playSelectedSound() {
+      alarmAudio.play();
+    }
+
+    function handleMusicFile(event) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      reader.onload = () => {
+        musicFileURL = reader.result;
+        localStorage.setItem("musicFileURL", musicFileURL);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Arxa planda işləmək üçün service worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js');
+    }
+
+    // Alarm yoxlanışını başlat
+    setInterval(checkAlarms, 60000);
+
+    // Başlatmaq üçün funksiyalar
+    renderAlarms();
+  </script>
+</body>
+</html>
