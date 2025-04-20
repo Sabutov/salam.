@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Canlı Hava Məlumatı</title>
+
+  <!-- Leaflet (2D) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <!-- MapLibre (3D) -->
+  <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
+  <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-size: cover;
+      background-position: center;
+      transition: background-image 0.5s ease;
+    }
+
+    #container {
+      background-color: rgba(0,0,0,0.5);
+      padding: 1rem;
+      color: white;
+    }
+
+    #map {
+      height: 400px;
+      margin-top: 10px;
+    }
+
+    .info {
+      font-size: 1.2rem;
+    }
+
+    .forecast, .hourly {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .forecast-day, .hour-box {
+      background-color: rgba(255, 255, 255, 0.2);
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    #search-bar {
+      margin-bottom: 10px;
+    }
+
+    #search-bar input, button {
+      padding: 8px;
+      font-size: 1rem;
+      border-radius: 5px;
+      border: none;
+    }
+
+    #search-bar input {
+      width: 200px;
+      margin-right: 5px;
+    }
+
+    #search-bar button {
+      background-color: #3f9;
+      cursor: pointer;
+    }
+
+    #toggle-buttons {
+      margin: 10px 0;
+    }
+
+    #toggle-buttons button {
+      margin-right: 10px;
+      background-color: #666;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <div id="search-bar">
+      <input type="text" id="search-input" placeholder="Şəhər və ya ölkə adı daxil et" />
+      <button onclick="searchLocation()">Axtar</button>
+    </div>
+
+    <h2 id="location">Yüklənir...</h2>
+    <div class="info">
+      <p id="temp"></p>
+      <p id="condition"></p>
+      <p id="humidity"></p>
+      <p id="wind"></p>
+    </div>
+
+    <div class="hourly" id="hourly"></div>
+    <div class="forecast" id="forecast"></div>
+
+    <div id="toggle-buttons">
+      <button onclick="switchTo2D()">2D Görünüş</button>
+      <button onclick="switchTo3D()">3D Görünüş</button>
+    </div>
+
+    <div id="map"></div>
+  </div>
+
+  <script>
+    let leafletMap, marker, mapLibreMap;
+
+    function updateWeatherUI(data) {
+      document.getElementById("location").innerText = `${data.location.name}, ${data.location.country}`;
+      document.getElementById("temp").innerText = `🌡️ Temperatur: ${data.current.temp_c}°C`;
+      document.getElementById("condition").innerText = `🌤️ Hava: ${data.current.condition.text}`;
+      document.getElementById("humidity").innerText = `💧 Rütubət: ${data.current.humidity}%`;
+      document.getElementById("wind").innerText = `🌬️ Külək: ${data.current.wind_kph} km/s`;
+
+      const forecastContainer = document.getElementById("forecast");
+      forecastContainer.innerHTML = "";
+      data.forecast.forecastday.forEach(day => {
+        const el = document.createElement("div");
+        el.className = "forecast-day";
+        el.innerHTML = `
+          <strong>${day.date}</strong><br>
+          ☀️ ${day.day.condition.text}<br>
+          🌡️ Max: ${day.day.maxtemp_c}°C<br>
+          🌡️ Min: ${day.day.mintemp_c}°C<br>
+          💧 Yağış ehtimalı: ${day.day.daily_chance_of_rain}%`;
+        forecastContainer.appendChild(el);
+      });
+
+      const hourlyContainer = document.getElementById("hourly");
+      hourlyContainer.innerHTML = "";
+      const now = new Date();
+      const currentHour = now.getHours();
+      data.forecast.forecastday[0].hour.forEach(hour => {
+        const hourTime = new Date(hour.time).getHours();
+        if (hourTime >= currentHour) {
+          const box = document.createElement("div");
+          box.className = "hour-box";
+          box.innerHTML = `
+            <strong>${hour.time.split(" ")[1]}</strong><br>
+            ${hour.condition.text.includes("rain") ? "🌧️" : hour.condition.text.includes("sun") ? "☀️" : "⛅"} ${hour.condition.text}<br>
+            🌡️ ${hour.temp_c}°C<br>
+            💧 Yağış: ${hour.chance_of_rain}%`;
+          hourlyContainer.appendChild(box);
+        }
+      });
+    }
+
+    function setCityBackground(city) {
+      const images = {
+        "Baku": "https://source.unsplash.com/1600x900/?baku",
+        "London": "https://source.unsplash.com/1600x900/?london",
+        "Paris": "https://source.unsplash.com/1600x900/?paris",
+        "New York": "https://source.unsplash.com/1600x900/?new-york",
+        "Tokyo": "https://source.unsplash.com/1600x900/?tokyo",
+        "Moscow": "https://source.unsplash.com/1600x900/?moscow"
+      };
+      document.body.style.backgroundImage = `url("${images[city] || 'https://source.unsplash.com/1600x900/?nature'}")`;
+    }
+
+    async function getWeatherByCoords(lat, lon) {
+      const res = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=dc631cc3288540ff93c204600251004&q=${lat},${lon}&days=3&aqi=no&alerts=no`);
+      const data = await res.json();
+      updateWeatherUI(data);
+      setCityBackground(data.location.name);
+      if (marker && leafletMap) {
+        marker.bindPopup(`${data.location.name}<br>${data.current.temp_c}°C`).openPopup();
+      }
+    }
+
+    async function searchLocation() {
+      const query = document.getElementById("search-input").value.trim();
+      if (!query) return;
+      const res = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=dc631cc3288540ff93c204600251004&q=${encodeURIComponent(query)}&days=3`);
+      const data = await res.json();
+      const lat = data.location.lat;
+      const lon = data.location.lon;
+      updateWeatherUI(data);
+      setCityBackground(data.location.name);
+      if (leafletMap) {
+        leafletMap.setView([lat, lon], 8);
+        if (marker) leafletMap.removeLayer(marker);
+        marker = L.marker([lat, lon]).addTo(leafletMap).bindPopup(`${data.location.name}<br>${data.current.temp_c}°C`).openPopup();
+      } else if (mapLibreMap) {
+        mapLibreMap.setCenter([lon, lat]);
+      }
+    }
+
+    function initLeafletMap(lat, lon) {
+      leafletMap = L.map('map').setView([lat, lon], 8);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(leafletMap);
+
+      marker = L.marker([lat, lon]).addTo(leafletMap).bindPopup("Buradasınız").openPopup();
+
+      leafletMap.on('click', function (e) {
+        const { lat, lng } = e.latlng;
+        if (marker) leafletMap.removeLayer(marker);
+        marker = L.marker([lat, lng]).addTo(leafletMap).bindPopup("Yüklənir...").openPopup();
+        getWeatherByCoords(lat, lng);
+      });
+    }
+
+    function switchTo2D() {
+      if (mapLibreMap) {
+        mapLibreMap.remove();
+        mapLibreMap = null;
+      }
+      document.getElementById("map").innerHTML = "";
+      initLeafletMap(40.4093, 49.8671);
+    }
+
+    function switchTo3D() {
+      if (leafletMap) {
+        leafletMap.remove();
+        leafletMap = null;
+      }
+      document.getElementById("map").innerHTML = "";
+      mapLibreMap = new maplibregl.Map({
+        container: "map",
+        style: "https://demotiles.maplibre.org/style.json",
+        center: [49.8671, 40.4093],
+        zoom: 10,
+        pitch: 45,
+        bearing: -17.6,
+        antialias: true
+      });
+      mapLibreMap.addControl(new maplibregl.NavigationControl());
+
+      // Add marker in 3D view at current location
+      mapLibreMap.on('load', function () {
+        const marker = new maplibregl.Marker()
+          .setLngLat([49.8671, 40.4093])
+          .setPopup(new maplibregl.Popup().setHTML("Buradasınız"))
+          .addTo(mapLibreMap);
+      });
+    }
+
+    window.addEventListener("load", () => {
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          const { latitude, longitude } = position.coords;
+          getWeatherByCoords(latitude, longitude);
+          initLeafletMap(latitude, longitude);
+        }, () => {
+          const fallbackLat = 40.4093;
+          const fallbackLon = 49.8671;
+          getWeatherByCoords(fallbackLat, fallbackLon);
+          initLeafletMap(fallbackLat, fallbackLon);
+        });
+      }
+    });
+  </script>
+</body>
+</html>
