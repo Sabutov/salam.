@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Canlı Hava Məlumatı</title>
+
+  <!-- Leaflet (2D) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <!-- MapLibre (3D) -->
+  <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
+  <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-size: cover;
+      background-position: center;
+      transition: background-image 0.5s ease;
+    }
+
+    #container {
+      background-color: rgba(0,0,0,0.5);
+      padding: 1rem;
+      color: white;
+    }
+
+    #map {
+      height: 400px;
+      margin-top: 10px;
+    }
+
+    .info {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    #temp {
+      font-size: 2.5rem;
+      font-weight: bold;
+    }
+
+    .forecast, .hourly {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+    }
+
+    .forecast-day, .hour-box {
+      background-color: rgba(255, 255, 255, 0.2);
+      padding: 10px;
+      border-radius: 8px;
+      flex-basis: 48%;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    #search-bar {
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    #search-bar input, button {
+      padding: 8px;
+      font-size: 1rem;
+      border-radius: 5px;
+      border: none;
+    }
+
+    #search-bar input {
+      width: 200px;
+      margin-right: 5px;
+    }
+
+    #search-bar button {
+      background-color: #3f9;
+      cursor: pointer;
+    }
+
+    #toggle-buttons {
+      margin: 10px 0;
+      text-align: center;
+    }
+
+    #toggle-buttons button {
+      margin-right: 10px;
+      background-color: #666;
+      color: white;
+    }
+
+    .hour-bottom {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .hour-emoji {
+      font-size: 3rem;
+      line-height: 1;
+    }
+
+    .hour-temp-large {
+      font-size: 2rem;
+      font-weight: bold;
+    }
+
+    @media (max-width: 768px) {
+      #search-bar input {
+        width: 100%;
+        margin-right: 0;
+      }
+      .forecast-day, .hour-box {
+        flex-basis: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <div id="search-bar">
+      <input type="text" id="search-input" placeholder="Şəhər və ya ölkə adı daxil et" />
+      <button onclick="searchLocation()">Axtar</button>
+    </div>
+
+    <h2 id="location">Yüklənir...</h2>
+    <div class="info">
+      <p id="temp"></p>
+      <p id="condition"></p>
+      <p id="humidity"></p>
+      <p id="wind"></p>
+    </div>
+
+    <h3>Saatlıq Proqnoz</h3>
+    <div class="hourly" id="hourly"></div>
+
+    <h3>Günlük Proqnoz</h3>
+    <div class="forecast" id="forecast"></div>
+
+    <div id="toggle-buttons">
+      <button onclick="switchTo2D()">2D Görünüş</button>
+      <button onclick="switchTo3D()">3D Görünüş</button>
+    </div>
+
+    <div id="map"></div>
+  </div>
+
+  <script>
+    let leafletMap, marker, mapLibreMap;
+
+    const azConditions = {
+      "Sunny": "Günəşli",
+      "Clear": "Açıq",
+      "Partly cloudy": "Qismən buludlu",
+      "Cloudy": "Buludlu",
+      "Overcast": "Çox buludlu",
+      "Mist": "Dumanlı",
+      "Patchy rain possible": "Yerli yağış mümkündür",
+      "Light rain": "Yüngül yağış",
+      "Moderate rain": "Orta yağış",
+      "Heavy rain": "Güclü yağış",
+      "Thunderstorm": "Şimşək",
+      "Partly rain": "Yerli yağış",
+      "Showers": "Yağışlı",
+      "Heavy showers": "Güclü yağışlı",
+      "Light snow": "Yüngül qar",
+      "Snow": "Qar",
+      "Heavy snow": "Güclü qar",
+      "Sleet": "Yağışlı qar",
+      "Hail": "Saçma"
+    };
+
+    function translateCondition(text) {
+      return azConditions[text] || text;
+    }
+
+    function getConditionEmoji(text) {
+      const currentHour = new Date().getHours();
+      if (currentHour >= 18 || currentHour < 6) {
+        if (text.includes("Günəş") || text.includes("Açıq")) return "🌙";
+        if (text.includes("Bulud")) return "🌙⛅";
+      }
+      if (text.includes("Yağış")) return "🌧️";
+      if (text.includes("Bulud")) return "⛅";
+      if (text.includes("Günəş") || text.includes("Açıq")) return "☀️";
+      if (text.includes("Duman")) return "🌫️";
+      if (text.includes("Qar")) return "❄️";
+      return "🌤️";
+    }
+
+    function setWeatherBackground(condition) {
+      let bgUrl = "https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1600&q=80";
+      if (condition.includes("Günəş")) bgUrl = "https://images.unsplash.com/photo-1501973801540-537f08ccae7d?auto=format&fit=crop&w=1600&q=80";
+      else if (condition.includes("Bulud")) bgUrl = "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1600&q=80";
+      else if (condition.includes("Yağış")) bgUrl = "https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?auto=format&fit=crop&w=1600&q=80";
+      else if (condition.includes("Duman")) bgUrl = "https://images.unsplash.com/photo-1499242246423-c49c3a409e1d?auto=format&fit=crop&w=1600&q=80";
+      else if (condition.includes("Qar")) bgUrl = "https://images.unsplash.com/photo-1608889175345-7ac47b4dc858?auto=format&fit=crop&w=1600&q=80";
+      document.body.style.backgroundImage = `url('${bgUrl}')`;
+    }
+
+    function updateWeatherUI(data) {
+      const translated = translateCondition(data.current.condition.text);
+      const emoji = getConditionEmoji(translated);
+      document.getElementById("location").innerText = `${data.location.name}, ${data.location.country}`;
+      document.getElementById("temp").innerText = `${emoji} ${data.current.temp_c}°C`;
+      document.getElementById("condition").innerText = `Hava: ${translated}`;
+      document.getElementById("humidity").innerText = `💧 Rütubət: ${data.current.humidity}%`;
+      document.getElementById("wind").innerText = `🌬️ Külək: ${data.current.wind_kph} km/s`;
+
+      const hourlyContainer = document.getElementById("hourly");
+      hourlyContainer.innerHTML = "";
+      const now = new Date();
+      const currentHour = now.getHours();
+      data.forecast.forecastday[0].hour.forEach(hour => {
+        const hourTime = new Date(hour.time).getHours();
+        if (hourTime >= currentHour) {
+          const box = document.createElement("div");
+          box.className = "hour-box";
+          const cond = translateCondition(hour.condition.text);
+          const emoji = getConditionEmoji(cond);
+          box.innerHTML = `
+            <strong>${hour.time.split(" ")[1]}</strong><br>
+            ${cond}<br>
+            🌡️ ${hour.temp_c}°C<br>
+            💧 Yağış: ${hour.chance_of_rain}%<br>
+            <div class="hour-bottom">
+              <div class="hour-emoji">${emoji}</div>
+              <div class="hour-temp-large">${hour.feelslike_c.toFixed(1)}°C</div>
+            </div>
+          `;
+          hourlyContainer.appendChild(box);
+        }
+      });
+
+      const forecastContainer = document.getElementById("forecast");
+      forecastContainer.innerHTML = "";
+      data.forecast.forecastday.forEach(day => {
+        const el = document.createElement("div");
+        const cond = translateCondition(day.day.condition.text);
+        el.className = "forecast-day";
+        el.innerHTML = `
+          <strong>${day.date}</strong><br>
+          ${getConditionEmoji(cond)} ${cond}<br>
+          🌡️ Max: ${day.day.maxtemp_c}°C<br>
+          🌡️ Min: ${day.day.mintemp_c}°C<br>
+          💧 Yağış ehtimalı: ${day.day.daily_chance_of_rain}%`;
+        forecastContainer.appendChild(el);
+      });
+
+      setWeatherBackground(translated);
+    }
+
+    async function getWeatherByCoords(lat, lon) {
+      const res = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=dc631cc3288540ff93c204600251004&q=${lat},${lon}&days=3&aqi=no&alerts=no`);
+      const data = await res.json();
+      updateWeatherUI(data);
+      if (marker && leafletMap) {
+        marker.bindPopup(`${data.location.name}<br>${data.current.temp_c}°C`).openPopup();
+      }
+    }
+
+    async function searchLocation() {
+      const query = document.getElementById("search-input").value.trim();
+      if (!query) return;
+      const res = await fetch(`https://api.weatherapi.com/v1/forecast.json?key=dc631cc3288540ff93c204600251004&q=${encodeURIComponent(query)}&days=3`);
+      const data = await res.json();
+      const lat = data.location.lat;
+      const lon = data.location.lon;
+      updateWeatherUI(data);
+      if (leafletMap) {
+        leafletMap.setView([lat, lon], 8);
+        if (marker) leafletMap.removeLayer(marker);
+        marker = L.marker([lat, lon]).addTo(leafletMap).bindPopup(`${data.location.name}<br>${data.current.temp_c}°C`).openPopup();
+      } else if (mapLibreMap) {
+        mapLibreMap.setCenter([lon, lat]);
+      }
+    }
+
+    function initLeafletMap(lat, lon) {
+      leafletMap = L.map('map').setView([lat, lon], 8);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(leafletMap);
+
+      marker = L.marker([lat, lon]).addTo(leafletMap).bindPopup("Buradasınız").openPopup();
+
+      leafletMap.on('click', function (e) {
+        const { lat, lng } = e.latlng;
+        if (marker) leafletMap.removeLayer(marker);
+        marker = L.marker([lat, lng]).addTo(leafletMap).bindPopup("Yüklənir...").openPopup();
+        getWeatherByCoords(lat, lng);
+      });
+    }
+
+    function switchTo2D() {
+      if (mapLibreMap) {
+        mapLibreMap.remove();
+        mapLibreMap = null;
+      }
+      document.getElementById("map").innerHTML = "";
+      initLeafletMap(40.4093, 49.8671);
+    }
+
+    function switchTo3D() {
+      if (leafletMap) {
+        leafletMap.remove();
+        leafletMap = null;
+      }
+      document.getElementById("map").innerHTML = "";
+      mapLibreMap = new maplibregl.Map({
+        container: "map",
+        style: "https://demotiles.maplibre.org/style.json",
+        center: [49.8671, 40.4093],
+        zoom: 10,
+        pitch: 45,
+        bearing: -17.6,
+        antialias: true
+      });
+      mapLibreMap.addControl(new maplibregl.NavigationControl());
+    }
+
+    window.addEventListener("load", () => {
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition((position) => {
+          const { latitude, longitude } = position.coords;
+          getWeatherByCoords(latitude, longitude);
+          initLeafletMap(latitude, longitude);
+        });
+      }
+    });
+  </script>
+</body>
+</html>
