@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Elektron Lövhə</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      overflow: hidden;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 20px;
+      text-align: center;
+    }
+
+    canvas {
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      width: 100%;
+      height: 400px;
+      touch-action: none;
+      background-color: white;
+    }
+
+    input, select, button {
+      margin-top: 10px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    #add-text-btn {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .hamburger, .tools-toggle {
+      position: absolute;
+      top: 10px;
+      width: 30px;
+      height: 30px;
+      z-index: 1000;
+      cursor: pointer;
+    }
+
+    .hamburger {
+      left: 10px;
+    }
+
+    .tools-toggle {
+      right: 10px;
+    }
+
+    .hamburger div, .tools-toggle div {
+      width: 30px;
+      height: 4px;
+      margin: 5px 0;
+      background-color: #333;
+    }
+
+    #settings-panel, #tools-panel {
+      position: fixed;
+      top: 0;
+      background-color: #fff;
+      height: 100%;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+      z-index: 999;
+      padding: 20px;
+      transition: transform 0.3s ease;
+    }
+
+    #settings-panel {
+      left: 0;
+      width: 260px;
+      transform: translateX(-100%);
+    }
+
+    #settings-panel.show {
+      transform: translateX(0);
+    }
+
+    #tools-panel {
+      right: 0;
+      width: 240px;
+      transform: translateX(100%);
+    }
+
+    #tools-panel.show {
+      transform: translateX(0);
+    }
+
+    .draggable-text {
+      position: absolute;
+      cursor: move;
+      user-select: none;
+      font-weight: bold;
+    }
+
+    .button-container {
+      margin-top: 20px;
+    }
+
+    .action-btn {
+      margin: 5px;
+      padding: 10px;
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .action-btn:hover {
+      background-color: #0b7dda;
+    }
+
+    #tools-panel h3 {
+      font-size: 18px;
+      margin-bottom: 20px;
+      color: #333;
+      text-align: center;
+    }
+
+    .tools-panel-section {
+      margin-bottom: 20px;
+    }
+
+    .tools-panel-section label {
+      display: block;
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 5px;
+    }
+
+    .tools-panel-section select, .tools-panel-section input {
+      width: 100%;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    .tools-panel-section button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 5px;
+      background-color: #f44336;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .tools-panel-section button:hover {
+      background-color: #e57373;
+    }
+  </style>
+</head>
+<body>
+  <!-- Hamburger menyusu -->
+  <div class="hamburger" id="hamburger">
+    <div></div><div></div><div></div>
+  </div>
+
+  <!-- Alətlər paneli düyməsi -->
+  <div class="tools-toggle" id="tools-toggle">
+    <div></div><div></div><div></div>
+  </div>
+
+  <!-- Ayarlar paneli -->
+  <div id="settings-panel">
+    <h3>Ayarlar</h3>
+    <label for="language-select">Dil seçin:</label>
+    <select id="language-select">
+      <option value="az">Azərbaycan</option>
+      <option value="en">English</option>
+      <option value="tr">Türkçe</option>
+    </select>
+  </div>
+
+  <!-- Alətlər paneli -->
+  <div id="tools-panel">
+    <h3>Alətlər</h3>
+
+    <div class="tools-panel-section">
+      <label id="brush-label" for="brush-size">Fırça qalınlığı:</label>
+      <select id="brush-size">
+        <option value="2">İncə</option>
+        <option value="5">Orta</option>
+        <option value="10">Qalın</option>
+      </select>
+    </div>
+
+    <div class="tools-panel-section">
+      <label id="font-label" for="font-size">Yazı ölçüsü:</label>
+      <select id="font-size">
+        <option value="14">Kiçik</option>
+        <option value="20" selected>Orta</option>
+        <option value="30">Böyük</option>
+      </select>
+    </div>
+
+    <div class="tools-panel-section">
+      <label id="color-label" for="color-picker-palette">Palitra:</label>
+      <input type="color" id="color-picker-palette" value="#000000">
+    </div>
+
+    <div class="tools-panel-section">
+      <button class="action-btn" id="eraser-btn">Silgi</button>
+      <button class="action-btn" id="undo-btn">Geri Al</button>
+      <button class="action-btn" id="clear-btn">Təmizlə</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1 id="header-title">Elektron Lövhə</h1>
+    <canvas id="board"></canvas>
+    <div>
+      <input type="text" id="text-input" placeholder="Lövhəyə yazın...">
+      <button id="add-text-btn">Daxil et</button>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("board");
+    const ctx = canvas.getContext("2d");
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+
+    let drawing = false;
+    let eraserMode = false;
+    let currentColor = "#000000";
+    let currentBrushSize = 2;
+    let currentFontSize = 20;
+    let drawnPaths = [];
+
+    const languageStrings = {
+      az: {
+        title: "Elektron Lövhə",
+        addText: "Daxil et",
+        brush: "Fırça qalınlığı:",
+        font: "Yazı ölçüsü:",
+        color: "Palitra:",
+        eraser: "Silgi",
+        undo: "Geri Al",
+        clear: "Təmizlə",
+        input: "Lövhəyə yazın..."
+      },
+      en: {
+        title: "Digital Board",
+        addText: "Add",
+        brush: "Brush Size:",
+        font: "Font Size:",
+        color: "Color:",
+        eraser: "Eraser",
+        undo: "Undo",
+        clear: "Clear",
+        input: "Type on board..."
+      },
+      tr: {
+        title: "Dijital Tahta",
+        addText: "Ekle",
+        brush: "Fırça kalınlığı:",
+        font: "Yazı boyutu:",
+        color: "Renk:",
+        eraser: "Silgi",
+        undo: "Geri Al",
+        clear: "Temizle",
+        input: "Tahtaya yazın..."
+      }
+    };
+
+    document.getElementById("language-select").addEventListener("change", (e) => {
+      const lang = e.target.value;
+      document.getElementById("header-title").innerText = languageStrings[lang].title;
+      document.getElementById("add-text-btn").innerText = languageStrings[lang].addText;
+      document.getElementById("brush-label").innerText = languageStrings[lang].brush;
+      document.getElementById("font-label").innerText = languageStrings[lang].font;
+      document.getElementById("color-label").innerText = languageStrings[lang].color;
+      document.getElementById("eraser-btn").innerText = languageStrings[lang].eraser;
+      document.getElementById("undo-btn").innerText = languageStrings[lang].undo;
+      document.getElementById("clear-btn").innerText = languageStrings[lang].clear;
+      document.getElementById("text-input").placeholder = languageStrings[lang].input;
+    });
+
+    document.getElementById("hamburger").addEventListener("click", () => {
+      document.getElementById("settings-panel").classList.toggle("show");
+    });
+
+    document.getElementById("tools-toggle").addEventListener("click", () => {
+      document.getElementById("tools-panel").classList.toggle("show");
+    });
+
+    document.getElementById("color-picker-palette").addEventListener("input", e => {
+      currentColor = e.target.value;
+    });
+
+    document.getElementById("brush-size").addEventListener("change", e => {
+      currentBrushSize = parseInt(e.target.value);
+    });
+
+    document.getElementById("font-size").addEventListener("change", e => {
+      currentFontSize = parseInt(e.target.value);
+    });
+
+    document.getElementById("eraser-btn").addEventListener("click", () => {
+      eraserMode = !eraserMode;
+    });
+
+    document.getElementById("undo-btn").addEventListener("click", () => {
+      drawnPaths.pop();
+      redrawCanvas();
+    });
+
+    document.getElementById("clear-btn").addEventListener("click", () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawnPaths = [];
+    });
+
+    document.getElementById("add-text-btn").addEventListener("click", () => {
+      const text = document.getElementById("text-input").value;
+      if (!text) return;
+
+      const span = document.createElement("span");
+      span.textContent = text;
+      span.style.color = currentColor;
+      span.style.fontSize = currentFontSize + "px";
+      span.className = "draggable-text";
+      span.style.top = "200px";
+      span.style.left = "200px";
+      document.body.appendChild(span);
+
+      span.onmousedown = function (e) {
+        let offsetX = e.clientX - span.offsetLeft;
+        let offsetY = e.clientY - span.offsetTop;
+
+        function onMouseMove(e) {
+          span.style.left = `${e.clientX - offsetX}px`;
+          span.style.top = `${e.clientY - offsetY}px`;
+        }
+
+        document.addEventListener("mousemove", onMouseMove);
+        document.onmouseup = () => {
+          document.removeEventListener("mousemove", onMouseMove);
+          document.onmouseup = null;
+        };
+      };
+
+      document.getElementById("text-input").value = "";
+    });
+
+    canvas.addEventListener("mousedown", (e) => {
+      drawing = true;
+      ctx.beginPath();
+      ctx.moveTo(e.offsetX, e.offsetY);
+    });
+
+    canvas.addEventListener("mousemove", (e) => {
+      if (!drawing) return;
+      ctx.lineWidth = eraserMode ? 20 : currentBrushSize;
+      ctx.lineCap = "round";
+      ctx.strokeStyle = eraserMode ? "#fff" : currentColor;
+      ctx.lineTo(e.offsetX, e.offsetY);
+      ctx.stroke();
+      drawnPaths.push({
+        x: e.offsetX, y: e.offsetY,
+        size: currentBrushSize,
+        color: eraserMode ? "#fff" : currentColor
+      });
+    });
+
+    canvas.addEventListener("mouseup", () => drawing = false);
+    canvas.addEventListener("mouseout", () => drawing = false);
+
+    function redrawCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.beginPath();
+      for (let p of drawnPaths) {
+        ctx.lineWidth = p.size;
+        ctx.strokeStyle = p.color;
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+      }
+    }
+  </script>
+</body>
+</html>
