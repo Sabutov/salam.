@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Giriş Formu</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      padding: 0;
+      margin: 0;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    body {
+      padding: 0 20px;
+    }
+
+    form {
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+      position: relative;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px 16px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      padding: 14px;
+      width: 100%;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .back-btn {
+      background-color: #28a745;
+      margin-top: 15px;
+    }
+
+    .back-btn:hover {
+      background-color: #218838;
+    }
+
+    .google-btn {
+      margin-top: 10px;
+      background-color: #db4437;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .google-btn img {
+      width: 20px; /* Google loqosunun ölçüsünü buradan dəyişə bilərsiniz */
+    }
+
+    .google-btn:hover {
+      background-color: #c1351d;
+    }
+
+    .facebook-btn {
+      margin-top: 10px;
+      background-color: #3b5998;
+    }
+
+    .facebook-btn:hover {
+      background-color: #2d4373;
+    }
+
+    @media (max-height: 500px) {
+      form {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<form action="https://formspree.io/f/mpwpklyg" method="POST">
+  <h2>Giriş Formu</h2>
+  <input type="text" name="ad" placeholder="Adınız" required />
+  <input type="email" name="email" placeholder="Email" required />
+  <input type="password" name="sifre" placeholder="Şifrə" required />
+  <button type="submit">Göndər</button>
+  <button class="google-btn" type="button" onclick="signInWithGoogle()">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Google.png" alt="Google Logo" />
+    🔐 Google ilə daxil ol
+  </button>
+  <button class="facebook-btn" type="button" onclick="signInWithFacebook()">🔐 Facebook ilə daxil ol</button>
+  <button class="back-btn" type="button" onclick="window.location.href='https://mccleaurg-glionts-twaency.yolasite.com';">Əsas səhifəyə qayıt</button>
+</form>
+
+<!-- Firebase JS SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth-compat.js"></script>
+
+<script>
+  // 🔧 Firebase konfiqurasiyası — BURANI ÖZ PROYEKTiNİZLƏ ƏVƏZ EDİN
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  // 🔌 Firebase-i başladın
+  firebase.initializeApp(firebaseConfig);
+
+  const auth = firebase.auth();
+  const googleProvider = new firebase.auth.GoogleAuthProvider();
+  const facebookProvider = new firebase.auth.FacebookAuthProvider();
+
+  function signInWithGoogle() {
+    auth.signInWithPopup(googleProvider)
+      .then((result) => {
+        const user = result.user;
+        alert("Xoş gəldiniz, " + user.displayName + "!");
+        // İstəsəniz buradan sonra istifadəçini yönləndirə bilərsiniz
+        // window.location.href = "profil.html";
+      })
+      .catch((error) => {
+        console.error(error);
+        alert("Google ilə giriş zamanı xəta baş verdi!");
+      });
+  }
+
+  function signInWithFacebook() {
+    auth.signInWithPopup(facebookProvider)
+      .then((result) => {
+        const user = result.user;
+        alert("Xoş gəldiniz, " + user.displayName + "!");
+        // İstəsəniz buradan sonra istifadəçini yönləndirə bilərsiniz
+        // window.location.href = "profil.html";
+      })
+      .catch((error) => {
+        console.error(error);
+        alert("Facebook ilə giriş zamanı xəta baş verdi!");
+      });
+  }
+</script>
+
+</body>
+</html>
