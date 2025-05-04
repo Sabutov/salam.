@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobil Naviqasiya Xəritəsi</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: sans-serif;
+    }
+    #map {
+      height: 100%;
+      width: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+    #controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    input {
+      padding: 8px;
+      font-size: 14px;
+      width: 100%;
+    }
+    button {
+      padding: 10px;
+      font-size: 14px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #info {
+      position: absolute;
+      bottom: 60px;
+      left: 10px;
+      right: 10px;
+      z-index: 1000;
+      background: rgba(255,255,255,0.9);
+      padding: 8px;
+      font-size: 14px;
+      border-radius: 8px;
+    }
+    #mode-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 50px;
+      background: white;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 1000;
+      border-top: 1px solid #ccc;
+    }
+    .mode-btn {
+      font-size: 14px;
+      padding: 5px 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      background: #fff;
+    }
+    .mode-btn.active {
+      background: #007bff;
+      color: white;
+    }
+    #center-btn {
+      position: absolute;
+      bottom: 120px;
+      right: 10px;
+      z-index: 1000;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 50%;
+      padding: 10px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div id="controls">
+  <input type="text" id="start" placeholder="Başlanğıc nöqtə" />
+  <input type="text" id="destination" placeholder="Son nöqtə" />
+  <button onclick="searchRoute()">Yol Tap</button>
+</div>
+
+<div id="info"></div>
+
+<div id="mode-bar">
+  <div class="mode-btn active" onclick="setMapMode('2d')">2D</div>
+  <div class="mode-btn" onclick="setMapMode('3d')">3D</div>
+  <div class="mode-btn" onclick="setMapMode('satellite')">Uydu</div>
+</div>
+
+<div id="center-btn" onclick="goToCurrentLocation()">
+  📍
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+<script src="https://rawcdn.githack.com/bbecquet/Leaflet.RotatedMarker/master/leaflet.rotatedMarker.js"></script>
+<script>
+  let map;
+  let currentLocation = null;
+  let routeLayer = null;
+  let directionMarker = null;
+  let heading = 0;
+  const apiKey = "5b3ce3597851110001cf62485e0b51ba821e4683a6b55c8e141767db"; // OpenRouteService API açarı
+
+  const layers = {
+    '2d': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'),
+    '3d': L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png'),
+    'satellite': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}')
+  };
+
+  map = L.map('map', {
+    center: [40.4093, 49.8671],
+    zoom: 13,
+    layers: [layers['2d']]
+  });
+
+  navigator.geolocation.getCurrentPosition(pos => {
+    currentLocation = [pos.coords.latitude, pos.coords.longitude];
+    directionMarker = L.marker(currentLocation).addTo(map).bindPopup("Siz buradasınız").openPopup();
+    map.setView(currentLocation, 15);
+
+    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${currentLocation[0]}&lon=${currentLocation[1]}`)
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("start").value = data.display_name;
+      });
+  });
+
+  function searchRoute() {
+    const start = document.getElementById("start").value;
+    const destination = document.getElementById("destination").value;
+    if (!start || !destination) return alert("Zəhmət olmasa başlanğıc və son nöqtəni yazın.");
+
+    Promise.all([
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${start}`).then(res => res.json()),
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${destination}`).then(res => res.json())
+    ]).then(([startData, endData]) => {
+      if (startData.length == 0 || endData.length == 0) return alert("Nöqtələr tapılmadı.");
+      const startCoord = [parseFloat(startData[0].lat), parseFloat(startData[0].lon)];
+      const endCoord = [parseFloat(endData[0].lat), parseFloat(endData[0].lon)];
+
+      getRoute(startCoord, endCoord);
+    });
+  }
+
+  function getRoute(start, end) {
+    fetch("https://api.openrouteservice.org/v2/directions/driving-car/geojson", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": apiKey
+      },
+      body: JSON.stringify({ coordinates: [[start[1], start[0]], [end[1], end[0]]] })
+    }).then(res => res.json()).then(data => {
+      if (routeLayer) map.removeLayer(routeLayer);
+      routeLayer = L.geoJSON(data, {
+        style: { color: "blue", weight: 4 }
+      }).addTo(map);
+      map.fitBounds(routeLayer.getBounds());
+
+      const summary = data.features[0].properties.summary;
+      const distance = (summary.distance / 1000).toFixed(2);
+      const duration = (summary.duration / 60).toFixed(1);
+      document.getElementById("info").innerHTML = `Məsafə: ${distance} km | Vaxt: ${duration} dəq`;
+    });
+  }
+
+  function setMapMode(mode) {
+    for (let key in layers) {
+      map.removeLayer(layers[key]);
+    }
+    layers[mode].addTo(map);
+    document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector(`.mode-btn:contains('${mode.toUpperCase()}')`).classList.add('active');
+  }
+
+  function goToCurrentLocation() {
+    if (currentLocation) map.setView(currentLocation, 16);
+  }
+</script>
+
+</body>
+</html>
