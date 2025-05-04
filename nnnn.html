@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Naviqasiya Xəritəsi</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: sans-serif;
+    }
+    #map {
+      height: calc(100vh - 160px);
+      width: 100%;
+    }
+    #search-container {
+      padding: 10px;
+      background: #f7f7f7;
+      display: flex;
+      gap: 10px;
+      flex-direction: column;
+    }
+    input {
+      flex: 1;
+      padding: 8px;
+      font-size: 16px;
+    }
+    button {
+      padding: 8px 16px;
+      font-size: 16px;
+    }
+    #info {
+      padding: 10px;
+      background: #f9f9f9;
+      font-size: 14px;
+    }
+    #mode-bar {
+      height: 50px;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      background-color: #fff;
+      border-top: 1px solid #ccc;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+    }
+    .mode-btn {
+      padding: 8px 12px;
+      border-radius: 10px;
+      background: white;
+      font-weight: bold;
+      cursor: pointer;
+      border: 1px solid #ccc;
+      transition: 0.2s ease;
+    }
+    .mode-btn:hover {
+      background-color: #e0e0e0;
+      transform: scale(1.05);
+    }
+    .mode-btn.active {
+      background-color: #007bff;
+      color: white;
+      border-color: #007bff;
+    }
+    #current-location-btn {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background-color: #007bff;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 100;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="search-container">
+    <input type="text" id="start-location" placeholder="Başlanğıc yeri" disabled />
+    <input type="text" id="destination" placeholder="Gedəcəyiniz yeri yazın..."/>
+    <button onclick="searchRoute()">Yol Tap</button>
+  </div>
+  <div id="map"></div>
+  <div id="info"></div>
+
+  <div id="mode-bar">
+    <div class="mode-btn active" onclick="setMapMode('2d')">2D</div>
+    <div class="mode-btn" onclick="setMapMode('3d')">3D</div>
+    <div class="mode-btn" onclick="setMapMode('satellite')">Uydu</div>
+  </div>
+
+  <button id="current-location-btn" onclick="goToCurrentLocation()">Mənim Yerimə Get</button>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://rawcdn.githack.com/bbecquet/Leaflet.RotatedMarker/master/leaflet.rotatedMarker.js"></script>
+
+  <script>
+    let currentLocation = null;
+    let directionMarker = null;
+    let routeLayer = null;
+    let heading = 0;
+
+    const arrowIcon = L.icon({
+      iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
+      iconSize: [40, 40],
+      iconAnchor: [20, 20],
+    });
+
+    const layers = {
+      '2d': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'),
+      '3d': L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png'),
+      'satellite': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}')
+    };
+
+    const map = L.map('map', {
+      center: [40.4093, 49.8671],
+      zoom: 13,
+      layers: [layers['2d']]
+    });
+
+    // Obyektlər üçün məlumat və şəkillər
+    const objects = [
+      {
+        name: "Məktəb 1",
+        lat: 40.4143,
+        lon: 49.8705,
+        image: "https://via.placeholder.com/100",
+        description: "Bu məktəb şəhərin mərkəzində yerləşir."
+      },
+      {
+        name: "Xəstəxana 1",
+        lat: 40.4173,
+        lon: 49.8691,
+        image: "https://via.placeholder.com/100",
+        description: "Bu xəstəxana 24 saat xidmət göstərir."
+      },
+      {
+        name: "Ticarət Mərkəzi",
+        lat: 40.4199,
+        lon: 49.8710,
+        image: "https://via.placeholder.com/100",
+        description: "Böyük alış-veriş mərkəzi və restoranlar."
+      },
+      {
+        name: "Park 1",
+        lat: 40.4200,
+        lon: 49.8670,
+        image: "https://via.placeholder.com/100",
+        description: "Şəhərin böyük və gözəl parkı."
+      }
+    ];
+
+    // Obyekt markerləri xəritəyə əlavə edirik
+    objects.forEach(obj => {
+      const marker = L.marker([obj.lat, obj.lon]).addTo(map)
+        .bindPopup(`
+          <b>${obj.name}</b><br/>
+          <img src="${obj.image}" alt="${obj.name}" style="width:100px;height:100px;"/><br/>
+          <p>${obj.description}</p>
+        `);
+    });
+
+    if (window.DeviceOrientationEvent) {
+      window.addEventListener("deviceorientationabsolute", updateHeading, true);
+      window.addEventListener("deviceorientation", updateHeading, true);
+    }
+
+    function updateHeading(event) {
+      heading = event.alpha || 0;
+      if (directionMarker) {
+        directionMarker.setRotationAngle(heading);
+      }
+    }
+
+    navigator.geolocation.watchPosition(pos => {
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+      currentLocation = [lat, lon];
+
+      if (!directionMarker) {
+        directionMarker = L.marker(currentLocation, {
+          icon: arrowIcon,
+          rotationAngle: heading,
+          rotationOrigin: "center center"
+        }).addTo(map).bindPopup("Siz buradasınız").openPopup();
+        map.setView(currentLocation, 15);
+
+        // Başlanğıc yerini birinci xana avtomatik olaraq doldururuq
+        document.getElementById("start-location").value = "Siz buradasınız: " + lat.toFixed(6) + ", " + lon.toFixed(6);
+      } else {
+        directionMarker.setLatLng(currentLocation);
+        directionMarker.setRotationAngle(heading);
+      }
+    }, err => {
+      alert("Yer təyin edilə bilmədi.");
+    });
+
+    function searchRoute() {
+      const destination = document.getElementById("destination").value.trim();
+      if (!destination || !currentLocation) {
+        alert("Zəhmət olmasa həm yerinizi, həm də gedəcəyiniz yeri daxil edin.");
+        return;
+      }
+
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${destination}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.length === 0) {
+            alert("Yer tapılmadı.");
+            return;
+          }
+
+          const destLat = parseFloat(data[0].lat);
+          const destLon = parseFloat(data[0].lon);
+          const placeName = data[0].display_name;
+
+          // Yer adını inputa yaz
+          document.getElementById("destination").value = placeName;
+
+          getRoute(currentLocation, [destLat, destLon]);
+        })
+        .catch(err => {
+          alert("Xəta baş verdi.");
+        });
+    }
+
+    function getRoute(start, end) {
+      const apiKey = "5b3ce3597851110001cf62485e0b51ba821e4683a6b55c8e141767db"; // Əvəz et öz açarınla
+
+      fetch("https://api.openrouteservice.org/v2/directions/driving-car/geojson", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": apiKey
+        },
+        body: JSON.stringify({
+          coordinates: [
+            [start[1], start[0]],
+            [end[1], end[0]]
+          ]
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (routeLayer) map.removeLayer(routeLayer);
+        routeLayer = L.geoJSON(data, {
+          style: {
+            color: "blue",
+            weight: 4
+          }
+        }).addTo(map);
+        map.fitBounds(routeLayer.getBounds());
+
+        const summary = data.features[0].properties.summary;
+        const distance = (summary.distance / 1000).toFixed(2);
+        const duration = (summary.duration / 60).toFixed(1);
+        document.getElementById("info").innerHTML = `
+          <strong>Məsafə:</strong> ${distance} km<br/>
+          <strong>Təxmini Vaxt:</strong> ${duration} dəq
+        `;
+      })
+      .catch(err => {
+        alert("Rota alınmadı.");
+      });
+    }
+
+    function setMapMode(mode) {
+      for (let key in layers) {
+        map.removeLayer(layers[key]);
+      }
+      layers[mode].addTo(map);
+    }
+
+    function goToCurrentLocation() {
+      if (currentLocation) {
+        map.setView(currentLocation, 15);
+      } else {
+        alert("İstifadəçinin mövqeyi tapılmadı.");
+      }
+    }
+
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>
