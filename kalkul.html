@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulyator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: white;
+            overflow: hidden;
+            padding: 10px;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .calculator {
+            width: 100%;
+            max-width: 360px;
+            border-radius: 20px;
+            background-color: #2a2a2a;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            border: 2px solid #444;
+        }
+
+        .display {
+            background-color: #1f1f1f;
+            color: white;
+            font-size: 2.5rem;
+            text-align: right;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            min-height: 70px;
+            line-height: 70px;
+            overflow-x: auto;
+            transition: all 0.2s ease;
+            box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .display.error {
+            color: red;
+            background-color: #3b3b3b;
+        }
+
+        .date-time {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 0.8rem;
+            color: #aaa;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 12px;
+        }
+
+        .btn {
+            background-color: #444;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            padding: 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:hover {
+            background-color: #666;
+            transform: scale(1.05);
+        }
+
+        .btn:active {
+            background-color: #888;
+            box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .operator {
+            background-color: #f39c12;
+            color: #000;
+        }
+
+        .operator:hover {
+            background-color: #e67e22;
+        }
+
+        .operator:active {
+            background-color: #d35400;
+        }
+
+        .btn:focus {
+            outline: none;
+        }
+
+        @media (max-width: 400px) {
+            .calculator {
+                padding: 15px;
+            }
+
+            .display {
+                font-size: 2rem;
+                padding: 10px;
+                min-height: 60px;
+                line-height: 60px;
+            }
+
+            .btn {
+                font-size: 1.5rem;
+                padding: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="date-time" id="datetime"></div>
+        <div id="display" class="display">0</div>
+        <div class="buttons">
+            <button class="btn operator" onclick="clearDisplay()">C</button>
+            <button class="btn" onclick="appendToDisplay('7')">7</button>
+            <button class="btn" onclick="appendToDisplay('8')">8</button>
+            <button class="btn" onclick="appendToDisplay('9')">9</button>
+            <button class="btn operator" onclick="appendToDisplay('+')">+</button>
+            <button class="btn" onclick="appendToDisplay('4')">4</button>
+            <button class="btn" onclick="appendToDisplay('5')">5</button>
+            <button class="btn" onclick="appendToDisplay('6')">6</button>
+            <button class="btn operator" onclick="appendToDisplay('-')">-</button>
+            <button class="btn" onclick="appendToDisplay('1')">1</button>
+            <button class="btn" onclick="appendToDisplay('2')">2</button>
+            <button class="btn" onclick="appendToDisplay('3')">3</button>
+            <button class="btn operator" onclick="appendToDisplay('*')">*</button>
+            <button class="btn" onclick="appendToDisplay('0')">0</button>
+            <button class="btn" onclick="appendToDisplay('.')">.</button>
+            <button class="btn operator" onclick="appendToDisplay('/')">/</button>
+            <button class="btn operator" onclick="calculateResult()">=</button>
+            <button class="btn operator" onclick="appendToDisplay('%')">%</button>
+            <button class="btn operator" onclick="calculateSqrt()">√</button>
+        </div>
+    </div>
+
+    <script>
+        const display = document.getElementById('display');
+
+        function updateDateTime() {
+            const now = new Date();
+            const time = now.toLocaleTimeString('az-AZ', { hour: '2-digit', minute: '2-digit' });
+            const date = now.toLocaleDateString('az-AZ', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+            document.getElementById('datetime').textContent = `${date} | ${time}`;
+        }
+
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+
+        function clearDisplay() {
+            display.textContent = '0';
+            display.classList.remove('error');
+        }
+
+        function appendToDisplay(value) {
+            if (display.textContent === '0' || display.textContent === 'Error') {
+                display.textContent = value;
+                display.classList.remove('error');
+            } else {
+                display.textContent += value;
+            }
+        }
+
+        function calculateResult() {
+            try {
+                let result = eval(display.textContent.replace('%', '/100'));
+                display.textContent = Number(result.toFixed(10));
+                display.classList.remove('error');
+            } catch (e) {
+                display.textContent = 'Error';
+                display.classList.add('error');
+            }
+        }
+
+        function calculateSqrt() {
+            try {
+                let value = parseFloat(display.textContent);
+                if (value < 0) throw new Error();
+                display.textContent = Math.sqrt(value).toFixed(4);
+                display.classList.remove('error');
+            } catch {
+                display.textContent = 'Error';
+                display.classList.add('error');
+            }
+        }
+    </script>
+</body>
+</html>
