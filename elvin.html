@@ -1,0 +1,1464 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MiniLalafo - Tam Özellikli İkinci El Site</title>
+<style>
+  /* --- GENEL --- */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0; padding: 0;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+    transition: background-color 0.3s, color 0.3s;
+  }
+  :root {
+    --primary: #ff6f61;
+    --bg: #f7f7f7;
+    --text: #222;
+    --card-bg: white;
+    --input-bg: #fff;
+    --input-border: #ccc;
+    --toast-bg: #333;
+    --toast-text: white;
+  }
+  body.dark {
+    --primary: #ff6f61;
+    --bg: #121212;
+    --text: #eee;
+    --card-bg: #222;
+    --input-bg: #333;
+    --input-border: #555;
+    --toast-bg: #eee;
+    --toast-text: #222;
+  }
+
+  /* --- HEADER --- */
+  header {
+    background: var(--primary);
+    color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 1.7rem;
+    cursor: pointer;
+  }
+  .search-bar {
+    flex-grow: 1;
+    margin: 0 1rem;
+  }
+  .search-bar input {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 4px;
+  }
+  button {
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+  }
+  button:hover {
+    opacity: 0.85;
+  }
+
+  /* --- NAV CATEGORIES --- */
+  nav {
+    background: var(--card-bg);
+    padding: 0.5rem 2rem;
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    border-bottom: 1px solid #ddd;
+  }
+  nav button {
+    background: none;
+    color: var(--text);
+  }
+  nav button.active,
+  nav button:hover {
+    background: var(--primary);
+    color: white;
+  }
+
+  /* --- MAIN ÜRÜN LİSTESİ --- */
+  main {
+    padding: 1rem 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(220px,1fr));
+    gap: 1rem;
+  }
+  .card {
+    background: var(--card-bg);
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease;
+    position: relative;
+  }
+  .card:hover {
+    transform: translateY(-5px);
+  }
+  .card img {
+    width: 100%;
+    border-radius: 6px 6px 0 0;
+    height: 150px;
+    object-fit: cover;
+  }
+  .card .info {
+    padding: 0.8rem 1rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .card .info h3 {
+    margin: 0 0 0.3rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+  .card .info p {
+    margin: 0.3rem 0 0.7rem;
+    color: #666;
+    flex-grow: 1;
+    font-size: 0.9rem;
+  }
+  .card .info .price {
+    font-weight: bold;
+    color: var(--primary);
+    font-size: 1.1rem;
+  }
+  .favorite-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: transparent;
+    border: none;
+    font-size: 1.5rem;
+    color: #ccc;
+    transition: color 0.3s ease;
+  }
+  .favorite-btn.favorited {
+    color: var(--primary);
+  }
+  .favorite-btn:hover {
+    color: var(--primary);
+  }
+
+  /* --- MODAL --- */
+  .modal {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 1rem;
+  }
+  .modal.active {
+    display: flex;
+  }
+  .modal-content {
+    background: var(--card-bg);
+    border-radius: 8px;
+    max-width: 600px;
+    width: 100%;
+    padding: 1.5rem;
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-content img {
+    width: 100%;
+    border-radius: 8px;
+    max-height: 300px;
+    object-fit: cover;
+  }
+  .modal-content h2 {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  .modal-content p {
+    color: var(--text);
+    line-height: 1.4;
+  }
+  .modal-content .price {
+    font-weight: 700;
+    color: var(--primary);
+    margin-top: 1rem;
+    font-size: 1.3rem;
+  }
+  .modal-close {
+    position: absolute;
+    top: 0.8rem;
+    right: 1rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #999;
+    transition: color 0.3s ease;
+    user-select: none;
+  }
+  .modal-close:hover {
+    color: var(--primary);
+  }
+
+  /* --- FORM MODAL --- */
+  .form-modal-content {
+    max-width: 400px;
+  }
+  .form-modal-content label {
+    display: block;
+    margin-top: 1rem;
+    font-weight: 600;
+  }
+  .form-modal-content input,
+  .form-modal-content textarea,
+  .form-modal-content select {
+    width: 100%;
+    padding: 0.4rem 0.6rem;
+    font-size: 1rem;
+    margin-top: 0.2rem;
+    border-radius: 4px;
+    border: 1px solid var(--input-border);
+    background-color: var(--input-bg);
+    color: var(--text);
+  }
+  .form-modal-content textarea {
+    resize: vertical;
+  }
+  .form-modal-content button {
+    margin-top: 1rem;
+    background-color: var(--primary);
+    color: white;
+    width: 100%;
+  }
+
+  /* --- TOAST --- */
+  #toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--toast-bg);
+    color: var(--toast-text);
+    padding: 1rem 1.5rem;
+    border-radius: 6px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+    z-index: 1100;
+  }
+  #toast.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* --- HEADER BUTONLAR --- */
+  .header-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  /* --- RESPONSIVE --- */
+  @media (max-width: 600px) {
+    header {
+      padding: 1rem;
+      gap: 0.5rem;
+    }
+    .search-bar {
+      margin: 0;
+      flex-grow: 1;
+      order: 3;
+    }
+    nav {
+      padding: 0.5rem 1rem;
+    }
+    main {
+      padding: 1rem 1rem;
+      grid-template-columns: repeat(auto-fill,minmax(150px,1fr));
+    }
+  }
+
+</style>
+</head>
+<body>
+
+<header>
+  <h1 onclick="resetFilters()">MiniLalafo</h1>
+  <div class="search-bar">
+    <input type="search" id="searchInput" placeholder="Ürün ara..." />
+  </div>
+  <div class="header-buttons">
+    <button id="loginBtn">Giriş Yap</button>
+    <button id="addProductBtn">Ürün Ekle</button>
+    <button id="themeToggle">🌙</button>
+  </div>
+</header>
+
+<nav id="categoryNav">
+  <!-- Kategoriler dinamik eklenecek -->
+</nav>
+
+<main id="productList">
+  <!-- Ürünler dinamik listelenecek -->
+</main>
+
+<!-- Ürün Detay Modal -->
+<div class="modal" id="productModal">
+  <div class="modal-content">
+    <span class="modal-close" id="closeProductModal">&times;</span>
+    <img src="" alt="Ürün Resmi" id="modalImage" />
+    <h2 id="modalTitle"></h2>
+    <p id="modalDescription"></p>
+    <div class="price" id="modalPrice"></div>
+  </div>
+</div>
+
+<!-- Giriş Modal -->
+<div class="modal" id="loginModal">
+  <div class="modal-content form-modal-content">
+    <span class="modal-close" id="closeLoginModal">&times;</span>
+    <h2>Giriş Yap</h2>
+    <label for="usernameInput">Kullanıcı Adı</label>
+    <input type="text" id="usernameInput" placeholder="Kullanıcı adınızı girin" />
+    <label for="passwordInput">Şifre</label>
+    <input type="password" id="passwordInput" placeholder="Şifrenizi girin" />
+    <button id="loginSubmitBtn">Giriş</button>
+  </div>
+</div>
+
+<!-- Ürün Ekleme Modal -->
+<div class="modal" id="addProductModal">
+  <div class="modal-content form-modal-content">
+    <span class="modal-close" id="closeAddProductModal">&times;</span>
+    <h2>Yeni Ürün Ekle</h2>
+    <label for="prodTitle">Başlık</label>
+    <input type="text" id="prodTitle" placeholder="Ürün başlığı" />
+    <label for="prodDesc">Açıklama</label>
+    <textarea id="prodDesc" rows="3" placeholder="Ürün açıklaması"></textarea>
+    <label for="prodPrice">Fiyat (₺)</label>
+    <input type="number" id="prodPrice" placeholder="Fiyat" />
+    <label for="prodCategory">Kategori</label>
+    <select id="prodCategory">
+      <!-- Kategoriler JS ile yüklenecek -->
+    </select>
+    <label for="prodImage">Resim URL</label>
+    <input type="url" id="prodImage" placeholder="Resim URL'si" />
+    <button id="addProductSubmitBtn">Ekle</button>
+  </div>
+</div>
+
+<!-- Bildirim -->
+<div id="toast"></div>
+
+<script>
+  // --- Veri: Örnek ürünler ve kategoriler ---
+  const categories = ["Tümü", "Elektronik", "Mobilya", "Giyim", "Kitap", "Ev Aletleri"];
+  let products = [
+    {
+      id: 1,
+      title: "Samsung Galaxy S21",
+      description: "Temiz kullanılmış, kutu ve şarj aleti ile.",
+      price: 5500,
+      category: "Elektronik",
+      image: "https://images.samsung.com/is/image/samsung/p6pim/tr/sm-g991bzadeua/gallery/tr-galaxy-s21-5g-g991-sm-g991bzadeua-368304390?$720_576_PNG$"
+    },
+    {
+      id: 2,
+      title: "Ahşap TV Ünitesi",
+      description: "Modern tasarım, sağlam ve temiz.",
+      price: 1200,
+      category: "Mobilya",
+      image: "https://cdn.mobilya.com.tr/ahsap-tv-unitesi-modern-800x600.jpg"
+    },
+    {
+      id: 3,
+      title: "Nike Spor Ayakkabı",
+      description: "Orijinal, 42 numara, az kullanılmış.",
+      price: 350,
+      category: "Giyim",
+      image: "https://cdn.nike.com/spor-ayakkabi.jpg"
+    },
+    {
+      id: 4,
+      title: "Mustafa Kemal Atatürk Kitabı",
+      description: "Tarih ve biyografi sevenler için ideal.",
+      price: 45,
+      category: "Kitap",
+      image: "https://cdn.kitap.com/ataturk.jpg"
+    },
+    {
+      id: 5,
+      title: "Arçelik Buzdolabı",
+      description: "Enerji tasarruflu, 2 yıl garantili.",
+      price: 3500,
+      category: "Ev Aletleri",
+      image: "https://cdn.arcelik.com/buzdolabi.jpg"
+    }
+  ];
+
+  // --- State ---
+  let filteredCategory = "Tümü";
+  let currentSearch = "";
+  let loggedInUser = null;
+  let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+
+  // --- DOM ELEMENTS ---
+  const productList = document.getElementById("productList");
+  const categoryNav = document.getElementById("categoryNav");
+  const searchInput = document.getElementById("searchInput");
+  const productModal = document.getElementById("productModal");
+  const modalImage = document.getElementById("modalImage");
+  const modalTitle = document.getElementById("modalTitle");
+  const modalDescription = document.getElementById("modalDescription");
+  const modalPrice = document.getElementById("modalPrice");
+  const closeProductModal = document.getElementById("closeProductModal");
+
+  const loginBtn = document.getElementById("loginBtn");
+  const loginModal = document.getElementById("loginModal");
+  const closeLoginModal = document.getElementById("closeLoginModal");
+  const loginSubmitBtn = document.getElementById("loginSubmitBtn");
+  const usernameInput = document.getElementById("usernameInput");
+  const passwordInput = document.getElementById("passwordInput");
+
+  const addProductBtn = document.getElementById("addProductBtn");
+  const addProductModal = document.getElementById("addProductModal");
+  const closeAddProductModal = document.getElementById("closeAddProductModal");
+  const addProductSubmitBtn = document.getElementById("addProductSubmitBtn");
+
+  const prodTitle = document.getElementById("prodTitle");
+  const prodDesc = document.getElementById("prodDesc");
+  const prodPrice = document.getElementById("prodPrice");
+  const prodCategory = document.getElementById("prodCategory");
+  const prodImage = document.getElementById("prodImage");
+
+  const toast = document.getElementById("toast");
+
+  const themeToggle = document.getElementById("themeToggle");
+
+  // --- Fonksiyonlar ---
+
+  // Kategorileri yükle ve nav'a ekle
+  function loadCategories() {
+    categoryNav.innerHTML = "";
+    categories.forEach(cat => {
+      const btn = document.createElement("button");
+      btn.textContent = cat;
+      btn.classList.toggle("active", cat === filteredCategory);
+      btn.addEventListener("click", () => {
+        filteredCategory = cat;
+        renderProducts();
+        updateCategoryNav();
+      });
+      categoryNav.appendChild(btn);
+    });
+  }
+
+  // Kategori dropdown'u ürün eklemede doldur
+  function loadCategoryDropdown() {
+    prodCategory.innerHTML = "";
+    categories.filter(c => c !== "Tümü").forEach(cat => {
+      const opt = document.createElement("option");
+      opt.value = cat;
+      opt.textContent = cat;
+      prodCategory.appendChild(opt);
+    });
+  }
+
+  // Ürünleri filtrele ve göster
+  function renderProducts() {
+    let filtered = products.filter(prod => {
+      const matchesCategory = filteredCategory === "Tümü" || prod.category === filteredCategory;
+      const matchesSearch = prod.title.toLowerCase().includes(currentSearch) || prod.description.toLowerCase().includes(currentSearch);
+      return matchesCategory && matchesSearch;
+    });
+
+    productList.innerHTML = "";
+
+    if (filtered.length === 0) {
+      productList.innerHTML = "<p>Hiç ürün bulunamadı.</p>";
+      return;
+    }
+
+    filtered.forEach(prod => {
+      const card = document.createElement("div");
+      card.className = "card";
+
+      card.innerHTML = `
+        <button class="favorite-btn" title="Favorilere Ekle/Çıkar">&hearts;</button>
+        <img src="${prod.image}" alt="${prod.title}" />
+        <div class="info">
+          <h3>${prod.title}</h3>
+          <p>${prod.description.length > 60 ? prod.description.slice(0,60) + "..." : prod.description}</p>
+          <div class="price">${prod.price.toLocaleString("tr-TR", {style:"currency", currency:"TRY"})}</div>
+        </div>
+      `;
+
+      // Favori durumunu ayarla
+      const favBtn = card.querySelector(".favorite-btn");
+      if (favorites.includes(prod.id)) {
+        favBtn.classList.add("favorited");
+      }
+      favBtn.addEventListener("click", e => {
+        e.stopPropagation();
+        toggleFavorite(prod.id, favBtn);
+      });
+
+      card.addEventListener("click", () => openProductModal(prod));
+
+      productList.appendChild(card);
+    });
+  }
+
+  // Favorilere ekle/çıkar
+  function toggleFavorite(id, btn) {
+    const index = favorites.indexOf(id);
+    if (index > -1) {
+      favorites.splice(index, 1);
+      btn.classList.remove("favorited");
+      showToast("Ürün favorilerden çıkarıldı.");
+    } else {
+      favorites.push(id);
+      btn.classList.add("favorited");
+      showToast("Ürün favorilere eklendi.");
+    }
+    localStorage.setItem("favorites", JSON.stringify(favorites));
+  }
+
+  // Ürün modalını aç
+  function openProductModal(prod) {
+    modalImage.src = prod.image;
+    modalTitle.textContent = prod.title;
+    modalDescription.textContent = prod.description;
+    modalPrice.textContent = prod.price.toLocaleString("tr-TR", {style:"currency", currency:"TRY"});
+    productModal.classList.add("active");
+  }
+
+  // Ürün modalını kapat
+  closeProductModal.addEventListener("click", () => {
+    productModal.classList.remove("active");
+  });
+  productModal.addEventListener("click", e => {
+    if (e.target === productModal) productModal.classList.remove("active");
+  });
+
+  // Arama inputu dinle
+  searchInput.addEventListener("input", e => {
+    currentSearch = e.target.value.trim().toLowerCase();
+    renderProducts();
+  });
+
+  // Kategori butonlarını güncelle (aktif sınıf)
+  function updateCategoryNav() {
+    Array.from(categoryNav.children).forEach(btn => {
+      btn.classList.toggle("active", btn.textContent === filteredCategory);
+    });
+  }
+
+  // Başlık tıklanınca filtreleri sıfırla
+  function resetFilters() {
+    filteredCategory = "Tümü";
+    currentSearch = "";
+    searchInput.value = "";
+    updateCategoryNav();
+    renderProducts();
+  }
+
+  // Giriş Modal aç/kapat
+  loginBtn.addEventListener("click", () => {
+    loginModal.classList.add("active");
+  });
+  closeLoginModal.addEventListener("click", () => {
+    loginModal.classList.remove("active");
+  });
+  loginModal.addEventListener("click", e => {
+    if (e.target === loginModal) loginModal.classList.remove("active");
+  });
+
+  // Basit login simülasyonu
+  loginSubmitBtn.addEventListener("click", () => {
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
+
+    if (!username || !password) {
+      showToast("Lütfen tüm alanları doldurun.");
+      return;
+    }
+
+    // Basit demo olarak direkt login
+    loggedInUser = username;
+    loginModal.classList.remove("active");
+    loginBtn.textContent = `Hoşgeldin, ${username}`;
+    showToast("Başarıyla giriş yapıldı.");
+  });
+
+  // Ürün ekleme modal aç/kapat
+  addProductBtn.addEventListener("click", () => {
+    if (!loggedInUser) {
+      showToast("Ürün eklemek için giriş yapmalısınız.");
+      loginModal.classList.add("active");
+      return;
+    }
+    addProductModal.classList.add("active");
+  });
+  closeAddProductModal.addEventListener("click", () => {
+    addProductModal.classList.remove("active");
+    clearAddProductForm();
+  });
+  addProductModal.addEventListener("click", e => {
+    if (e.target === addProductModal) {
+      addProductModal.classList.remove("active");
+      clearAddProductForm();
+    }
+  });
+
+  // Ürün ekleme formu temizle
+  function clearAddProductForm() {
+    prodTitle.value = "";
+    prodDesc.value = "";
+    prodPrice.value = "";
+    prodCategory.value = categories[1];
+    prodImage.value = "";
+  }
+
+  // Yeni ürün ekle
+  addProductSubmitBtn.addEventListener("click", () => {
+    const title = prodTitle.value.trim();
+    const desc = prodDesc.value.trim();
+    const price = parseFloat(prodPrice.value);
+    const category = prodCategory.value;
+    const image = prodImage.value.trim();
+
+    if (!title || !desc || !price || !category || !image) {
+      showToast("Lütfen tüm alanları eksiksiz doldurun.");
+      return;
+    }
+
+    const newProduct = {
+      id: Date.now(),
+      title,
+      description: desc,
+      price,
+      category,
+      image
+    };
+
+    products.unshift(newProduct); // başa ekle
+    addProductModal.classList.remove("active");
+    clearAddProductForm();
+    filteredCategory = "Tümü";
+    currentSearch = "";
+    searchInput.value = "";
+    updateCategoryNav();
+    renderProducts();
+    showToast("Yeni ürün başarıyla eklendi.");
+  });
+
+  // Tema toggle (Açık/Koyu)
+  themeToggle.addEventListener("click", () => {
+    document.body.classList.toggle("dark");
+    if (document.body.classList.contains("dark")) {
+      themeToggle.textContent = "☀️";
+      localStorage.setItem("theme", "dark");
+    } else {
+      themeToggle.textContent = "🌙";
+      localStorage.setItem("theme", "light");
+    }
+  });
+
+  // Önce tema ayarını uygula
+  function applyTheme() {
+    const theme = localStorage.getItem("theme");
+    if (theme === "dark") {
+      document.body.classList.add("dark");
+      themeToggle.textContent = "☀️";
+    } else {
+      document.body.classList.remove("dark");
+      themeToggle.textContent = "🌙";
+    }
+  }
+
+  // Bildirim göster
+  function showToast(message) {
+    toast.textContent = message;
+    toast.classList.add("show");
+    setTimeout(() => {
+      toast.classList.remove("show");
+    }, 3000);
+  }
+
+  // Başlangıç
+  loadCategories();
+  loadCategoryDropdown();
+  renderProducts();
+  applyTheme();
+
+</script>
+
+<style>
+  /* Genel Stil */
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    background-color: #f2f2f2;
+    color: #333;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  body.dark {
+    background-color: #121212;
+    color: #e0e0e0;
+  }
+
+  /* Header */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #0077cc;
+    padding: 10px 20px;
+    color: white;
+    flex-wrap: wrap;
+  }
+  header h1 {
+    margin: 0;
+    cursor: pointer;
+  }
+  .search-bar input {
+    padding: 5px 10px;
+    font-size: 1rem;
+    border-radius: 4px;
+    border: none;
+    min-width: 200px;
+  }
+  .header-buttons button {
+    margin-left: 10px;
+    padding: 7px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    background-color: #005fa3;
+    color: white;
+    transition: background-color 0.3s ease;
+  }
+  .header-buttons button:hover {
+    background-color: #004080;
+  }
+
+  /* Kategori Nav */
+  #categoryNav {
+    display: flex;
+    justify-content: center;
+    background-color: #e0e0e0;
+    padding: 10px 0;
+    flex-wrap: wrap;
+  }
+  #categoryNav button {
+    margin: 5px 10px;
+    padding: 7px 15px;
+    border: none;
+    border-radius: 20px;
+    background-color: #ccc;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+  }
+  #categoryNav button.active {
+    background-color: #0077cc;
+    color: white;
+  }
+  #categoryNav button:hover:not(.active) {
+    background-color: #a0a0a0;
+  }
+
+  /* Ürün Kartları */
+  #productList {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
+    gap: 20px;
+    padding: 20px;
+  }
+  .card {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.3s ease;
+  }
+  body.dark .card {
+    background-color: #222;
+  }
+  .card:hover {
+    box-shadow: 0 4px 15px rgb(0 0 0 / 0.3);
+  }
+  .card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+  }
+  .card .info {
+    padding: 15px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .card h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.2rem;
+  }
+  .card p {
+    margin: 0 0 15px 0;
+    flex-grow: 1;
+  }
+  .price {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #0077cc;
+  }
+
+  /* Favori Butonu */
+  .favorite-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    font-size: 1.4rem;
+    color: #bbb;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+  .favorite-btn:hover {
+    color: #0077cc;
+  }
+  .favorite-btn.favorited {
+    color: #e74c3c;
+  }
+
+  /* Modal */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+  }
+  .modal.active {
+    display: flex;
+  }
+  .modal-content {
+    background-color: white;
+    max-width: 400px;
+    width: 90%;
+    border-radius: 10px;
+    padding: 20px;
+    position: relative;
+    text-align: center;
+  }
+  body.dark .modal-content {
+    background-color: #333;
+    color: #ddd;
+  }
+  .modal-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #888;
+  }
+  .modal-close:hover {
+    color: #555;
+  }
+  .modal-content img {
+    width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    border-radius: 8px;
+    margin-bottom: 15px;
+  }
+  .modal-content h2 {
+    margin: 10px 0;
+  }
+  .modal-content p {
+    margin: 10px 0 20px 0;
+  }
+
+  /* Form Modal İçerik */
+  .form-modal-content {
+    max-width: 400px;
+  }
+  .form-modal-content label {
+    display: block;
+    text-align: left;
+    margin-bottom: 5px;
+    font-weight: 600;
+  }
+  .form-modal-content input,
+  .form-modal-content textarea,
+  .form-modal-content select {
+    width: 100%;
+    margin-bottom: 15px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    box-sizing: border-box;
+  }
+  body.dark .form-modal-content input,
+  body.dark .form-modal-content textarea,
+  body.dark .form-modal-content select {
+    background-color: #555;
+    border-color: #777;
+    color: #eee;
+  }
+  .form-modal-content button {
+    padding: 10px 15px;
+    border: none;
+    background-color: #0077cc;
+    color: white;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.3s ease;
+  }
+  .form-modal-content button:hover {
+    background-color: #005fa3;
+  }
+
+  /* Bildirim (Toast) */
+  #toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #0077cc;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 30px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    font-weight: 600;
+    z-index: 10000;
+  }
+  #toast.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .search-bar input {
+      width: 100%;
+      min-width: unset;
+      margin-bottom: 10px;
+    }
+    .header-buttons {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+    }
+    #categoryNav {
+      flex-wrap: wrap;
+    }
+    #productList {
+      grid-template-columns: 1fr;
+      padding: 10px;
+    }
+  }
+</style>
+Here is a complete, modern, and responsive product catalog webpage in HTML, CSS, and JavaScript with the features you asked for:
+
+- Product cards with image, title, description, price  
+- Favorite button toggling with heart icon and color  
+- Filter products by categories via nav buttons  
+- Search bar filtering by product title or description  
+- Dark/light mode toggle stored in localStorage  
+- Responsive design for mobile  
+- Modal to show product details on click  
+- Toast notification when favorites are added or removed  
+- Category dropdown selector to filter  
+- Header with site title and controls  
+
+---
+
+You can copy-paste this into a single `.html` file and open it in any modern browser to see it fully functional:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Modern Product Catalog</title>
+  <style>
+    /* General Styles */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      background-color: #f2f2f2;
+      color: #333;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    body.dark {
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #0077cc;
+      padding: 10px 20px;
+      color: white;
+      flex-wrap: wrap;
+    }
+    header h1 {
+      margin: 0;
+      cursor: pointer;
+    }
+    .search-bar input {
+      padding: 5px 10px;
+      font-size: 1rem;
+      border-radius: 4px;
+      border: none;
+      min-width: 200px;
+    }
+    .header-buttons button {
+      margin-left: 10px;
+      padding: 7px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      background-color: #005fa3;
+      color: white;
+      transition: background-color 0.3s ease;
+    }
+    .header-buttons button:hover {
+      background-color: #004080;
+    }
+
+    /* Category Nav */
+    #categoryNav {
+      display: flex;
+      justify-content: center;
+      background-color: #e0e0e0;
+      padding: 10px 0;
+      flex-wrap: wrap;
+    }
+    #categoryNav button {
+      margin: 5px 10px;
+      padding: 7px 15px;
+      border: none;
+      border-radius: 20px;
+      background-color: #ccc;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.3s ease;
+    }
+    #categoryNav button.active {
+      background-color: #0077cc;
+      color: white;
+    }
+    #categoryNav button:hover:not(.active) {
+      background-color: #a0a0a0;
+    }
+
+    /* Product Cards */
+    #productList {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+    .card {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: box-shadow 0.3s ease;
+    }
+    body.dark .card {
+      background-color: #222;
+    }
+    .card:hover {
+      box-shadow: 0 4px 15px rgb(0 0 0 / 0.3);
+    }
+    .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+    .card .info {
+      padding: 15px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .card h3 {
+      margin: 0 0 10px 0;
+      font-size: 1.2rem;
+    }
+    .card p {
+      margin: 0 0 15px 0;
+      flex-grow: 1;
+    }
+    .price {
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: #0077cc;
+    }
+
+    /* Favorite Button */
+    .favorite-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: transparent;
+      border: none;
+      font-size: 1.4rem;
+      color: #bbb;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+    .favorite-btn:hover {
+      color: #0077cc;
+    }
+    .favorite-btn.favorited {
+      color: #e74c3c;
+    }
+
+    /* Modal */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal-content {
+      background-color: white;
+      max-width: 400px;
+      width: 90%;
+      border-radius: 10px;
+      padding: 20px;
+      position: relative;
+      text-align: center;
+    }
+    body.dark .modal-content {
+      background-color: #333;
+      color: #ddd;
+    }
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #888;
+    }
+    .modal-close:hover {
+      color: #555;
+    }
+    .modal-content img {
+      width: 100%;
+      max-height: 200px;
+      object-fit: contain;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+    .modal-content h2 {
+      margin: 10px 0;
+    }
+    .modal-content p {
+      margin: 10px 0 20px 0;
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #0077cc;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 30px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      font-weight: 600;
+      z-index: 10000;
+    }
+    #toast.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .search-bar input {
+        width: 100%;
+        min-width: unset;
+        margin-bottom: 10px;
+      }
+      .header-buttons {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+      }
+      #categoryNav {
+        flex-wrap: wrap;
+      }
+      #productList {
+        grid-template-columns: 1fr;
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1 id="siteTitle">My Store</h1>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search products..." />
+    </div>
+    <div class="header-buttons">
+      <button id="themeToggle">🌙</button>
+      <select id="categorySelect" title="Filter by category">
+        <option value="all">All Categories</option>
+      </select>
+    </div>
+  </header>
+
+  <nav id="categoryNav"></nav>
+
+  <main>
+    <div id="productList"></div>
+  </main>
+
+  <!-- Modal for product details -->
+  <div class="modal" id="productModal">
+    <div class="modal-content">
+      <span class="modal-close" id="modalClose">&times;</span>
+      <img src="" alt="" id="modalImg" />
+      <h2 id="modalTitle"></h2>
+      <p id="modalDescription"></p>
+      <p class="price" id="modalPrice"></p>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div id="toast"></div>
+
+  <script>
+    const products = [
+      {
+        id: 1,
+        title: "Classic Sneakers",
+        description: "Comfortable and stylish sneakers for everyday use.",
+        price: "$49.99",
+        category: "Footwear",
+        image: "https://images.unsplash.com/photo-1528701800489-0e3d8a5d4a9d?auto=format&fit=crop&w=400&q=80"
+      },
+      {
+        id: 2,
+        title: "Wireless Headphones",
+        description: "Noise-cancelling over-ear headphones with high fidelity sound.",
+        price: "$89.99",
+        category: "Electronics",
+        image: "https://images.unsplash.com/photo-1512499617640-c2f99902f8d3?auto=format&fit=crop&w=400&q=80"
+      },
+      {
+        id: 3,
+        title: "Leather Wallet",
+        description: "Genuine leather wallet with multiple compartments.",
+        price: "$29.99",
+        category: "Accessories",
+        image: "https://images.unsplash.com/photo-1533227268428-f9ed070785b0?auto=format&fit=crop&w=400&q=80"
+      },
+      {
+        id: 4,
+        title: "Smart Watch",
+        description: "Track your fitness and stay connected on the go.",
+        price: "$129.99",
+        category: "Electronics",
+        image: "https://images.unsplash.com/photo-1517430816045-df4b7de1663e?auto=format&fit=crop&w=400&q=80"
+      },
+      {
+        id: 5,
+        title: "Running Shorts",
+        description: "Lightweight and breathable shorts for active sports.",
+        price: "$19.99",
+        category: "Clothing",
+        image: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=400&q=80"
+      },
+      {
+        id: 6,
+        title: "Sunglasses",
+        description: "UV protection with a modern design.",
+        price: "$24.99",
+        category: "Accessories",
+        image: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=400&q=80"
+      }
+    ];
+
+    let favorites = new Set(JSON.parse(localStorage.getItem('favorites') || "[]"));
+    let currentCategory = "all";
+    let currentSearch = "";
+
+    const productListEl = document.getElementById('productList');
+    const categoryNav = document.getElementById('categoryNav');
+    const searchInput = document.getElementById('searchInput');
+    const themeToggle = document.getElementById('themeToggle');
+    const productModal = document.getElementById('productModal');
+    const modalClose = document.getElementById('modalClose');
+    const modalImg = document.getElementById('modalImg');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalDescription = document.getElementById('modalDescription');
+    const modalPrice = document.getElementById('modalPrice');
+    const toast = document.getElementById('toast');
+    const categorySelect = document.getElementById('categorySelect');
+
+    function saveFavorites() {
+      localStorage.setItem('favorites', JSON.stringify(Array.from(favorites)));
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      setTimeout(() => {
+        toast.classList.remove("show");
+      }, 3000);
+    }
+
+    // Render category buttons in nav and options in select dropdown
+    function loadCategories() {
+      const categories = Array.from(new Set(products.map(p => p.category))).sort();
+      categoryNav.innerHTML = '';
+      categorySelect.innerHTML = '<option value="all">All Categories</option>';
+
+      categories.forEach(cat => {
+        // Nav buttons
+        const btn = document.createElement('button');
+        btn.textContent = cat;
+        btn.dataset.category = cat;
+        if (cat === currentCategory) btn.classList.add('active');
+        btn.addEventListener('click', () => {
+          currentCategory = cat;
+          highlightCategoryButtons();
+          filterAndRenderProducts();
+          categorySelect.value = cat;
+        });
+        categoryNav.appendChild(btn);
+
+        // Select dropdown options
+        const opt = document.createElement('option');
+        opt.value = cat;
+        opt.textContent = cat;
+        categorySelect.appendChild(opt);
+      });
+    }
+
+    function highlightCategoryButtons() {
+      [...categoryNav.children].forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.category === currentCategory);
+      });
+    }
+
+    // Render product cards according to filters
+    function filterAndRenderProducts() {
+      let filtered = products;
+
+      if (currentCategory !== "all") {
+        filtered = filtered.filter(p => p.category === currentCategory);
+      }
+
+      if (currentSearch.trim() !== "") {
+        const searchLower = currentSearch.toLowerCase();
+        filtered = filtered.filter(p => 
+          p.title.toLowerCase().includes(searchLower) ||
+          p.description.toLowerCase().includes(searchLower)
+        );
+      }
+
+      renderProducts(filtered);
+    }
+
+    function renderProducts(list = products) {
+      productListEl.innerHTML = '';
+      if (list.length === 0) {
+        productListEl.innerHTML = '<p style="grid-column:1/-1; text-align:center; font-style:italic;">No products found.</p>';
+        return;
+      }
+
+      list.forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.tabIndex = 0;
+        card.setAttribute('role', 'button');
+        card.setAttribute('aria-label', `View details of ${product.title}`);
+
+        // Clicking card opens modal with details
+        card.addEventListener('click', () => openModal(product));
+
+        // Favorite button
+        const favBtn = document.createElement('button');
+        favBtn.className = 'favorite-btn';
+        favBtn.innerHTML = favorites.has(product.id) ? '❤️' : '🤍';
+        if (favorites.has(product.id)) favBtn.classList.add('favorited');
+        favBtn.title = favorites.has(product.id) ? 'Remove from favorites' : 'Add to favorites';
+
+        favBtn
