@@ -66,7 +66,7 @@
     form textarea {
       min-height: 120px;
     }
-    button {
+    button[type="submit"] {
       background: #00796b;
       color: white;
       font-weight: 700;
@@ -80,7 +80,7 @@
       transition: background-color 0.3s ease, transform 0.15s ease;
       user-select: none;
     }
-    button:hover {
+    button[type="submit"]:hover {
       background: #004d40;
       transform: scale(1.05);
     }
@@ -107,6 +107,30 @@
       color: #1b5e20;
       font-weight: 700;
       text-align: center;
+    }
+    .back-button {
+      width: 100%;
+      margin-top: 15px;
+      text-align: center;
+    }
+    .back-button button {
+      background-color: transparent;
+      border: 2px solid #00796b;
+      color: #00796b;
+      border-radius: 12px;
+      padding: 12px 26px;
+      font-size: 1.1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+      user-select: none;
+    }
+    .back-button button:hover,
+    .back-button button:focus {
+      background-color: #00796b;
+      color: white;
+      outline: none;
+      transform: scale(1.05);
     }
     .socials {
       margin-top: 25px;
@@ -160,6 +184,10 @@
       <p><strong>Ünvan:</strong> Azərbaycan Texniki Universiteti, Bakı</p>
     </div>
 
+    <div class="back-button">
+      <button onclick="history.back()" aria-label="Geri qayıt">← Geri Qayıt</button>
+    </div>
+
     <div class="socials" aria-label="Sosial media hesabları">
       <a href="https://www.instagram.com/shabutofh?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener" aria-label="Instagram">
         <!-- Instagram SVG -->
@@ -196,17 +224,15 @@
           const successMsg = document.getElementById('successMsg');
           successMsg.style.display = 'block';
           form.reset();
-
           setTimeout(() => {
             successMsg.style.display = 'none';
-          }, 5000);
+          }, 7000);
         } else {
-          alert('Mesaj göndərilə bilmədi. Zəhmət olmasa, yenidən cəhd edin.');
+          alert('Göndərmə zamanı xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.');
         }
       }).catch(() => {
-        alert('Şəbəkə xətası. Zəhmət olmasa, internet bağlantınızı yoxlayın.');
+        alert('Şəbəkə xətası. Zəhmət olmasa əlaqəni yoxlayın.');
       });
-
       return false;
     }
   </script>
