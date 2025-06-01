@@ -18,10 +18,31 @@
       padding: 20px;
       text-align: center;
       box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      position: relative;
     }
     header h1 {
       margin: 0;
       font-size: 2.2rem;
+    }
+    /* Geri qayit düyməsi */
+    .back-button {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #0055aa;
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      font-size: 1rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .back-button:hover {
+      background: #003366;
     }
     .container {
       max-width: 1000px;
@@ -97,11 +118,17 @@
       .images-row figure {
         max-width: 100%;
       }
+      .back-button {
+        left: 10px;
+        padding: 6px 12px;
+        font-size: 0.9rem;
+      }
     }
   </style>
 </head>
 <body>
   <header>
+    <button class="back-button" onclick="history.back()">Geri Qayıt</button>
     <h1>AzTU Tələbə Gənclər Təşkilatı (TGT)</h1>
   </header>
 
@@ -113,7 +140,7 @@
         <figcaption>AzTU TGT tədbirindən görüntü</figcaption>
       </figure>
       <figure>
-        <img src="https://www.aztu.edu.az/web_admin/upload/files/aztu.edu.az/announcements/qq.jpg" alt="" />
+        <img src="https://www.aztu.edu.az/web_admin/upload/files/aztu.edu.az/announcements/qq.jpg" alt="TGT üzvləri fəaliyyət zamanı" />
         <figcaption>TGT üzvləri fəaliyyət zamanı</figcaption>
       </figure>
     </div>
@@ -159,8 +186,8 @@
     <div class="section">
       <h2>Əlaqə və Sosial Şəbəkələr</h2>
       <div class="socials">
-        <a href="https://www.instagram.com/aztutgt" target="_blank">Instagram</a>
-        <a href="https://www.facebook.com/aztutgt" target="_blank">Facebook</a>
+        <a href="https://www.instagram.com/aztutgt" target="_blank" rel="noopener">Instagram</a>
+        <a href="https://www.facebook.com/aztutgt" target="_blank" rel="noopener">Facebook</a>
       </div>
     </div>
   </div>
