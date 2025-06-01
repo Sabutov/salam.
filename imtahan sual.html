@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AzTU İmtahan Cavabları</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #e0f7fa, #ffffff);
+      margin: 0;
+      padding: 20px;
+      color: #1a1a1a;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      font-weight: 700;
+      color: #00796b;
+      margin-bottom: 15px;
+      text-align: center;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 720px;
+    }
+
+    .form, .search-section, .answers {
+      background: white;
+      border-radius: 15px;
+      padding: 25px 30px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+      margin-bottom: 25px;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .form:hover, .search-section:hover, .answers:hover {
+      box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    }
+
+    h2 {
+      color: #004d40;
+      margin-bottom: 18px;
+      font-weight: 600;
+      border-left: 5px solid #00796b;
+      padding-left: 12px;
+      user-select: none;
+    }
+
+    input[type="text"],
+    textarea,
+    input[type="file"] {
+      width: 100%;
+      padding: 14px 16px;
+      margin-top: 12px;
+      margin-bottom: 18px;
+      border-radius: 12px;
+      border: 1.8px solid #b2dfdb;
+      font-size: 16px;
+      transition: border-color 0.25s ease;
+      outline-offset: 2px;
+      resize: vertical;
+      font-family: inherit;
+      color: #004d40;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus {
+      border-color: #00796b;
+      box-shadow: 0 0 6px #80cbc4;
+    }
+
+    button {
+      background: #00796b;
+      color: white;
+      border: none;
+      padding: 16px;
+      width: 100%;
+      border-radius: 14px;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 6px 12px rgba(0,121,107,0.4);
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+      user-select: none;
+    }
+
+    button:hover {
+      background: #004d40;
+      box-shadow: 0 8px 20px rgba(0,77,64,0.6);
+    }
+
+    .card {
+      background: #e0f2f1;
+      border-left: 6px solid #004d40;
+      padding: 18px 22px;
+      margin-bottom: 15px;
+      border-radius: 14px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.06);
+      position: relative;
+      transition: background-color 0.25s ease;
+    }
+
+    .card:hover {
+      background-color: #b2dfdb;
+    }
+
+    .card h3 {
+      margin: 0 0 10px 0;
+      color: #004d40;
+      font-weight: 700;
+      font-size: 20px;
+    }
+
+    .card p {
+      margin: 6px 0;
+      font-size: 16px;
+      color: #004d40;
+      line-height: 1.4;
+      user-select: text;
+    }
+
+    .file-link {
+      display: inline-block;
+      margin-top: 10px;
+      background: #004d40;
+      color: #a7ffeb;
+      padding: 8px 14px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      box-shadow: 0 3px 8px rgba(0,77,64,0.5);
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+
+    .file-link:hover {
+      background-color: #00796b;
+    }
+
+    .search-section input {
+      font-size: 15px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+      border-radius: 12px;
+      border: 1.6px solid #80cbc4;
+      color: #004d40;
+      outline-offset: 2px;
+    }
+
+    .search-section input:focus {
+      border-color: #004d40;
+      box-shadow: 0 0 6px #004d40;
+    }
+
+    .delete-btn {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      background: #e53935;
+      border: none;
+      color: white;
+      padding: 8px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+      box-shadow: 0 3px 7px rgba(229,57,53,0.7);
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+
+    .delete-btn:hover {
+      background: #b71c1c;
+    }
+
+    .admin-label {
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      background: #00796b;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      user-select: none;
+      box-shadow: 0 3px 6px rgba(0,121,107,0.7);
+    }
+
+    /* Mobil üçün */
+    @media (max-width: 600px) {
+      body {
+        padding: 15px 10px;
+      }
+      .form, .search-section, .answers {
+        padding: 20px 18px;
+      }
+      button, .file-link {
+        font-size: 15px;
+        padding: 14px;
+      }
+      .card h3 {
+        font-size: 18px;
+      }
+      .card p {
+        font-size: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📘 AzTU İmtahan Cavabları Paylaşma səhifəsi</h1>
+
+  <div class="container">
+    <div class="form" aria-label="Cavab əlavə et">
+      <h2>✅ Cavab Əlavə Et</h2>
+      <input type="text" id="group" placeholder="Qrup (məs: B-321)" required autocomplete="off" />
+      <input type="text" id="subject" placeholder="Fənn (məs: Riyaziyyat)" required autocomplete="off" />
+      <textarea id="answer" rows="4" placeholder="Cavab mətni..." required></textarea>
+      <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png" />
+      <button type="button" onclick="addAnswer()" aria-label="Cavab əlavə et düyməsi">Əlavə Et</button>
+    </div>
+
+    <div class="search-section" aria-label="Cavab axtar">
+      <h2>🔍 Cavab Axtar</h2>
+      <input
+        type="text"
+        id="searchSubject"
+        placeholder="Fənnə görə axtar..."
+        oninput="displayAnswers()"
+        autocomplete="off"
+      />
+      <input
+        type="text"
+        id="searchGroup"
+        placeholder="Qrupa görə axtar..."
+        oninput="displayAnswers()"
+        autocomplete="off"
+      />
+      <label style="display:block; margin-top: 12px; font-weight: 600; color:#004d40; user-select:none;">
+        <input type="checkbox" id="showAdminOnly" onchange="displayAnswers()" />
+        Yalnız Adminin əlavə etdiklərini göstər
+      </label>
+    </div>
+
+    <div class="answers" aria-live="polite" aria-relevant="additions" aria-atomic="true">
+      <h2>📋 Cavablar</h2>
+      <div id="answersList"></div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'aztu_answers';
+    let answers = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+
+    function addAnswer() {
+      const group = document.getElementById('group').value.trim();
+      const subject = document.getElementById('subject').value.trim();
+      const answerText = document.getElementById('answer').value.trim();
+      const fileInput = document.getElementById('fileInput');
+      const isAdmin = prompt('İstifadəçi adınızı daxil edin (admin üçün "admin" yazın):').trim().toLowerCase();
+
+      if (!group || !subject || !answerText) {
+        alert('Zəhmət olmasa, bütün sahələri doldurun!');
+        return;
+      }
+
+      let fileURL = '';
+      let fileName = '';
+      if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        fileURL = URL.createObjectURL(file);
+        fileName = file.name;
+      }
+
+      answers.push({
+        group,
+        subject,
+        answerText,
+        fileURL,
+        fileName,
+        user: isAdmin || 'İstifadəçi',
+      });
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(answers));
+      clearForm();
+      displayAnswers();
+    }
+
+    function clearForm() {
+      document.getElementById('group').value = '';
+      document.getElementById('subject').value = '';
+      document.getElementById('answer').value = '';
+      document.getElementById('fileInput').value = '';
+    }
+
+    function displayAnswers() {
+      const searchSubject = document.getElementById('searchSubject').value.trim().toLowerCase();
+      const searchGroup = document.getElementById('searchGroup').value.trim().toLowerCase();
+      const showAdminOnly = document.getElementById('showAdminOnly').checked;
+
+      const list = document.getElementById('answersList');
+      list.innerHTML = '';
+
+      let filtered = answers.filter((item) => {
+        const subjectMatch = item.subject.toLowerCase().includes(searchSubject);
+        const groupMatch = item.group.toLowerCase().includes(searchGroup);
+        const adminMatch = showAdminOnly ? item.user === 'admin' : true;
+        return subjectMatch && groupMatch && adminMatch;
+      });
+
+      if (filtered.length === 0) {
+        list.innerHTML = '<p style="color:#00796b; font-weight:600;">Heç bir cavab tapılmadı.</p>';
+        return;
+      }
+
+      filtered.forEach((item, index) => {
+        list.innerHTML += `
+          <div class="card" role="article" aria-label="Cavab">
+            ${item.user === 'admin' ? '<div class="admin-label">Admin</div>' : ''}
+            <h3>${item.subject} - <small>${item.group}</small></h3>
+            <p>${item.answerText.replace(/\n/g, '<br>')}</p>
+            ${
+              item.fileURL
+                ? `<a href="${item.fileURL}" download="${item.fileName}" class="file-link" aria-label="Faylı yüklə: ${item.fileName}">${item.fileName}</a>`
+                : ''
+            }
+            <button class="delete-btn" aria-label="Cavabı sil" onclick="deleteAnswer(${index})" ${
+              item.user === 'admin' || item.user === prompt('Silmək üçün istifadəçi adını daxil edin:').trim().toLowerCase()
+                ? ''
+                : 'disabled title="Bu cavabı yalnız əlavə edən istifadəçi silə bilər"'
+            }>Sil</button>
+          </div>
+        `;
+      });
+    }
+
+    function deleteAnswer(index) {
+      const currentUser = prompt('Silmək üçün istifadəçi adınızı daxil edin:').trim().toLowerCase();
+      if (
+        answers[index].user === currentUser ||
+        (currentUser === 'admin' && answers[index].user !== 'admin')
+      ) {
+        if (confirm('Bu cavabı silmək istədiyinizə əminsiniz?')) {
+          answers.splice(index, 1);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(answers));
+          displayAnswers();
+        }
+      } else {
+        alert('Bu cavabı yalnız əlavə edən istifadəçi və ya admin silə bilər.');
+      }
+    }
+
+    // İlk yüklənmədə göstər
+    displayAnswers();
+  </script>
+</body>
+</html>
