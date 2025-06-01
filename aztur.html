@@ -138,6 +138,26 @@
     text-align: center;
   }
 
+  /* Geri Qayıt düyməsi stili */
+  .back-button-container {
+    text-align: center;
+    margin: 40px 0;
+  }
+  .back-button {
+    background: #00529B;
+    color: #fff;
+    border: none;
+    padding: 12px 30px;
+    font-size: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,82,155,0.6);
+    transition: background-color 0.3s ease;
+  }
+  .back-button:hover {
+    background: #003f7d;
+  }
+
   footer {
     margin-top: 80px;
     background: #003b70;
@@ -243,6 +263,10 @@
       Azərbaycan Texniki Universiteti 1950-ci ildə yaradılmış və o vaxtdan bəri ölkənin texniki elminin və təhsilinin inkişafında əsas rol oynamışdır. Müxtəlif dövrlərdə universitet müxtəlif yeniliklərə imza atmış, həm ölkə daxilində, həm də beynəlxalq arenada tanınmış alimlər yetişdirmişdir.
     </p>
   </section>
+  
+  <div class="back-button-container">
+    <button class="back-button" onclick="history.back()">Geri Qayıt</button>
+  </div>
 </div>
 
 <footer>
