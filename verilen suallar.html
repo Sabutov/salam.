@@ -33,11 +33,33 @@
       padding: 30px 20px;
       text-align: center;
       box-shadow: var(--shadow);
+      position: relative;
     }
 
     header h1 {
       margin: 0;
       font-size: 28px;
+    }
+
+    #backBtn {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: var(--accent-color);
+      border: none;
+      color: var(--white);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+
+    #backBtn:hover {
+      background-color: #005f87;
     }
 
     .container {
@@ -134,12 +156,19 @@
       summary {
         font-size: 15px;
       }
+
+      #backBtn {
+        padding: 6px 12px;
+        font-size: 13px;
+        left: 10px;
+      }
     }
   </style>
 </head>
 <body>
 
 <header>
+  <button id="backBtn" aria-label="Əvvəlki səhifəyə qayıt">← Geri</button>
   <h1>AzTU - Tez-tez Verilən Suallar</h1>
 </header>
 
@@ -167,7 +196,7 @@
   <details><summary>Tədbirlər necə elan olunur?</summary><p>Universitet saytında və sosial şəbəkələrdə yerləşdirilir.</p></details>
 
   <h2>Onlayn Xidmətlər</h2>
-  <details><summary>Şəxsi kabinetə necə daxil olmaq olar?</summary><p><a href="https://sso.aztu.edu.az" target="_blank">sso.aztu.edu.az</a> saytından daxil olmaq mümkündür.</p></details>
+  <details><summary>Şəxsi kabinetə necə daxil olmaq olar?</summary><p><a href="https://sso.aztu.edu.az" target="_blank" rel="noopener noreferrer">sso.aztu.edu.az</a> saytından daxil olmaq mümkündür.</p></details>
   <details><summary>Elektron dərsliklərə necə çatmaq olar?</summary><p>Kitabxana bölməsi və şəxsi kabinet vasitəsilə baxmaq mümkündür.</p></details>
   <details><summary>Dərs cədvəli haradan baxılır?</summary><p>Dekanlıq tərəfindən təqdim olunur və onlayn şəkildə paylanır.</p></details>
 
@@ -179,14 +208,20 @@
   <h2>Əlaqə və Rəsmi Məlumatlar</h2>
   <details><summary>Əlaqə nömrəsi nədir?</summary><p>(+994 12) 538 01 42</p></details>
   <details><summary>Rəsmi e-mail ünvanı hansıdır?</summary><p><a href="mailto:info@aztu.edu.az">info@aztu.edu.az</a></p></details>
-  <details><summary>Rəsmi sayt ünvanı nədir?</summary><p><a href="https://www.aztu.edu.az" target="_blank">www.aztu.edu.az</a></p></details>
+  <details><summary>Rəsmi sayt ünvanı nədir?</summary><p><a href="https://www.aztu.edu.az" target="_blank" rel="noopener noreferrer">www.aztu.edu.az</a></p></details>
   <details><summary>Sosial media hesabları hansılardır?</summary><p>Facebook, Instagram, YouTube: @aztuofficial</p></details>
 
 </div>
 
 <footer>
-  © 2025 Azərbaycan Texniki Universiteti — <a href="https://www.aztu.edu.az">aztu.edu.az</a>
+  © 2025 Azərbaycan Texniki Universiteti — <a href="https://www.aztu.edu.az" target="_blank" rel="noopener noreferrer">aztu.edu.az</a>
 </footer>
+
+<script>
+  document.getElementById('backBtn').addEventListener('click', () => {
+    window.history.back();
+  });
+</script>
 
 </body>
 </html>
