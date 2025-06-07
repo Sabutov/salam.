@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AzTU | Giriş</title>
+
+  <meta name="description" content="Azərbaycan Texniki Universitetinin rəsmi giriş səhifəsi." />
+  <meta property="og:title" content="AzTU | Giriş" />
+  <meta property="og:description" content="Azərbaycan Texniki Universitetinin rəsmi giriş səhifəsi." />
+  <meta property="og:image" content="https://www.aztu.edu.az/web_admin/upload/files/aztu.edu.az/logo.png" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-image: url('https://www.aztu.edu.az/web_admin/upload/files/aztu.edu.az/announcements/AzTU_-1632500114%20(1).jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-blend-mode: overlay;
+      background-color: rgba(2, 62, 138, 0.7);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: background-color 0.3s ease;
+    }
+
+    body.dark-mode {
+      background-color: #121212;
+      background-image: none;
+      color: #e0e0e0;
+    }
+
+    header {
+      text-align: center;
+      padding: 40px 20px 10px;
+      position: relative;
+    }
+
+    header h1 {
+      font-size: 2.2em;
+      margin-bottom: 10px;
+    }
+
+    header p {
+      font-size: 1em;
+      color: #dceefb;
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      gap: 15px;
+    }
+
+    .btn {
+      background-color: #ffffff;
+      color: #0077b6;
+      text-decoration: none;
+      padding: 14px 24px;
+      width: 90%;
+      max-width: 320px;
+      text-align: center;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1.05em;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      background-color: #e0f7fa;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .menu-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: rgba(0, 119, 182, 0.85);
+      border: none;
+      font-size: 2.2em;
+      color: white;
+      cursor: pointer;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      box-shadow: 0 4px 10px rgba(0, 119, 182, 0.6);
+      user-select: none;
+      z-index: 1100;
+    }
+
+    .menu-toggle:hover {
+      background-color: rgba(0, 119, 182, 1);
+      transform: scale(1.1);
+    }
+
+    .menu-toggle:active {
+      transform: scale(0.95);
+    }
+
+    .dropdown {
+      position: absolute;
+      top: 70px;
+      right: 20px;
+      background-color: rgba(2, 62, 138, 0.95);
+      border-radius: 16px;
+      padding: 12px 16px;
+      display: none;
+      flex-direction: column;
+      z-index: 1000;
+      min-width: 180px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .dropdown.show {
+      display: flex;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .dropdown button,
+    .dropdown select {
+      background: transparent;
+      border: none;
+      color: white;
+      text-align: left;
+      padding: 12px 10px;
+      font-size: 1em;
+      cursor: pointer;
+      width: 100%;
+      border-radius: 12px;
+      transition: background-color 0.25s ease;
+      user-select: none;
+      outline-offset: 2px;
+    }
+
+    .dropdown button:hover,
+    .dropdown select:hover,
+    .dropdown button:focus,
+    .dropdown select:focus {
+      background-color: rgba(255, 255, 255, 0.15);
+      outline: none;
+    }
+
+    .dropdown select {
+      background-color: rgba(255, 255, 255, 0.12);
+      color: white;
+      padding-right: 30px;
+    }
+
+    @media (max-width: 480px) {
+      header h1 {
+        font-size: 1.6em;
+      }
+
+      .btn {
+        font-size: 1em;
+      }
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 0.9em;
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    footer a {
+      color: #caf0f8;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1 data-lang="title">Azərbaycan Texniki Universiteti</h1>
+    <p data-lang="subtitle">Rəsmi Giriş Səhifəsi</p>
+
+    <button class="menu-toggle" onclick="toggleDropdown()">☰</button>
+
+    <div class="dropdown" id="dropdownMenu">
+      <button id="darkModeToggle" onclick="toggleDarkMode()">🌙 <span data-lang="darkMode">Qaranlıq rejim</span></button>
+      <a href="https://sabutov.github.io/salam./yardim.html" class="btn" data-lang="help">🆘 Yardım</a>
+      <select onchange="changeLanguage(this)" id="languageSelect">
+        <option value="az">AZ</option>
+        <option value="en">EN</option>
+      </select>
+    </div>
+  </header>
+
+  <div class="menu">
+    <a href="https://sabutov.github.io/salam./aztur.html" class="btn" data-lang="about">🏫 Haqqımızda</a>
+    <a href="https://sabutov.github.io/salam./elaqe.html" class="btn" data-lang="contact">☎️ Əlaqə</a>
+    <a href="https://sabutov.github.io/salam./videooooo.html" class="btn" data-lang="videos">📄 Tələbə videoları</a>
+    <a href="https://sso.aztu.edu.az/" class="btn" data-lang="koica">📊 KOICA</a>
+    <a href="https://www.aztu.edu.az/az/news" class="btn" data-lang="news">📰 Xəbərlər</a>
+    <a href="https://sabutov.github.io/salam./tezler.html" class="btn" data-lang="faq">❓ Tez-tez verilən suallar</a>
+  </div>
+
+  <footer>
+    © 2025 Azərbaycan Texniki Universiteti | <a href="mailto:info@aztu.edu.az">info@aztu.edu.az</a>
+  </footer>
+
+  <script>
+    const translations = {
+      az: {
+        title: "Azərbaycan Texniki Universiteti",
+        subtitle: "Rəsmi Giriş Səhifəsi",
+        about: "Haqqımızda",
+        contact: "Əlaqə",
+        videos: "Tələbə videoları",
+        koica: "KOICA",
+        news: "Xəbərlər",
+        darkMode: "Qaranlıq rejim",
+        lightMode: "Açıq rejim",
+        faq: "Tez-tez verilən suallar",
+        help: "Yardım"
+      },
+      en: {
+        title: "Azerbaijan Technical University",
+        subtitle: "Official Login Page",
+        about: "About Us",
+        contact: "Contact",
+        videos: "Student Videos",
+        koica: "KOICA",
+        news: "News",
+        darkMode: "Dark Mode",
+        lightMode: "Light Mode",
+        faq: "Frequently Asked Questions",
+        help: "Help"
+      }
+    };
+
+    function toggleDropdown() {
+      const menu = document.getElementById('dropdownMenu');
+      if (menu.classList.contains('show')) {
+        menu.style.opacity = '0';
+        menu.style.transform = 'translateY(-10px)';
+        setTimeout(() => {
+          menu.classList.remove('show');
+          menu.style.display = 'none';
+        }, 300);
+      } else {
+        menu.style.display = 'flex';
+        setTimeout(() => {
+          menu.classList.add('show');
+          menu.style.opacity = '1';
+          menu.style.transform = 'translateY(0)';
+        }, 10);
+      }
+    }
+
+    function toggleDarkMode() {
+      const isDark = document.body.classList.toggle('dark-mode');
+      localStorage.setItem('darkMode', isDark);
+      updateDarkModeText();
+    }
+
+    function updateDarkModeText() {
+      const isDark = document.body.classList.contains('dark-mode');
+      const lang = document.getElementById('languageSelect').value;
+      const text = isDark ? translations[lang].lightMode : translations[lang].darkMode;
+      const icon = isDark ? "🌞" : "🌙";
+      document.getElementById("darkModeToggle").innerHTML = `${icon} <span data-lang="darkMode">${text}</span>`;
+    }
+
+    function changeLanguage(select) {
+      const lang = select.value;
+      localStorage.setItem('language', lang);
+      document.querySelectorAll('[data-lang]').forEach(el => {
+        const key = el.getAttribute('data-lang');
+        if (translations[lang][key]) {
+          el.textContent = translations[lang][key];
+        }
+      });
+      updateDarkModeText();
+    }
+
+    document.addEventListener('click', function(e) {
+      const menu = document.getElementById('dropdownMenu');
+      const toggle = document.querySelector('.menu-toggle');
+      if (!menu.contains(e.target) && !toggle.contains(e.target)) {
+        if(menu.classList.contains('show')){
+          menu.style.opacity = '0';
+          menu.style.transform = 'translateY(-10px)';
+          setTimeout(() => {
+            menu.classList.remove('show');
+            menu.style.display = 'none';
+          }, 300);
+        }
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (localStorage.getItem('darkMode') === null && prefersDark) {
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('darkMode', true);
+      } else if (localStorage.getItem('darkMode') === 'true') {
+        document.body.classList.add('dark-mode');
+      }
+
+      const browserLang = navigator.language.slice(0, 2);
+      const savedLang = localStorage.getItem('language') || (['az', 'en'].includes(browserLang) ? browserLang : 'az');
+      document.getElementById('languageSelect').value = savedLang;
+      changeLanguage({ value: savedLang });
+      updateDarkModeText();
+    });
+  </script>
+</body>
+</html>
