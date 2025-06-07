@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AzTU - Tez-tez Verilən Suallar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --main-color: #004080;
+      --accent-color: #0077b6;
+      --bg-color: #f2f6fa;
+      --white: #ffffff;
+      --shadow: 0 8px 20px rgba(0,0,0,0.05);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Rubik', sans-serif;
+      margin: 0;
+      background: var(--bg-color);
+      color: #222;
+      line-height: 1.6;
+      animation: fadeIn 1s ease-in;
+    }
+
+    header {
+      background: linear-gradient(to right, #004080, #0059b3);
+      color: var(--white);
+      padding: 30px 20px;
+      text-align: center;
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    #backBtn {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: var(--accent-color);
+      border: none;
+      color: var(--white);
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+
+    #backBtn:hover {
+      background-color: #005f87;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    h2 {
+      font-size: 20px;
+      color: var(--main-color);
+      margin-bottom: 20px;
+      border-left: 4px solid var(--accent-color);
+      padding-left: 10px;
+    }
+
+    details {
+      background: var(--white);
+      border-radius: 8px;
+      margin-bottom: 12px;
+      padding: 16px 20px;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    details[open] {
+      background: #e6f0ff;
+      transform: scale(1.01);
+    }
+
+    summary {
+      font-weight: 600;
+      font-size: 16px;
+      outline: none;
+      list-style: none;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details summary::after {
+      content: '➕';
+      float: right;
+      transition: transform 0.3s ease;
+    }
+
+    details[open] summary::after {
+      content: '➖';
+      transform: rotate(180deg);
+    }
+
+    p {
+      margin-top: 12px;
+      font-size: 15px;
+      color: #333;
+    }
+
+    a {
+      color: var(--accent-color);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 14px;
+      color: #777;
+      background: #eef3f8;
+      margin-top: 50px;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 22px;
+      }
+
+      summary {
+        font-size: 15px;
+      }
+
+      #backBtn {
+        padding: 6px 12px;
+        font-size: 13px;
+        left: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <button id="backBtn" aria-label="Əvvəlki səhifəyə qayıt">← Geri</button>
+  <h1>AzTU - Tez-tez Verilən Suallar</h1>
+</header>
+
+<div class="container">
+
+  <h2>Ümumi Məlumat</h2>
+  <details><summary>AzTU harada yerləşir?</summary><p>Bakı şəhəri, H. Əliyev prospekti 103 ünvanında yerləşir.</p></details>
+  <details><summary>AzTU dövlət universitetidirmi?</summary><p>Bəli, dövlətə məxsus ali təhsil müəssisəsidir.</p></details>
+  <details><summary>Qəbul imtahanları necə aparılır?</summary><p>DİM vasitəsilə ixtisas seçimindən sonra qəbul olunur.</p></details>
+  <details><summary>Tədris hansı dillərdə aparılır?</summary><p>Azərbaycan və İngilis dillərində tədris olunur.</p></details>
+  <details><summary>Universitetin iş saatları necədir?</summary><p>Həftəiçi 09:00–18:00, şənbə yarımgün, bazar istirahət günüdür.</p></details>
+
+  <h2>Təhsil Prosesi</h2>
+  <details><summary>Təhsil formaları hansılardır?</summary><p>Əyani və qiyabi təhsil formaları mövcuddur.</p></details>
+  <details><summary>Semestrlər neçə ildir?</summary><p>Tədris ili 2 semestrdən ibarətdir.</p></details>
+  <details><summary>İmtahan nəticələri necə öyrənilir?</summary><p>Şəxsi kabinetdə və ya dekanlıq vasitəsilə baxmaq mümkündür.</p></details>
+  <details><summary>Diplom necə verilir?</summary><p>İmtahanları uğurla tamamlayan tələbəyə dövlət nümunəli diplom verilir.</p></details>
+  <details><summary>Təqaüdlər necə verilir?</summary><p>Akademik göstəricilərə əsasən dövlət və ya xüsusi təqaüdlər verilir.</p></details>
+  <details><summary>Əlavə dərs kursları varmı?</summary><p>Bəli, ingilis dili, proqramlaşdırma və digər əlavə təlimlər keçirilir.</p></details>
+
+  <h2>Tələbə Həyatı</h2>
+  <details><summary>Yataqxana təminatı varmı?</summary><p>Bəli, müəyyən kvota çərçivəsində yataqxana təqdim olunur.</p></details>
+  <details><summary>Tələbə klubları hansılardır?</summary><p>Debat, İKT, Könüllü, Musiqi, İdman və s. klublar fəaliyyət göstərir.</p></details>
+  <details><summary>İdman zalları varmı?</summary><p>Bəli, tələbələr üçün idman zalı və stadion mövcuddur.</p></details>
+  <details><summary>Tədbirlər necə elan olunur?</summary><p>Universitet saytında və sosial şəbəkələrdə yerləşdirilir.</p></details>
+
+  <h2>Onlayn Xidmətlər</h2>
+  <details><summary>Şəxsi kabinetə necə daxil olmaq olar?</summary><p><a href="https://sso.aztu.edu.az" target="_blank" rel="noopener noreferrer">sso.aztu.edu.az</a> saytından daxil olmaq mümkündür.</p></details>
+  <details><summary>Elektron dərsliklərə necə çatmaq olar?</summary><p>Kitabxana bölməsi və şəxsi kabinet vasitəsilə baxmaq mümkündür.</p></details>
+  <details><summary>Dərs cədvəli haradan baxılır?</summary><p>Dekanlıq tərəfindən təqdim olunur və onlayn şəkildə paylanır.</p></details>
+
+  <h2>Beynəlxalq Əlaqələr</h2>
+  <details><summary>AzTU Erasmus proqramında iştirak edirmi?</summary><p>Bəli, bir çox Avropa universitetləri ilə mübadilə həyata keçirilir.</p></details>
+  <details><summary>Xaricdə təhsil üçün dəstək varmı?</summary><p>Beynəlxalq ofis vasitəsilə Erasmus, Mevlana və digər proqramlara qoşula bilərsiniz.</p></details>
+  <details><summary>İngilis bölməsində hansı ixtisaslar var?</summary><p>İnformasiya texnologiyaları, mühəndislik, energetika və s.</p></details>
+
+  <h2>Əlaqə və Rəsmi Məlumatlar</h2>
+  <details><summary>Əlaqə nömrəsi nədir?</summary><p>(+994 12) 538 01 42</p></details>
+  <details><summary>Rəsmi e-mail ünvanı hansıdır?</summary><p><a href="mailto:info@aztu.edu.az">info@aztu.edu.az</a></p></details>
+  <details><summary>Rəsmi sayt ünvanı nədir?</summary><p><a href="https://www.aztu.edu.az" target="_blank" rel="noopener noreferrer">www.aztu.edu.az</a></p></details>
+  <details><summary>Sosial media hesabları hansılardır?</summary><p>Facebook, Instagram, YouTube: @aztuofficial</p></details>
+
+</div>
+
+<footer>
+  © 2025 Azərbaycan Texniki Universiteti — <a href="https://www.aztu.edu.az" target="_blank" rel="noopener noreferrer">aztu.edu.az</a>
+</footer>
+
+<script>
+  document.getElementById('backBtn').addEventListener('click', () => {
+    window.history.back();
+  });
+</script>
+
+</body>
+</html>
