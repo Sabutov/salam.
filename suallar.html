@@ -219,7 +219,12 @@
 
 <script>
   document.getElementById('backBtn').addEventListener('click', () => {
-    window.history.back();
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      // Əgər tarixçə yoxdursa, AzTU rəsmi saytına yönləndir
+      window.location.href = 'https://www.aztu.edu.az';
+    }
   });
 </script>
 
