@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AzTu Anket Form</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 600px;
+      margin: 2rem auto;
+      background: #f0f4ff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      color: #002244;
+    }
+    h1 {
+      text-align: center;
+      color: #003f7f;
+      margin-bottom: 1.5rem;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.8rem;
+    }
+    fieldset {
+      border: 2px solid #004c99;
+      border-radius: 10px;
+      padding: 1rem 1.5rem;
+    }
+    legend {
+      font-weight: bold;
+      font-size: 1.2rem;
+      color: #004c99;
+      padding: 0 0.5rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+    }
+    input[type="radio"] {
+      margin-right: 0.5rem;
+      cursor: pointer;
+    }
+    input[type="text"],
+    input[type="email"] {
+      width: 100%;
+      padding: 0.5rem;
+      font-size: 1rem;
+      border: 1.5px solid #004c99;
+      border-radius: 6px;
+      margin-top: 0.3rem;
+      box-sizing: border-box;
+    }
+    button {
+      width: 100%;
+      padding: 0.9rem;
+      font-size: 1.1rem;
+      background-color: #004c99;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #003366;
+    }
+    .note {
+      font-size: 0.9rem;
+      color: #004c99;
+      margin-top: 0.4rem;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>AzTu Anket Form</h1>
+
+  <!-- Formspree form -->
+  <form action="https://formspree.io/f/mvgrojrv" method="POST">
+
+    <!-- Ad Soyad Email -->
+    <fieldset>
+      <legend>Şəxsi məlumatlar</legend>
+
+      <label>
+        Ad:
+        <input type="text" name="first_name" required placeholder="Adınızı yazın" />
+      </label>
+
+      <label>
+        Soyad:
+        <input type="text" name="last_name" required placeholder="Soyadınızı yazın" />
+      </label>
+
+      <label>
+        Email:
+        <input type="email" name="email" required placeholder="Email ünvanınızı yazın" />
+      </label>
+    </fieldset>
+
+    <!-- Suallar -->
+    <fieldset>
+      <legend>1. Oxuduğun müddətdə ən sevdiyin müəllim?</legend>
+      <label><input type="radio" name="q1" value="Rəna Müəllim(Diskret Riy)"> Rəna Müəllim(Diskret Riy)</label>
+      <label><input type="radio" name="q1" value="Kamran Müəllim(kompüter qraf)"> Kamran Müəllim(kompüter qraf)</label>
+      <label><input type="radio" name="q1" value="Vüqar Müəllim(Proramlaşdırmanın əsasları)"> Vüqar Müəllim(Proramlaşdırmanın əsasları)</label>
+      <label><input type="radio" name="q1" value="Heç Biri"> Heç Biri</label>
+      <label>
+        Əgər "Heç Biri" seçmisinizsə, yazın: 
+        <input type="text" name="q1_text" placeholder="Cavabınızı yazın..." />
+      </label>
+      <div class="note">Qeyd:  Yazdığınız  gözəl mənalı cümlələr rəsmi Aztu appcreator səhifəsində paylaşılacaq.</div>
+    </fieldset>
+
+    <fieldset>
+      <legend>2. AzTu-da ən çox olmasını isdədiyiniz şey nədir?</legend>
+      <label><input type="radio" name="q2" value="Azərbaycan Texniki Universiteti">1-ci korpusda liftin qoyulması</label>
+      <label><input type="radio" name="q2" value="Azərbaycan Tibb Universiteti"> Universitetə girişinin əvvəlki yerə köçürülməsi </label>
+      <label><input type="radio" name="q2" value="Azərbaycan Turizm Universiteti"> Fantanların doğru düzgün işləməsi</label>
+      <label><input type="radio" name="q2" value="Azərbaycan Təhsil Universiteti"> Koicanın əvvəlki funksiyonallığının qaytarılması</label>
+      <label>
+        Əgər yuxarıdakılar düzgün deyilsə, yazın:
+        <input type="text" name="q2_text" placeholder="Cavabınızı yazın..." />
+      </label>
+      <div class="note">Qeyd:  Yazdığınız  gözəl mənalı cümlələr rəsmi Aztu appcreator səhifəsində paylaşılacaq.</div>
+    </fieldset>
+
+    <fieldset>
+      <legend>3. Aztu-nun ən sevdiyiniz cəhəti?</legend>
+      <label><input type="radio" name="q3" value="İmtahandan öncə suallrı verməsi"> İmtahandan öncə suallrı verməsi</label>
+      <label><input type="radio" name="q3" value="İmtahan zamanı güzəştlərin olunması"> İmtahan zamanı güzəştlərin olunması</label>
+      <label><input type="radio" name="q3" value="Müəllimlərin təcrübəsi və səmimiliyi">Müəllimlərin təcrübəsi və səmimiliyi</label>
+      <label><input type="radio" name="q3" value="Naxçıvan"> İmtahanları kompüterlə olması</label>
+      <label>
+        Əgər yuxarıdakılar düzgün deyilsə, yazın:
+        <input type="text" name="q3_text" placeholder="Cavabınızı yazın..." />
+      </label>
+      <div class="note">Qeyd: Yazdığınız  gözəl mənalı cümlələr rəsmi Aztu appcreator səhifəsində paylaşılacaq.</div>
+    </fieldset>
+    <fieldset>
+      <legend>4. AzTu-nun ən savadlı müəllimi?</legend>
+      <label><input type="radio" name="q3" value="İmtahandan öncə suallrı verməsi"> Vüqar Hüsynov(Komp qraf)</label>
+      <label><input type="radio" name="q3" value="İmtahan zamanı güzəştlərin olunması"> Vüqar Hüseynli(Proqramlaşdırmanın əsasları)</label>
+      <label><input type="radio" name="q3" value="Müəllimlərin təcrübəsi və səmimiliyi">Arzu Xəlilzadə(Az-Tarixi)</label>
+      <label><input type="radio" name="q3" value="Naxçıvan"> Rəsulzadə Aynur(Riyazi Analiz)</label>
+      <label>
+        Əgər yuxarıdakılar düzgün deyilsə, yazın:
+        <input type="text" name="q3_text" placeholder="Cavabınızı yazın..." />
+      </label>
+      <div class="note">Qeyd: Yazdığınız  gözəl mənalı cümlələr rəsmi Aztu appcreator səhifəsində paylaşılacaq.</div>
+    </fieldset>
+    <fieldset>
+      <legend>5. AzTu-nun ən yaxşı korpusu?</legend>
+      <label><input type="radio" name="q3" value="İmtahandan öncə suallrı verməsi"> 1 -ci korpus</label>
+      <label><input type="radio" name="q3" value="İmtahan zamanı güzəştlərin olunması"> 2-ci korpus</label>
+      <label><input type="radio" name="q3" value="Müəllimlərin təcrübəsi və səmimiliyi">3-cü korpus</label>
+      <label><input type="radio" name="q3" value="Naxçıvan"> 6-cı korpus</label>
+      <label>
+        Əgər yuxarıdakılar düzgün deyilsə, yazın:
+        <input type="text" name="q3_text" placeholder="Cavabınızı yazın..." />
+      </label>
+      <div class="note">Qeyd: Yazdığınız  gözəl mənalı cümlələr rəsmi Aztu appcreator səhifəsində paylaşılacaq.</div>
+    </fieldset>
+     <fieldset>
+      <legend>6. AzTu-nun ən yaxşı korpusu?</legend>
+      <label><input type="radio" name="q3" value="İmtahandan öncə suallrı verməsi"> 1 -ci korpus</label>
+      <label><input type="radio" name="q3" value="İmtahan zamanı güzəştlərin olunması"> 2-ci korpus</label>
+      <label><input type="radio" name="q3" value="Müəllimlərin təcrübəsi və səmimiliyi">3-cü korpus</label>
+      <label><input type="radio" name="q3" value="Naxçıvan"> 6-cı korpus</label>
+      <label>
+        Əgər yuxarıdakılar düzgün deyilsə, yazın:
+        <input type="text" name="q3_text" placeholder="Cavabınızı yazın..." />
+      </label>
+      <div class="note">Qeyd: Yazdığınız  gözəl mənalı cümlələr rəsmi Aztu appcreator səhifəsində paylaşılacaq.</div>
+    </fieldset>
+     <fieldset>
+      <legend>7. AzTu-ya haradan gəlirsən?</legend>
+      <label><input type="radio" name="q3" value="İmtahandan öncə suallrı verməsi"> Yasamal</label>
+      <label><input type="radio" name="q3" value="İmtahan zamanı güzəştlərin olunması"> Neftçilər</label>
+      <label><input type="radio" name="q3" value="Müəllimlərin təcrübəsi və səmimiliyi">Nəsimi</label>
+      <label><input type="radio" name="q3" value="Naxçıvan"> Lökbatan</label>
+      <label>
+        Əgər yuxarıdakılar düzgün deyilsə, yazın:
+        <input type="text" name="q3_text" placeholder="Cavabınızı yazın..." />
+      </label>
+      <div class="note">Qeyd: Yazdığınız  gözəl mənalı cümlələr rəsmi Aztu appcreator səhifəsində paylaşılacaq.</div>
+    </fieldset>
+     <legend>8. Tətbiqimizdən isdədiyiniz yenilik nədir?</legend>
+      <label>
+        
+        <input type="text" name="q3_text" placeholder="Cavabınızı yazın..." />
+      </label>
+      <div class="note">Qeyd: Yazdığınız  gözəl mənalı cümlələr rəsmi Aztu appcreator səhifəsində paylaşılacaq.</div>
+    </fieldset>
+    <fieldset>
+      <legend>9. AzTu-da ən sevdiyiniz təşkilat?</legend>
+      <label><input type="radio" name="q3" value="İmtahandan öncə suallrı verməsi"> TGT</label>
+      <label><input type="radio" name="q3" value="İmtahan zamanı güzəştlərin olunması"> THİK</label>
+      
+      <label>
+        Əgər yuxarıdakılar düzgün deyilsə, yazın:
+        <input type="text" name="q3_text" placeholder="Cavabınızı yazın..." />
+      </label>
+      <div class="note">Qeyd: Yazdığınız  gözəl mənalı cümlələr rəsmi Aztu appcreator səhifəsində paylaşılacaq.</div>
+    </fieldset>
+    <fieldset>
+      <legend> 10. Son olaraq dərsə 5 dəq gecikib özünə qayıb yazmayan,tələbə 2 dəq gecikdikdə qayıbı yapıştıran,camaat dənizdə üzdüyü bir vaxtda pəncərəni açmayın soyuqdu deyən Müəllimlərə ürəy sözləriniz:</legend>
+      
+      
+      <label>
+        <input type="text" name="q3_text" placeholder="Cavabınızı yazın..." />
+      </label>
+      <div class="note">Qeyd: Yazdığınız  gözəl mənalı cümlələr rəsmi Aztu appcreator səhifəsində paylaşılacaq.</div>
+    </fieldset>
+
+
+    <button type="submit">Göndər</button>
+  </form>
+
+</body>
+</html>
