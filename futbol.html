@@ -3,452 +3,225 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Canlı Futbol Nəticələri - Əsas Liqalar</title>
+  <title>AzTu Anket Form</title>
   <style>
-    /* Ümumi */
     body {
-      background-color: #111;
-      color: #eee;
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 10px;
-      user-select: none;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 600px;
+      margin: 2rem auto;
+      background: #f0f4ff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      color: #002244;
     }
     h1 {
       text-align: center;
-      color: #00ffc3;
-      margin-top: 15px;
+      color: #003f7f;
+      margin-bottom: 1.5rem;
     }
-
-    /* Hamburger Menyu */
-    #menuToggle {
-      position: fixed;
-      top: 15px;
-      left: 15px;
-      z-index: 9999;
-      display: block;
-      width: 30px;
-      height: 25px;
-      cursor: pointer;
-    }
-    #menuToggle span {
-      display: block;
-      height: 4px;
-      margin-bottom: 5px;
-      background: #00ffc3;
-      border-radius: 2px;
-      transition: 0.3s ease;
-    }
-    #menuToggle input {
-      display: none;
-    }
-    nav {
-      position: fixed;
-      background: #222;
-      height: 100%;
-      width: 250px;
-      top: 0;
-      left: -260px;
-      padding-top: 60px;
-      transition: 0.3s ease;
-      z-index: 9998;
-    }
-    #menuToggle input:checked ~ nav {
-      left: 0;
-    }
-    nav a {
-      display: block;
-      color: #00ffc3;
-      text-decoration: none;
-      padding: 12px 25px;
-      font-weight: bold;
-      font-size: 18px;
-      border-bottom: 1px solid #333;
-    }
-    nav a:hover {
-      background: #00ffc3;
-      color: #111;
-    }
-    #overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      background: rgba(0,0,0,0.5);
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-      z-index: 9997;
-    }
-    #menuToggle input:checked ~ #overlay {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    /* Turnir və matçlar */
-    .tournament {
-      margin-top: 50px;
-    }
-    .tournament h2 {
-      border-bottom: 1px solid #444;
-      padding-bottom: 5px;
-      margin-bottom: 10px;
-      color: #ffdb58;
-    }
-    .match {
-      background: #1a1a1a;
-      margin-bottom: 15px;
-      border-radius: 8px;
-      padding: 10px;
-      cursor: pointer;
-      user-select: none;
-    }
-    .teams {
+    form {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 16px;
+      flex-direction: column;
+      gap: 1.8rem;
     }
-    .team-logo {
-      width: 30px;
-      height: 30px;
-      object-fit: contain;
-      vertical-align: middle;
-      margin-right: 8px;
+    fieldset {
+      border: 2px solid #004c99;
+      border-radius: 10px;
+      padding: 1rem 1.5rem;
     }
-    .score {
-      font-size: 20px;
-      text-align: center;
-      margin: 10px 0;
+    legend {
       font-weight: bold;
-      user-select: text;
+      font-size: 1.2rem;
+      color: #004c99;
+      padding: 0 0.5rem;
     }
-    .status {
-      text-align: right;
-      font-size: 14px;
-      color: #aaa;
-      user-select: text;
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
     }
-    .goal-scorers, .stat {
-      font-size: 13px;
-      margin-top: 5px;
-      color: #ccc;
-      display: none;
-      user-select: text;
+    input[type="radio"] {
+      margin-right: 0.5rem;
+      cursor: pointer;
     }
-    .live-tag {
-      background: red;
+    input[type="text"],
+    input[type="email"] {
+      width: 100%;
+      padding: 0.5rem;
+      font-size: 1rem;
+      border: 1.5px solid #004c99;
+      border-radius: 6px;
+      margin-top: 0.3rem;
+      box-sizing: border-box;
+    }
+    button {
+      width: 100%;
+      padding: 0.9rem;
+      font-size: 1.1rem;
+      background-color: #004c99;
       color: white;
-      font-size: 12px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      margin-left: 8px;
-      user-select: none;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
     }
-    .section-title {
-      margin-top: 40px;
-      color: #00ffc3;
-      font-size: 22px;
-      border-bottom: 1px solid #333;
+    button:hover {
+      background-color: #003366;
+    }
+    .note {
+      font-size: 0.9rem;
+      color: #004c99;
+      margin-top: 0.4rem;
+      font-style: italic;
     }
   </style>
 </head>
 <body>
 
-  <h1>⚽ Canlı Futbol Nəticələri</h1>
+  <h1>AzTu Anket Form</h1>
 
-  <label id="menuToggle" for="menu-checkbox" aria-label="Menyu aç">
-    <input type="checkbox" id="menu-checkbox" />
-    <span></span>
-    <span></span>
-    <span></span>
-  </label>
+  <!-- Formspree form -->
+  <form action="https://formspree.io/f/mvgrojrv" method="POST">
 
-  <nav>
-    <a href="https://mccleaurg-glionts-twaency.yolasite.com/" target="_blank" rel="noopener noreferrer">Yerli Futbol Xəbərləri</a>
-    <a href="https://www.fifa.com/news" target="_blank" rel="noopener noreferrer">Beynəlxalq Futbol Xəbərləri</a>
-  </nav>
-  <div id="overlay"></div>
+    <!-- Ad Soyad Email -->
+    <fieldset>
+      <legend>Şəxsi məlumatlar</legend>
 
-  <!-- Canlı Matçlar - Əsas Liqalar -->
-  <h2 class="section-title">🔥 CANLI - Əsas Liqalar</h2>
-  <div id="live-main"></div>
+      <label>
+        Ad:
+        <input type="text" name="first_name" required placeholder="Adınızı yazın" />
+      </label>
 
-  <!-- Canlı Matçlar - Digər Liqalar -->
-  <h2 class="section-title">🔥 CANLI - Digər Liqalar</h2>
-  <div id="live-other"></div>
+      <label>
+        Soyad:
+        <input type="text" name="last_name" required placeholder="Soyadınızı yazın" />
+      </label>
 
-  <!-- Gələcək Matçlar -->
-  <h2 class="section-title">🔜 Gələcək Matçlar</h2>
-  <div id="upcoming">Yüklənir...</div>
+      <label>
+        Email:
+        <input type="email" name="email" required placeholder="Email ünvanınızı yazın" />
+      </label>
+    </fieldset>
 
-  <!-- Turnir Cədvəlləri - Əsas Liqalar -->
-  <h2 class="section-title">📊 Turnir Cədvəlləri - Əsas Liqalar</h2>
-  <div id="tables-main"></div>
+    <!-- Suallar -->
+    <fieldset>
+      <legend>1. Oxuduğun müddətdə ən sevdiyin müəllim?</legend>
+      <label><input type="radio" name="q1" value="Rəna Müəllim(Diskret Riy)"> Rəna Müəllim(Diskret Riy)</label>
+      <label><input type="radio" name="q1" value="Kamran Müəllim(kompüter qraf)"> Kamran Müəllim(kompüter qraf)</label>
+      <label><input type="radio" name="q1" value="Vüqar Müəllim(Proramlaşdırmanın əsasları)"> Vüqar Müəllim(Proramlaşdırmanın əsasları)</label>
+      <label><input type="radio" name="q1" value="Heç Biri"> Heç Biri</label>
+      <label>
+        Əgər "Heç Biri" seçmisinizsə, yazın: 
+        <input type="text" name="q1_text" placeholder="Cavabınızı yazın..." />
+      </label>
+      <div class="note">Qeyd:  Yazdığınız  gözəl mənalı cümlələr rəsmi Aztu appcreator səhifəsində paylaşılacaq.</div>
+    </fieldset>
 
-  <script>
-    // Menü overlay qapama
-    document.getElementById('overlay').addEventListener('click', () => {
-      document.getElementById('menu-checkbox').checked = false;
-    });
+    <fieldset>
+      <legend>2. AzTu-da ən çox olmasını isdədiyiniz şey nədir?</legend>
+      <label><input type="radio" name="q2" value="Azərbaycan Texniki Universiteti">1-ci korpusda liftin qoyulması</label>
+      <label><input type="radio" name="q2" value="Azərbaycan Tibb Universiteti"> Universitetə girişinin əvvəlki yerə köçürülməsi </label>
+      <label><input type="radio" name="q2" value="Azərbaycan Turizm Universiteti"> Fantanların doğru düzgün işləməsi</label>
+      <label><input type="radio" name="q2" value="Azərbaycan Təhsil Universiteti"> Koicanın əvvəlki funksiyonallığının qaytarılması</label>
+      <label>
+        Əgər yuxarıdakılar düzgün deyilsə, yazın:
+        <input type="text" name="q2_text" placeholder="Cavabınızı yazın..." />
+      </label>
+      <div class="note">Qeyd:  Yazdığınız  gözəl mənalı cümlələr rəsmi Aztu appcreator səhifəsində paylaşılacaq.</div>
+    </fieldset>
 
-    // Əsas liqalar siyahısı (Sofascore turnir adları ilə)
-    const mainLeagues = [
-      "Premier League",
-      "La Liga",
-      "Bundesliga",
-      "Serie A",
-      "Ligue 1"
-    ];
+    <fieldset>
+      <legend>3. Aztu-nun ən sevdiyiniz cəhəti?</legend>
+      <label><input type="radio" name="q3" value="İmtahandan öncə suallrı verməsi"> İmtahandan öncə suallrı verməsi</label>
+      <label><input type="radio" name="q3" value="İmtahan zamanı güzəştlərin olunması"> İmtahan zamanı güzəştlərin olunması</label>
+      <label><input type="radio" name="q3" value="Müəllimlərin təcrübəsi və səmimiliyi">Müəllimlərin təcrübəsi və səmimiliyi</label>
+      <label><input type="radio" name="q3" value="Naxçıvan"> İmtahanları kompüterlə olması</label>
+      <label>
+        Əgər yuxarıdakılar düzgün deyilsə, yazın:
+        <input type="text" name="q3_text" placeholder="Cavabınızı yazın..." />
+      </label>
+      <div class="note">Qeyd: Yazdığınız  gözəl mənalı cümlələr rəsmi Aztu appcreator səhifəsində paylaşılacaq.</div>
+    </fieldset>
+    <fieldset>
+      <legend>4. AzTu-nun ən savadlı müəllimi?</legend>
+      <label><input type="radio" name="q3" value="İmtahandan öncə suallrı verməsi"> Vüqar Hüsynov(Komp qraf)</label>
+      <label><input type="radio" name="q3" value="İmtahan zamanı güzəştlərin olunması"> Vüqar Hüseynli(Proqramlaşdırmanın əsasları)</label>
+      <label><input type="radio" name="q3" value="Müəllimlərin təcrübəsi və səmimiliyi">Arzu Xəlilzadə(Az-Tarixi)</label>
+      <label><input type="radio" name="q3" value="Naxçıvan"> Rəsulzadə Aynur(Riyazi Analiz)</label>
+      <label>
+        Əgər yuxarıdakılar düzgün deyilsə, yazın:
+        <input type="text" name="q3_text" placeholder="Cavabınızı yazın..." />
+      </label>
+      <div class="note">Qeyd: Yazdığınız  gözəl mənalı cümlələr rəsmi Aztu appcreator səhifəsində paylaşılacaq.</div>
+    </fieldset>
+    <fieldset>
+      <legend>5. AzTu-nun ən yaxşı korpusu?</legend>
+      <label><input type="radio" name="q3" value="İmtahandan öncə suallrı verməsi"> 1 -ci korpus</label>
+      <label><input type="radio" name="q3" value="İmtahan zamanı güzəştlərin olunması"> 2-ci korpus</label>
+      <label><input type="radio" name="q3" value="Müəllimlərin təcrübəsi və səmimiliyi">3-cü korpus</label>
+      <label><input type="radio" name="q3" value="Naxçıvan"> 6-cı korpus</label>
+      <label>
+        Əgər yuxarıdakılar düzgün deyilsə, yazın:
+        <input type="text" name="q3_text" placeholder="Cavabınızı yazın..." />
+      </label>
+      <div class="note">Qeyd: Yazdığınız  gözəl mənalı cümlələr rəsmi Aztu appcreator səhifəsində paylaşılacaq.</div>
+    </fieldset>
+     <fieldset>
+      <legend>6. AzTu-nun ən yaxşı korpusu?</legend>
+      <label><input type="radio" name="q3" value="İmtahandan öncə suallrı verməsi"> 1 -ci korpus</label>
+      <label><input type="radio" name="q3" value="İmtahan zamanı güzəştlərin olunması"> 2-ci korpus</label>
+      <label><input type="radio" name="q3" value="Müəllimlərin təcrübəsi və səmimiliyi">3-cü korpus</label>
+      <label><input type="radio" name="q3" value="Naxçıvan"> 6-cı korpus</label>
+      <label>
+        Əgər yuxarıdakılar düzgün deyilsə, yazın:
+        <input type="text" name="q3_text" placeholder="Cavabınızı yazın..." />
+      </label>
+      <div class="note">Qeyd: Yazdığınız  gözəl mənalı cümlələr rəsmi Aztu appcreator səhifəsində paylaşılacaq.</div>
+    </fieldset>
+     <fieldset>
+      <legend>7. AzTu-ya haradan gəlirsən?</legend>
+      <label><input type="radio" name="q3" value="İmtahandan öncə suallrı verməsi"> Yasamal</label>
+      <label><input type="radio" name="q3" value="İmtahan zamanı güzəştlərin olunması"> Neftçilər</label>
+      <label><input type="radio" name="q3" value="Müəllimlərin təcrübəsi və səmimiliyi">Nəsimi</label>
+      <label><input type="radio" name="q3" value="Naxçıvan"> Lökbatan</label>
+      <label>
+        Əgər yuxarıdakılar düzgün deyilsə, yazın:
+        <input type="text" name="q3_text" placeholder="Cavabınızı yazın..." />
+      </label>
+      <div class="note">Qeyd: Yazdığınız  gözəl mənalı cümlələr rəsmi Aztu appcreator səhifəsində paylaşılacaq.</div>
+    </fieldset>
+     <legend>8. Tətbiqimizdən isdədiyiniz yenilik nədir?</legend>
+      <label>
+        
+        <input type="text" name="q3_text" placeholder="Cavabınızı yazın..." />
+      </label>
+      <div class="note">Qeyd: Yazdığınız  gözəl mənalı cümlələr rəsmi Aztu appcreator səhifəsində paylaşılacaq.</div>
+    </fieldset>
+    <fieldset>
+      <legend>9. AzTu-da ən sevdiyiniz təşkilat?</legend>
+      <label><input type="radio" name="q3" value="İmtahandan öncə suallrı verməsi"> TGT</label>
+      <label><input type="radio" name="q3" value="İmtahan zamanı güzəştlərin olunması"> THİK</label>
+      
+      <label>
+        Əgər yuxarıdakılar düzgün deyilsə, yazın:
+        <input type="text" name="q3_text" placeholder="Cavabınızı yazın..." />
+      </label>
+      <div class="note">Qeyd: Yazdığınız  gözəl mənalı cümlələr rəsmi Aztu appcreator səhifəsində paylaşılacaq.</div>
+    </fieldset>
+    <fieldset>
+      <legend> 10. Son olaraq dərsə 5 dəq gecikib özünə qayıb yazmayan,tələbə 2 dəq gecikdikdə qayıbı yapıştıran,camaat dənizdə üzdüyü bir vaxtda pəncərəni açmayın soyuqdu deyən Müəllimlərə ürəy sözləriniz:</legend>
+      
+      
+      <label>
+        <input type="text" name="q3_text" placeholder="Cavabınızı yazın..." />
+      </label>
+      <div class="note">Qeyd: Yazdığınız  gözəl mənalı cümlələr rəsmi Aztu appcreator səhifəsində paylaşılacaq.</div>
+    </fieldset>
 
-    async function fetchGoalScorers(eventId) {
-      try {
-        const res = await fetch(`https://api.sofascore.com/api/v1/event/${eventId}/incident`);
-        const data = await res.json();
-        const goals = data.incidents.filter(e => e.type === "goal" && e.player);
-        return goals.map(goal => `${goal.player.name} ${goal.time.minute}'`).join(", ");
-      } catch {
-        return "Qol vuranlar mövcud deyil.";
-      }
-    }
 
-    async function fetchStatistics(eventId) {
-      try {
-        const res = await fetch(`https://api.sofascore.com/api/v1/event/${eventId}/statistics`);
-        const data = await res.json();
-        const stats = data.statistics.flatMap(g => g.groups).flatMap(i => i.statisticsItems);
-        const important = stats.filter(s => ['Ball possession', 'Total shots', 'Shots on target', 'Yellow cards', 'Red cards'].includes(s.name));
-        return important.map(s => `${s.name}: ${s.home} - ${s.away}`).join("<br>");
-      } catch {
-        return "Statistika yoxdur.";
-      }
-    }
-
-    // Canlı matçları çək və əsas/digər liqalara ayır
-    async function fetchLiveMatches() {
-      const containerMain = document.getElementById("live-main");
-      const containerOther = document.getElementById("live-other");
-      containerMain.innerHTML = "Yenilənir...";
-      containerOther.innerHTML = "Yenilənir...";
-
-      try {
-        const res = await fetch("https://api.sofascore.com/api/v1/sport/football/events/live");
-        const data = await res.json();
-
-        // Turnirləri əsas və digər olaraq qruplaşdır
-        let mainTournaments = {};
-        let otherTournaments = {};
-
-        data.events.forEach(event => {
-          const tname = event.tournament.name;
-
-          // Əsas liqaya daxildirsə
-          if(mainLeagues.includes(tname)) {
-            if (!mainTournaments[tname]) mainTournaments[tname] = [];
-            mainTournaments[tname].push(event);
-          } else {
-            if (!otherTournaments[tname]) otherTournaments[tname] = [];
-            otherTournaments[tname].push(event);
-          }
-        });
-
-        // Funksiya turnirə matçları əlavə etmək üçün
-        function addMatches(container, tournaments) {
-          container.innerHTML = "";
-          for (const [tournament, events] of Object.entries(tournaments)) {
-            const tDiv = document.createElement("div");
-            tDiv.className = "tournament";
-            tDiv.innerHTML = `<h2>${tournament}</h2>`;
-
-            events.forEach(e => {
-              const mDiv = document.createElement("div");
-              mDiv.className = "match";
-              const home = e.homeTeam;
-              const away = e.awayTeam;
-              const score = `${e.homeScore.current ?? 0} - ${e.awayScore.current ?? 0}`;
-              const minute = e.time?.minute ?? "";
-              const status = e.status?.description || "";
-              const isHalfTime = status.toLowerCase().includes("half") || status.toLowerCase().includes("break");
-              const showStatus = isHalfTime ? "Fasilə" : `${status} ${minute ? '(' + minute + "′)" : ''}`;
-              const liveTag = e.status?.type === "inprogress" ? '<span class="live-tag">CANLI</span>' : "";
-
-              mDiv.innerHTML = `
-                <div class="teams">
-                  <div><img class="team-logo" src="https://api.sofascore.app/api/v1/team/${home.id}/image" alt="${home.name}"> ${home.name}</div>
-                  <div><img class="team-logo" src="https://api.sofascore.app/api/v1/team/${away.id}/image" alt="${away.name}"> ${away.name}</div>
-                </div>
-                <div class="score">${score}</div>
-                <div class="status">${showStatus} ${liveTag}</div>
-                <div class="goal-scorers" id="goals-${e.id}">Qollar yüklənir...</div>
-                <div class="stat" id="stat-${e.id}">Statistika yüklənir...</div>
-              `;
-
-              // Matç klikləndikdə statistikaları açıb-bağlamaq
-              mDiv.addEventListener('click', () => {
-                const goalsDiv = document.getElementById(`goals-${e.id}`);
-                const statDiv = document.getElementById(`stat-${e.id}`);
-                if(goalsDiv.style.display === "block") {
-                  goalsDiv.style.display = "none";
-                  statDiv.style.display = "none";
-                } else {
-                  goalsDiv.style.display = "block";
-                  statDiv.style.display = "block";
-
-                  // Hər dəfə yenilə
-                  fetchGoalScorers(e.id).then(text => { goalsDiv.textContent = "Qollar: " + (text || "Yoxdur"); });
-                  fetchStatistics(e.id).then(html => { statDiv.innerHTML = html; });
-                }
-              });
-
-              tDiv.appendChild(mDiv);
-            });
-            container.appendChild(tDiv);
-          }
-        }
-
-        addMatches(containerMain, mainTournaments);
-        addMatches(containerOther, otherTournaments);
-      } catch (e) {
-        console.error(e);
-        containerMain.innerHTML = "Canlı matçlar mövcud deyil.";
-        containerOther.innerHTML = "";
-      }
-    }
-
-    // Gələcək matçları göstər
-    async function fetchUpcomingMatches() {
-      const container = document.getElementById("upcoming");
-      container.innerHTML = "Yenilənir...";
-
-      try {
-        const res = await fetch("https://api.sofascore.com/api/v1/sport/football/events/upcoming");
-        const data = await res.json();
-
-        // Sadəcə gələcək 15 matçı göstərək
-        const matches = data.events.slice(0, 15);
-
-        container.innerHTML = "";
-        matches.forEach(e => {
-          const div = document.createElement("div");
-          div.className = "match";
-
-          const home = e.homeTeam;
-          const away = e.awayTeam;
-          const date = new Date(e.startTimestamp * 1000);
-          const timeStr = date.toLocaleString('az-AZ', {hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short'});
-
-          div.innerHTML = `
-            <div class="teams">
-              <div><img class="team-logo" src="https://api.sofascore.app/api/v1/team/${home.id}/image" alt="${home.name}"> ${home.name}</div>
-              <div><img class="team-logo" src="https://api.sofascore.app/api/v1/team/${away.id}/image" alt="${away.name}"> ${away.name}</div>
-            </div>
-            <div class="status">Başlama vaxtı: ${timeStr}</div>
-          `;
-
-          container.appendChild(div);
-        });
-      } catch {
-        container.innerHTML = "Gələcək matçlar mövcud deyil.";
-      }
-    }
-
-    // Turnir cədvəlləri (əsas liqalar)
-    async function fetchTables() {
-      const container = document.getElementById("tables-main");
-      container.innerHTML = "Yenilənir...";
-
-      try {
-        // Əsas liqalar üçün cədvəl sorğuları
-        // Sofascore API-dən əl ilə uyğun tournament IDs lazım olarsa dəyişmək olar
-        // Burada sadəcə canlı liqalar arasında olanları göstəririk (dynamic)
-        // Məsələn üçün nümunə kimi istifadə edirik
-        const tournamentIds = {
-          "Premier League": 17,
-          "La Liga": 11,
-          "Bundesliga": 10,
-          "Serie A": 8,
-          "Ligue 1": 9
-        };
-
-        container.innerHTML = "";
-        for (const [name, id] of Object.entries(tournamentIds)) {
-          try {
-            const res = await fetch(`https://api.sofascore.com/api/v1/league/${id}/standings`);
-            const data = await res.json();
-            if(!data.standings) continue;
-
-            const div = document.createElement("div");
-            div.className = "tournament";
-
-            div.innerHTML = `<h2>${name} Cədvəli</h2>`;
-
-            // Cədvəl yaradılması
-            const table = document.createElement("table");
-            table.style.width = "100%";
-            table.style.borderCollapse = "collapse";
-            table.style.color = "#eee";
-            table.style.marginBottom = "30px";
-
-            // Cədvəl başlığı
-            const thead = document.createElement("thead");
-            thead.innerHTML = `
-              <tr style="border-bottom: 2px solid #555;">
-                <th>#</th>
-                <th>Komanda</th>
-                <th>O</th>
-                <th>Q</th>
-                <th>M</th>
-                <th>U</th>
-                <th>Qol</th>
-                <th>Xal</th>
-              </tr>`;
-            table.appendChild(thead);
-
-            const tbody = document.createElement("tbody");
-
-            data.standings.forEach(team => {
-              const tr = document.createElement("tr");
-              tr.style.borderBottom = "1px solid #333";
-              tr.innerHTML = `
-                <td>${team.position}</td>
-                <td><img src="https://api.sofascore.app/api/v1/team/${team.team.id}/image" alt="${team.team.name}" style="width:20px; vertical-align:middle; margin-right:5px;">${team.team.name}</td>
-                <td>${team.matchesPlayed}</td>
-                <td>${team.wins}</td>
-                <td>${team.losses}</td>
-                <td>${team.draws}</td>
-                <td>${team.goalsFor}:${team.goalsAgainst}</td>
-                <td>${team.points}</td>
-              `;
-              tbody.appendChild(tr);
-            });
-
-            table.appendChild(tbody);
-            div.appendChild(table);
-            container.appendChild(div);
-
-          } catch (e) {
-            console.warn(`Cədvəl yüklənmədi: ${name}`, e);
-          }
-        }
-      } catch (e) {
-        container.innerHTML = "Turnir cədvəlləri mövcud deyil.";
-      }
-    }
-
-    // Səhifə yüklənəndə və hər 60 saniyədən bir yenilə
-    async function refreshAll() {
-      await Promise.all([
-        fetchLiveMatches(),
-        fetchUpcomingMatches(),
-        fetchTables()
-      ]);
-    }
-
-    refreshAll();
-    setInterval(refreshAll, 60000); // 1 dəqiqədə yenilə
-
-  </script>
+    <button type="submit">Göndər</button>
+  </form>
 
 </body>
 </html>
