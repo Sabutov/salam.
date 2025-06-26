@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AzTU | Giriş</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #003566, #001d3d);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      text-align: center;
+      padding: 30px 20px 10px;
+    }
+    header h1 { font-size: 2.4em; color: #90e0ef; margin-bottom: 10px; }
+    header p { font-size: 1.1em; color: #dceefb; }
+
+    .story-bar {
+      display: flex;
+      overflow-x: auto;
+      padding: 16px;
+      gap: 12px;
+      background-color: #012a4a;
+    }
+
+    .story-item {
+      width: 75px;
+      flex-shrink: 0;
+      cursor: pointer;
+      text-align: center;
+      color: #dceefb;
+      font-size: 0.85em;
+      font-weight: 600;
+    }
+
+    .story-circle {
+      width: 75px;
+      height: 75px;
+      border-radius: 50%;
+      border: 3px solid #00b4d8;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+
+    .story-circle img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+    }
+
+    .story-modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.95);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    .story-modal.show { display: flex; }
+
+    .story-image {
+      max-width: 100%;
+      max-height: 85vh;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      object-fit: contain;
+      cursor: pointer;
+    }
+
+    .progress-bars {
+      display: flex;
+      gap: 4px;
+      position: absolute;
+      top: 15px;
+      left: 10px;
+      right: 10px;
+      height: 3px;
+    }
+
+    .progress-bar {
+      flex-grow: 1;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      background: #00b4d8;
+      height: 100%;
+      width: 0%;
+      animation-fill-mode: forwards;
+    }
+
+    @keyframes fill {
+      from { width: 0%; }
+      to { width: 100%; }
+    }
+
+    .nav-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 2.5rem;
+      color: #ffffffcc;
+      background: none;
+      border: none;
+      cursor: pointer;
+      z-index: 1010;
+      padding: 10px;
+    }
+
+    .nav-arrow.left { left: 10px; }
+    .nav-arrow.right { right: 10px; }
+    .nav-arrow:hover { color: #fff; }
+
+    #detailButton {
+      background-color: #00b4d8;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      font-size: 1em;
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
+      gap: 18px;
+    }
+
+    .btn {
+      background-color: #0077b6;
+      color: #fff;
+      text-decoration: none;
+      padding: 16px 26px;
+      width: 90%;
+      max-width: 320px;
+      text-align: center;
+      border-radius: 16px;
+      font-weight: 600;
+      font-size: 1.1em;
+    }
+
+    .btn:hover { background-color: #00b4d8; }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 0.9em;
+      background-color: rgba(0, 0, 0, 0.15);
+    }
+
+    footer a {
+      color: #90e0ef;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Başlıq -->
+  <header>
+    <h1>Azərbaycan Texniki Universiteti</h1>
+    <p>Rəsmi Giriş Səhifəsi</p>
+  </header>
+
+  <!-- Hekayə barı -->
+  <div class="story-bar" id="storyBar"></div>
+
+  <!-- Menyu -->
+  <div class="menu">
+    <a href="https://sabutov.github.io/salam./aztur.html" class="btn">🏫 Haqqımızda</a>
+    <a href="https://sabutov.github.io/salam./elaqe.html" class="btn">☎️ Əlaqə</a>
+    <a href="https://sabutov.github.io/salam./videooooo.html" class="btn">📄 Tələbə videoları</a>
+    <a href="https://sso.aztu.edu.az/" class="btn">📊 KOICA</a>
+    <a href="https://www.aztu.edu.az/az/news" class="btn">📰 Xəbərlər</a>
+    <a href="https://sabutov.github.io/salam./tezler.html" class="btn">❓ Tez-tez verilən suallar</a>
+  </div>
+
+  <!-- Altbilgi -->
+  <footer>
+    © 2025 Azərbaycan Texniki Universiteti | <a href="mailto:info@aztu.edu.az">info@aztu.edu.az</a>
+  </footer>
+
+  <!-- Modal -->
+  <div class="story-modal" id="storyModal" onclick="closeStory()">
+    <div class="progress-bars" id="progressBars"></div>
+    <button class="nav-arrow left" onclick="prevImage(event)">&#10094;</button>
+    <button class="nav-arrow right" onclick="nextImage(event)">&#10095;</button>
+    <img class="story-image" id="storyImage" />
+    <a href="#" id="detailButton" target="_blank">Ətraflı</a>
+  </div>
+
+  <!-- Script -->
+  <script>
+    const stories = [
+      {
+        title: "Məzuniyyət",
+        link: "https://example.com/mezun",
+        images: ["https://via.placeholder.com/800x600.png?text=Məzuniyyət"]
+      },
+      {
+        title: "Layihə",
+        link: "https://example.com/layihe",
+        images: [
+          "https://th.bing.com/th/id/OIP.1iDiaXoBjipTRgkMwjv7MwHaJ4?w=135&h=180&c=7&r=0&o=7&dpr=1.3&pid=1.7&rm=3",
+          "https://via.placeholder.com/800x600.png?text=Layihə+2"
+        ]
+      }
+    ];
+
+    const storyBar = document.getElementById('storyBar');
+    const modal = document.getElementById("storyModal");
+    const img = document.getElementById("storyImage");
+    const detailButton = document.getElementById("detailButton");
+    const progressBars = document.getElementById("progressBars");
+
+    let currentStoryIndex = 0;
+    let currentImageIndex = 0;
+    let timeoutId;
+    let paused = false;
+    let startTime;
+    let remainingTime = 5000;
+
+    function populateStoryBar() {
+      stories.forEach((story, index) => {
+        const item = document.createElement('div');
+        item.className = "story-item";
+        item.onclick = () => startStory(index);
+
+        const circle = document.createElement('div');
+        circle.className = "story-circle";
+
+        const image = document.createElement('img');
+        image.src = story.images[0];
+
+        const label = document.createElement('div');
+        label.textContent = story.title;
+
+        circle.appendChild(image);
+        item.appendChild(circle);
+        item.appendChild(label);
+        storyBar.appendChild(item);
+      });
+    }
+
+    function startStory(index) {
+      currentStoryIndex = index;
+      currentImageIndex = 0;
+      showStory();
+    }
+
+    function showStory() {
+      const story = stories[currentStoryIndex];
+      img.src = story.images[currentImageIndex];
+      detailButton.href = story.link;
+      modal.classList.add("show");
+
+      setupProgressBars(story.images.length);
+      startProgress(currentImageIndex);
+      startTimer();
+    }
+
+    function setupProgressBars(count) {
+      progressBars.innerHTML = "";
+      for (let i = 0; i < count; i++) {
+        const bar = document.createElement('div');
+        bar.className = 'progress-bar';
+        const fill = document.createElement('div');
+        fill.className = 'progress-fill';
+        bar.appendChild(fill);
+        progressBars.appendChild(bar);
+      }
+    }
+
+    function startProgress(index) {
+      const fills = progressBars.querySelectorAll('.progress-fill');
+      fills.forEach((f, i) => {
+        f.style.animation = 'none';
+        f.style.width = i < index ? '100%' : '0%';
+      });
+
+      setTimeout(() => {
+        fills[index].style.animation = `fill 5s linear forwards`;
+      }, 50);
+    }
+
+    function startTimer() {
+      clearTimeout(timeoutId);
+      startTime = Date.now();
+      remainingTime = 5000;
+      timeoutId = setTimeout(() => {
+        nextImage();
+      }, remainingTime);
+    }
+
+    function pauseStory() {
+      if (paused) return;
+      paused = true;
+      clearTimeout(timeoutId);
+      const elapsed = Date.now() - startTime;
+      remainingTime -= elapsed;
+    }
+
+    function resumeStory() {
+      if (!paused) return;
+      paused = false;
+      startTime = Date.now();
+      timeoutId = setTimeout(() => {
+        nextImage();
+      }, remainingTime);
+    }
+
+    function nextImage(event) {
+      if (event) event.stopPropagation();
+      currentImageIndex++;
+      const images = stories[currentStoryIndex].images;
+      if (currentImageIndex >= images.length) {
+        closeStory();
+      } else {
+        img.src = images[currentImageIndex];
+        startProgress(currentImageIndex);
+        startTimer();
+      }
+    }
+
+    function prevImage(event) {
+      event.stopPropagation();
+      if (currentImageIndex > 0) {
+        currentImageIndex--;
+        img.src = stories[currentStoryIndex].images[currentImageIndex];
+        startProgress(currentImageIndex);
+        startTimer();
+      }
+    }
+
+    function closeStory() {
+      modal.classList.remove("show");
+      clearTimeout(timeoutId);
+    }
+
+    img.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (paused) return;
+      nextImage();
+    });
+
+    img.addEventListener("mousedown", pauseStory);
+    img.addEventListener("mouseup", resumeStory);
+    img.addEventListener("touchstart", pauseStory);
+    img.addEventListener("touchend", resumeStory);
+
+    populateStoryBar();
+  </script>
+</body>
+</html>
