@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hava Proqnozu</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.10/css/weather-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Modern, Mobil-Birinci CSS Dizaynı */
+        :root {
+            --primary-bg: #e0f2f7; /* Açık mavi, arka plan */
+            --secondary-bg: #c1e4f2; /* Biraz daha koyu mavi */
+            --card-bg: #ffffff; /* Kart arka planı */
+            --text-color: #333d47; /* Koyu gri metin */
+            --accent-color: #007bff; /* Mavi vurgu rengi */
+            --accent-dark: #0056b3; /* Koyu mavi vurgu */
+            --light-text: #6c757d; /* Açık gri metin */
+            --border-color: #e9ecef; /* Sınır rengi */
+            --shadow-light: rgba(0, 0, 0, 0.05);
+            --shadow-medium: rgba(0, 0, 0, 0.1);
+            --icon-color: #5aa1e5; /* İkon rengi */
+            --error-color: #dc3545;
+            --warning-color: #ffc107;
+            --success-color: #28a745;
+        }
+
+        body {
+            font-family: 'Rubik', sans-serif;
+            background: linear-gradient(135deg, var(--primary-bg), var(--secondary-bg));
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            flex-grow: 1;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--card-bg);
+            padding: 15px 20px;
+            border-radius: 15px;
+            box-shadow: var(--shadow-medium);
+            display: flex;
+            flex-direction: column; /* Mobil için dikey düzen */
+            gap: 15px;
+            align-items: center;
+            position: sticky;
+            top: 10px;
+            z-index: 1000;
+            margin-bottom: 20px; /* Alttaki içeriğe boşluk */
+        }
+
+        header h1 {
+            font-size: 1.8em;
+            color: var(--accent-color);
+            margin: 0;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .search-section {
+            display: flex;
+            width: 100%;
+            gap: 10px;
+            position: relative;
+        }
+
+        .search-section input[type="text"] {
+            flex-grow: 1;
+            padding: 12px 18px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1em;
+            background-color: #f8f9fa;
+            color: var(--text-color);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .search-section input[type="text"]:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+            outline: none;
+        }
+
+        .search-section button {
+            padding: 5px 8px;
+            background-color: var(--accent-color);
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .search-section button:hover {
+            background-color: var(--accent-dark);
+            transform: translateY(-2px);
+        }
+
+        .search-results {
+            position: absolute;
+            width: 100%;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            box-shadow: var(--shadow-medium);
+            z-index: 1001;
+            max-height: 200px;
+            overflow-y: auto;
+            top: calc(100% + 5px);
+            display: none;
+        }
+
+        .search-results ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .search-results li {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-color);
+            transition: background-color 0.2s ease;
+            font-size: 0.95em;
+        }
+
+        .search-results li:last-child {
+            border-bottom: none;
+        }
+
+        .search-results li:hover {
+            background-color: var(--secondary-bg);
+        }
+
+        /* Card styles */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: var(--shadow-medium);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden; /* İçeriğin taşmasını engelle */
+        }
+
+        .card h2 {
+            font-size: 1.6em;
+            color: var(--accent-color);
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        /* Current Weather Section */
+        #currentWeatherInfo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .current-weather-main {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 25px;
+            width: 100%;
+        }
+
+        .location-name {
+            font-size: 2.2em;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 8px;
+        }
+
+        .local-time {
+            font-size: 0.95em;
+            color: var(--light-text);
+            margin-bottom: 15px;
+        }
+
+        .temperature {
+            font-size: 4em;
+            font-weight: 700;
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .temperature i.wi {
+            font-size: 1em; /* İkonu sıcaklığa göre büyüt */
+            color: var(--icon-color);
+        }
+
+        .description {
+            font-size: 1.4em;
+            color: var(--light-text);
+            font-weight: 500;
+        }
+
+        .add-favorite-btn {
+            background-color: var(--accent-color);
+            color: #ffffff;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            margin-top: 25px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            width: fit-content;
+        }
+
+        .add-favorite-btn:hover {
+            background-color: var(--accent-dark);
+            transform: translateY(-2px);
+        }
+
+        .current-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 15px;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .detail-item {
+            background-color: var(--secondary-bg);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--border-color);
+        }
+
+        .detail-item p {
+            font-size: 0.9em;
+            color: var(--light-text);
+            margin-bottom: 5px;
+        }
+
+        .detail-item span {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+
+        .alerts {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: rgba(255, 193, 7, 0.1);
+            color: var(--warning-color);
+            text-align: center;
+            border: 1px solid var(--warning-color);
+            animation: fadeIn 0.6s ease-out;
+            width: 100%;
+        }
+
+        .alerts.no-alerts {
+            background-color: var(--secondary-bg);
+            color: var(--light-text);
+            border: 1px solid var(--border-color);
+            box-shadow: none;
+            font-style: italic;
+        }
+
+        .alerts h3 {
+            margin-bottom: 10px;
+            font-size: 1.4em;
+            color: var(--warning-color);
+        }
+
+        .alerts ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .alerts li {
+            margin-bottom: 8px;
+            font-size: 0.95em;
+            line-height: 1.4;
+        }
+
+        /* Forecast Section */
+        .forecast-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .forecast-tab-button {
+            background: none;
+            border: none;
+            padding: 10px 15px;
+            font-size: 1.1em;
+            font-weight: 500;
+            color: var(--light-text);
+            cursor: pointer;
+            transition: color 0.3s ease, border-bottom 0.3s ease;
+            margin: 0 5px;
+            position: relative;
+            top: 2px; /* Border ile hizalama */
+        }
+
+        .forecast-tab-button.active {
+            color: var(--accent-color);
+            border-bottom: 3px solid var(--accent-color);
+            font-weight: 600;
+        }
+
+        .forecast-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Mobil için daha küçük kartlar */
+            gap: 15px;
+        }
+
+        .forecast-item {
+            background-color: var(--secondary-bg);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: var(--shadow-light);
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .forecast-item:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .forecast-item p {
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            color: var(--light-text);
+        }
+
+        .forecast-item .temp {
+            font-size: 1.4em;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-top: 8px;
+        }
+
+        .forecast-item .icon {
+            font-size: 2.5em;
+            margin-bottom: 8px;
+            color: var(--icon-color);
+        }
+
+        .forecast-item .pop {
+            font-size: 0.8em;
+            color: var(--light-text);
+            margin-top: 5px;
+        }
+
+        /* Map Section */
+        #map {
+            height: 300px; /* Mobil için daha az yer kaplasın */
+            width: 100%;
+            border-radius: 15px;
+            box-shadow: var(--shadow-medium);
+            margin-bottom: 20px;
+        }
+
+        /* Favorite Locations */
+        .favorite-locations ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .favorite-locations li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1em;
+            color: var(--text-color);
+            transition: background-color 0.2s ease;
+        }
+
+        .favorite-locations li:last-child {
+            border-bottom: none;
+        }
+
+        .favorite-locations li:hover {
+            background-color: var(--secondary-bg);
+            cursor: pointer;
+        }
+
+        .favorite-locations li span {
+            flex-grow: 1;
+            cursor: pointer;
+            padding-right: 10px;
+        }
+
+        .favorite-locations button {
+            background: none;
+            border: none;
+            color: var(--error-color);
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            padding: 5px 8px;
+            border-radius: 5px;
+        }
+
+        .favorite-locations button:hover {
+            color: darken(var(--error-color), 10%);
+            background-color: rgba(var(--error-color), 0.1);
+        }
+
+        .empty-state {
+            text-align: center;
+            color: var(--light-text);
+            padding: 20px;
+            font-size: 0.95em;
+            font-style: italic;
+        }
+
+        /* Messages */
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            text-align: center;
+            font-weight: 500;
+            font-size: 1em;
+            animation: fadeIn 0.5s ease-out;
+            width: 100%;
+        }
+
+        .error-message {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: var(--error-color);
+            border: 1px solid var(--error-color);
+        }
+
+        .loading-message {
+            background-color: rgba(0, 123, 255, 0.1);
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+        }
+
+        .success-message {
+            background-color: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+            border: 1px solid var(--success-color);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Desktop specific adjustments */
+        @media (min-width: 768px) {
+            .container {
+                display: grid;
+                grid-template-columns: 2fr 1fr; /* Sol ana içerik, sağ sidebar */
+                gap: 25px;
+                padding: 30px;
+            }
+
+            header {
+                flex-direction: row; /* Desktop'ta yatay düzen */
+                justify-content: space-between;
+                align-items: center;
+                position: static; /* Sticky olmasın, daha düzgün hizalama */
+                margin-bottom: 0;
+                grid-column: 1 / -1; /* Tüm genişliği kaplasın */
+            }
+
+            header h1 {
+                text-align: left;
+                font-size: 2.2em;
+            }
+
+            .search-section {
+                width: auto;
+                max-width: 450px;
+            }
+
+            .main-content {
+                grid-column: 1 / 2; /* Sol tarafa yerleştir */
+            }
+
+            .sidebar {
+                grid-column: 2 / 3; /* Sağ tarafa yerleştir */
+            }
+
+            .card {
+                padding: 30px;
+            }
+
+            #map {
+                height: 400px; /* Desktop'ta daha büyük harita */
+            }
+
+            .current-details-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Hava Proqnozu</h1>
+        <div class="search-section">
+            <input type="text" id="cityInput" placeholder="Şəhər və ya ölkə adı daxil et">
+            <div id="searchResults" class="search-results"></div>
+            <button id="searchButton">Axtar</button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="main-content">
+            <div class="weather-info card" id="currentWeatherInfo">
+                <div class="loading-message message">Hava məlumatları yüklənir...</div>
+            </div>
+
+            <div class="forecast-section card" id="forecastSection">
+                <h2>Proqnoz</h2>
+                <div class="forecast-tabs">
+                    <button class="forecast-tab-button active" data-tab="hourly">Saatlıq</button>
+                    <button class="forecast-tab-button" data-tab="daily">Günlük</button>
+                </div>
+                <div id="hourlyForecastGrid" class="forecast-grid">
+                    <div class="empty-state">Saatlıq proqnoz mövcud deyil.</div>
+                </div>
+                <div id="dailyForecastGrid" class="forecast-grid" style="display: none;">
+                    <div class="empty-state">Günlük proqnoz mövcud deyil.</div>
+                </div>
+            </div>
+
+            <div class="map-section card">
+                <h2>Xəritədən seçin</h2>
+                <div id="map"></div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <div class="favorite-locations card">
+                <h2>Favorit Yerlərim</h2>
+                <ul id="favoriteLocationsList">
+                    <li class="empty-state">Favorit yer yoxdur.</li>
+                </ul>
+            </div>
+            <div class="card notification-settings" style="margin-top: 20px;">
+                <h2>Bildiriş Ayarları</h2>
+                <p style="margin-bottom: 15px; font-size: 0.9em; color: var(--light-text);">
+                    Yağış ehtimalı 70%-dən yuxarı olduqda bildirişlər al. (Səhifə aktiv olduqda işləyir)
+                </p>
+                <button id="requestNotificationPermission" class="add-favorite-btn" style="width: 100%; margin-top: 0;">
+                    Bildiriş icazəsi ver
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        // *** DİQQƏT: BURADAKİ API AÇARLARINI ÖZ AÇARLARINIZLA DƏYİŞDİRİN! ***
+        // Weatherbit.io API açarınız: https://www.weatherbit.io/account/dashboard
+        const WEATHERBIT_API_KEY = "b32b3930ba3241ddaa67e7cca66af5f4"; 
+        // WeatherAPI.com API açarınız (Axtarış üçün): https://www.weatherapi.com/my/
+        const WEATHERAPI_SEARCH_KEY = "0364c1047bc24ef7ae452127250308"; 
+
+        const translations = {
+            "no_internet_connection": "İnternet bağlantısı yoxdur: Zəhmət olmasa, bağlantınızı yoxlayın.",
+            "weather_update_success": "Hava məlumatları yeniləndi.",
+            "location_not_found": "Yer tapılmadı. Zəhmət olmasa, düzgün bir şəhər və ya ölkə adı daxil edin.",
+            "api_access_denied": "API girişi rədd edildi. Zəhmət olmasa, API açarınızı yoxlayın.",
+            "generic_error": "Xəta: Hava məlumatları hazırda əlçatan deyil. Zəhmət olmasa, yenidən cəhd edin.",
+            "enter_location_name": "Zəhmət olmasa, şəhər və ya ölkə adı daxil edin.",
+            "weather_alerts_title": "Hava Xəbərdarlıqları",
+            "no_alerts": "Aktiv hava xəbərdarlığı yoxdur.",
+            "add_to_favorites": "Favoritlərə əlavə et",
+            "remove_from_favorites": "Favoritlərdən çıxar",
+            "hourly_forecast_title": "Saatlıq Proqnoz",
+            "daily_forecast_title": "Günlük Proqnoz",
+            "humidity": "Rütubət",
+            "wind_speed": "Küləyin Sürəti",
+            "feels_like": "Hiss Olunan",
+            "pressure": "Təzyiq",
+            "visibility": "Görünürlük",
+            "uv_index": "UV İndeksi",
+            "sunrise": "Günəşin Çıxması",
+            "sunset": "Günəşin Batması",
+            "celsius": "Selsi",
+            "fahrenheit": "Farenheit",
+            "today": "Bugün",
+            "loading_weather_data": "Hava məlumatları yüklənir...",
+            "no_favorite_locations": "Favorit yer yoxdur.",
+            "local_time": "Yerli Vaxt",
+            "precipitation_probability": "Yağıntı Ehtimalı",
+            "notification_title": "Hava Bildirişi",
+            "rain_alert_message": "Yağış ehtimalı {pop}% təşkil edir. Çətir götürməyi unutmayın!",
+            "permission_granted": "İcazə verildi.",
+            "permission_denied": "İcazə rədd edildi.",
+            "permission_default": "İcazə tələb olunur.",
+            "fetching_location_name": "Yer adı alınır..."
+        };
+
+        const weatherDescriptions = {
+            "Clear Sky": "Açıq Səma",
+            "Few clouds": "Az Buludlu",
+            "Scattered clouds": "Dağınıq Buludlar",
+            "Broken clouds": "Qırıq Buludlar",
+            "Overcast clouds": "Buludlu",
+            "Light drizzle": "Yüngül Çiskin",
+            "Drizzle": "Çiskin",
+            "Heavy drizzle": "Güclü Çiskin",
+            "Light rain": "Yüngül Yağış",
+            "Rain": "Yağış",
+            "Moderate rain": "Mötədil Yağış",
+            "Heavy rain": "Güclü Yağış",
+            "Extreme rain": "Həddindən artıq Yağış",
+            "Very heavy rain": "Çox Güclü Yağış",
+            "Light shower rain": "Yüngül Qısa Yağış",
+            "Shower rain": "Qısa Yağış",
+            "Heavy shower rain": "Güclü Qısa Yağış",
+            "Light thunderstorm": "Yüngül Tufan",
+            "Thunderstorm": "Tufan",
+            "Heavy thunderstorm": "Güclü Tufan",
+            "Ragged thunderstorm": "Nizamsız Tufan",
+            "Thunderstorm with light rain": "Yüngül Yağışla Tufan",
+            "Thunderstorm with rain": "Yağışla Tufan",
+            "Thunderstorm with heavy rain": "Güclü Yağışla Tufan",
+            "Light snow": "Yüngül Qar",
+            "Snow": "Qar",
+            "Heavy snow": "Güclü Qar",
+            "Sleet": "Qarışıq Yağış",
+            "Shower snow": "Qısa Qar",
+            "Light rain and snow": "Yüngül Yağış və Qar",
+            "Rain and snow": "Yağış və Qar",
+            "Light shower sleet": "Yüngül Qısa Buzlu Yağış",
+            "Shower sleet": "Qısa Buzlu Yağış",
+            "Freezing rain": "Donan Yağış",
+            "Mist": "Duman",
+            "Smoke": "Tüstü",
+            "Haze": "Çən",
+            "Sand/dust whirls": "Qum/Toz Burulğanları",
+            "Fog": "Duman",
+            "Freezing Fog": "Donan Duman",
+            "Squalls": "Külək",
+            "Tornado": "Qasırğa",
+            "Hail": "Dolu",
+            "Light pollution": "Yüngül Çirklənmə",
+            "Drizzle rain": "Çiskinli Yağış",
+            "Shower drizzle": "Qısa Çiskin",
+            "Heavy shower drizzle": "Güclü Qısa Çiskin",
+            "Light shower snow": "Yüngül Qısa Qar",
+            "Heavy shower snow": "Güclü Qısa Qar",
+            "Light fog": "Yüngül Duman",
+            "Patches of fog": "Duman Ləkələri",
+            "Shallow fog": "Sığ Duman",
+            "Partial Fog": "Qismən Duman",
+            "Mostly clear": "Əsasən Açıq",
+            "Partly cloudy": "Qismən Buludlu",
+            "Clear": "Açıq",
+            "Cloudy": "Buludlu",
+            // Weatherbit API-dən gələn digər hava təsvirləri buraya əlavə oluna bilər
+        };
+
+        const weatherIconMap = {
+            // Weatherbit ikon kodlarını Wi ikon siniflərinə uyğunlaşdırın
+            // Weatherbit API ikon kodları: https://www.weatherbit.io/api/codes
+            "200": "wi-thunderstorm", "201": "wi-thunderstorm", "202": "wi-thunderstorm",
+            "230": "wi-storm-showers", "231": "wi-storm-showers", "232": "wi-storm-showers", "233": "wi-storm-showers",
+            "300": "wi-sprinkle", "301": "wi-sprinkle", "302": "wi-sprinkle",
+            "500": "wi-rain", "501": "wi-rain", "502": "wi-storm-showers", "511": "wi-rain-mix", "520": "wi-showers", "521": "wi-showers", "522": "wi-storm-showers",
+            "600": "wi-snow", "601": "wi-snow", "602": "wi-snow", "610": "wi-sleet", "611": "wi-sleet", "612": "wi-sleet", "621": "wi-snow", "622": "wi-snow", "623": "wi-snow",
+            "700": "wi-fog", "711": "wi-smoke", "721": "wi-day-haze", "731": "wi-dust", "741": "wi-fog", "751": "wi-sandstorm",
+            "800": "wi-day-sunny", // Clear sky
+            "801": "wi-day-cloudy", "802": "wi-day-cloudy", "803": "wi-cloudy", "804": "wi-cloudy",
+            "900": "wi-tornado",
+        };
+
+        const cityInput = document.getElementById('cityInput');
+        const searchButton = document.getElementById('searchButton');
+        const currentWeatherInfo = document.getElementById('currentWeatherInfo');
+        const hourlyForecastGrid = document.getElementById('hourlyForecastGrid');
+        const dailyForecastGrid = document.getElementById('dailyForecastGrid');
+        const favoriteLocationsList = document.getElementById('favoriteLocationsList');
+        const mapElement = document.getElementById('map');
+        const requestNotificationPermissionBtn = document.getElementById('requestNotificationPermission');
+        const searchResultsDiv = document.getElementById('searchResults');
+        const forecastTabButtons = document.querySelectorAll('.forecast-tab-button');
+
+        let map;
+        let currentMarker;
+        let notificationInterval;
+        let searchTimeout;
+        let favoriteLocations = [];
+        let currentLocationData = null; // Cari yerin məlumatlarını saxlamaq üçün
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initMap();
+            loadFavoriteLocations();
+            fetchWeatherData("Bakı, Azərbaycan"); // Səhifə yüklənəndə Bakının hava məlumatlarını göstər
+            checkNotificationPermissionStatus();
+        });
+
+        // Event Listeners
+        searchButton.addEventListener('click', () => {
+            const cityName = cityInput.value.trim();
+            if (cityName) {
+                fetchWeatherData(cityName);
+                searchResultsDiv.style.display = 'none'; // Axtarışdan sonra nəticələri gizlət
+                cityInput.value = ''; // Axtarışdan sonra inputu təmizlə
+            } else {
+                displayMessage(currentWeatherInfo, translations.enter_location_name, 'error');
+            }
+        });
+
+        cityInput.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            const query = cityInput.value.trim();
+            if (query.length > 2) { // Minimum 3 simvoldan sonra axtarış et
+                searchTimeout = setTimeout(() => searchCities(query), 300); // 300ms gecikmə ilə axtar
+            } else {
+                searchResultsDiv.innerHTML = '';
+                searchResultsDiv.style.display = 'none';
+            }
+        });
+
+        cityInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                searchButton.click(); // Enter düyməsinə basıldıqda axtarış düyməsinə kliklə
+            }
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!searchResultsDiv.contains(event.target) && event.target !== cityInput) {
+                searchResultsDiv.style.display = 'none'; // Axtarış nəticələrindən kənara kliklədikdə gizlət
+            }
+        });
+
+        requestNotificationPermissionBtn.addEventListener('click', requestNotificationPermission);
+
+        forecastTabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const tab = button.dataset.tab;
+                switchForecastTab(tab);
+            });
+        });
+
+
+        // --- Funksiyalar ---
+
+        function initMap() {
+            if (map) {
+                map.remove(); // Əgər xəritə artıq mövcuddursa, onu sil
+            }
+            map = L.map('map').setView([40.3953, 49.8671], 9); // Default olaraq Bakı, Azərbaycan
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            // Xəritədə klik hadisəsini dinlə
+            map.on('click', onMapClick);
+        }
+
+        async function onMapClick(e) {
+            const { lat, lng } = e.latlng;
+            console.log(`Xəritədə klikləndi: Lat: ${lat}, Lng: ${lng}`);
+            
+            displayMessage(currentWeatherInfo, translations.fetching_location_name, 'loading');
+            try {
+                const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`Nominatim xətası: ${response.statusText}`);
+                }
+                const data = await response.json();
+                let locationName = "Bilinməyən Yer";
+                if (data.address) {
+                    // Şəhər və ölkə adını daha dəqiq almağa çalışın
+                    locationName = data.address.city || data.address.town || data.address.village || data.address.hamlet || data.address.county || data.address.state || data.address.country;
+                    if (data.address.country && !locationName.includes(data.address.country)) {
+                        locationName += `, ${data.address.country}`;
+                    }
+                }
+                console.log("Nominatim cavabı:", data);
+                console.log("Alınan yer adı:", locationName);
+                fetchWeatherDataByCoordinates(lat, lng, locationName);
+            } catch (error) {
+                console.error("Yer adı alınarkən xəta baş verdi:", error);
+                displayMessage(currentWeatherInfo, translations.generic_error, 'error');
+                fetchWeatherDataByCoordinates(lat, lng, "Naməlum Yer (Xəritədə Seçildi)"); // Ad alınmasa da hava məlumatlarını göstər
+            }
+        }
+
+        function displayMessage(element, message, type = 'loading') {
+            // Elementin içini təmizlə və mesajı yerləşdir
+            element.innerHTML = `<div class="message ${type}-message">${message}</div>`;
+        }
+
+
+        async function fetchWeatherData(locationName) {
+            displayMessage(currentWeatherInfo, translations.loading_weather_data, 'loading');
+            try {
+                // WeatherAPI.com ilə koordinatları almaq
+                const geoResponse = await fetch(`https://api.weatherapi.com/v1/search.json?key=${WEATHERAPI_SEARCH_KEY}&q=${encodeURIComponent(locationName)}`);
+                if (!geoResponse.ok) {
+                    if (geoResponse.status === 403) throw new Error(translations.api_access_denied);
+                    throw new Error(`Coğrafi məlumat xətası: ${geoResponse.statusText} (${geoResponse.status})`);
+                }
+                const geoData = await geoResponse.json();
+
+                if (geoData && geoData.length > 0) {
+                    const { lat, lon, name, country } = geoData[0];
+                    const fullLocationName = `${name}, ${country}`;
+                    fetchWeatherDataByCoordinates(lat, lon, fullLocationName);
+                } else {
+                    displayMessage(currentWeatherInfo, translations.location_not_found, 'error');
+                }
+            } catch (error) {
+                console.error("Hava məlumatları alınarkən xəta baş verdi:", error);
+                displayMessage(currentWeatherInfo, error.message, 'error');
+            }
+        }
+
+        async function fetchWeatherDataByCoordinates(lat, lon, locationName = "") {
+            // Hava məlumatlarını yükləməyə başlamazdan əvvəl əvvəlki mesajları sil
+            currentWeatherInfo.innerHTML = ''; 
+            displayMessage(currentWeatherInfo, translations.loading_weather_data, 'loading');
+
+            try {
+                const weatherbitCurrentUrl = `https://api.weatherbit.io/v2.0/current?lat=${lat}&lon=${lon}&key=${WEATHERBIT_API_KEY}&lang=az`;
+                const weatherbitHourlyUrl = `https://api.weatherbit.io/v2.0/forecast/hourly?lat=${lat}&lon=${lon}&key=${WEATHERBIT_API_KEY}&hours=24&lang=az`;
+                const weatherbitDailyUrl = `https://api.weatherbit.io/v2.0/forecast/daily?lat=${lat}&lon=${lon}&key=${WEATHERBIT_API_KEY}&days=7&lang=az`;
+                const weatherbitAlertsUrl = `https://api.weatherbit.io/v2.0/alerts?lat=${lat}&lon=${lon}&key=${WEATHERBIT_API_KEY}&lang=az`;
+
+                const [currentResponse, hourlyResponse, dailyResponse, alertsResponse] = await Promise.all([
+                    fetch(weatherbitCurrentUrl),
+                    fetch(weatherbitHourlyUrl),
+                    fetch(weatherbitDailyUrl),
+                    fetch(weatherbitAlertsUrl)
+                ]);
+
+                if (!currentResponse.ok || !hourlyResponse.ok || !dailyResponse.ok || !alertsResponse.ok) {
+                    if (currentResponse.status === 403 || hourlyResponse.status === 403 || dailyResponse.status === 403 || alertsResponse.status === 403) {
+                        throw new Error(translations.api_access_denied);
+                    }
+                    throw new Error(translations.generic_error);
+                }
+
+                const currentData = await currentResponse.json();
+                const hourlyData = await hourlyResponse.json();
+                const dailyData = await dailyResponse.json();
+                const alertsData = await alertsResponse.json();
+
+                currentLocationData = {
+                    lat: lat,
+                    lon: lon,
+                    name: locationName || (currentData.data[0].city_name + (currentData.data[0].country_code ? `, ${currentData.data[0].country_code}` : ''))
+                };
+
+                // Məlumatlar uğurla alındıqdan sonra, div-i təmizləyib yeni məlumatları göstər
+                currentWeatherInfo.innerHTML = ''; // Əvvəlki mesajı təmizlə
+                displayCurrentWeather(currentData.data[0], currentLocationData);
+                displayHourlyForecast(hourlyData.data);
+                displayDailyForecast(dailyData.data);
+                displayWeatherAlerts(alertsData.alerts);
+                updateMapLocation(lat, lon, currentLocationData.name);
+                // Mesajı ən sonda göstəririk ki, digər elementlər yükləndikdən sonra üstə çıxmasın
+                // displayMessage(currentWeatherInfo, translations.weather_update_success, 'success'); 
+                checkRainNotification(hourlyData.data);
+
+            } catch (error) {
+                console.error("Hava məlumatlarını çəkərkən xəta baş verdi:", error);
+                displayMessage(currentWeatherInfo, error.message, 'error');
+            }
+        }
+
+        function displayCurrentWeather(data, locationData) { 
+            if (!data || !locationData || !locationData.name) { 
+                displayMessage(currentWeatherInfo, translations.generic_error, 'error');
+                return;
+            }
+
+            const localTime = new Date(data.ts * 1000).toLocaleString('az-AZ', {
+                weekday: 'long', hour: '2-digit', minute: '2-digit', hour12: false
+            });
+
+            const weatherIconClass = weatherIconMap[data.weather.code] || "wi-na";
+            const weatherDescription = weatherDescriptions[data.weather.description] || data.weather.description;
+
+            const isFavorite = favoriteLocations.some(fav => fav.name === locationData.name); 
+            const favoriteButtonText = isFavorite ? translations.remove_from_favorites : translations.add_to_favorites;
+            const favoriteButtonClass = isFavorite ? 'remove-favorite-btn' : 'add-favorite-btn';
+
+            // Buradakı innerHTML atamasını birbaşa currentWeatherInfo elementinə edirik.
+            // Bu, onun içindəki "loading message"i siləcək və əsas məlumatları yerləşdirəcək.
+            currentWeatherInfo.innerHTML = `
+                <div class="current-weather-main">
+                    <h3 class="location-name">${locationData.name}</h3>
+                    <p class="local-time">${translations.local_time}: ${localTime}</p>
+                    <div class="temperature">
+                        <i class="wi ${weatherIconClass}"></i>
+                        <span>${Math.round(data.temp)}°C</span>
+                    </div>
+                    <p class="description">${weatherDescription}</p>
+                    <button id="addFavoriteBtn" class="${favoriteButtonClass}">${favoriteButtonText}</button>
+                </div>
+
+                <div class="current-details-grid">
+                    <div class="detail-item">
+                        <p>${translations.feels_like}</p>
+                        <span>${Math.round(data.app_temp)}°C</span>
+                    </div>
+                    <div class="detail-item">
+                        <p>${translations.humidity}</p>
+                        <span>${data.rh}%</span>
+                    </div>
+                    <div class="detail-item">
+                        <p>${translations.wind_speed}</p>
+                        <span>${Math.round(data.wind_spd * 3.6)} km/h</span>
+                    </div>
+                    <div class="detail-item">
+                        <p>${translations.pressure}</p>
+                        <span>${Math.round(data.pres)} hPa</span>
+                    </div>
+                    <div class="detail-item">
+                        <p>${translations.visibility}</p>
+                        <span>${data.vis} km</span>
+                    </div>
+                    <div class="detail-item">
+                        <p>${translations.uv_index}</p>
+                        <span>${data.uv}</span>
+                    </div>
+                    <div class="detail-item">
+                        <p>${translations.sunrise}</p>
+                        <span>${formatTime(data.sunrise)}</span>
+                    </div>
+                    <div class="detail-item">
+                        <p>${translations.sunset}</p>
+                        <span>${formatTime(data.sunset)}</span>
+                    </div>
+                </div>
+                <div id="weatherAlertsContainer"></div>
+            `;
+
+            // Favorit düyməsinin klik hadisəsini buraya əlavə edirik
+            document.getElementById('addFavoriteBtn').addEventListener('click', toggleFavorite);
+        }
+
+        function displayHourlyForecast(data) {
+            hourlyForecastGrid.innerHTML = ''; // Əvvəlki proqnozları təmizlə
+            if (!data || data.length === 0) {
+                hourlyForecastGrid.innerHTML = `<div class="empty-state">Saatlıq proqnoz mövcud deyil.</div>`;
+                return;
+            }
+
+            // Növbəti 24 saat üçün (cari saatdan başlayaraq)
+            const now = new Date();
+            const filteredData = data.filter(item => {
+                const itemTime = new Date(item.ts * 1000);
+                return itemTime >= now;
+            }).slice(0, 24); // Yalnız növbəti 24 saat
+
+            filteredData.forEach(hour => {
+                const time = new Date(hour.ts * 1000).toLocaleTimeString('az-AZ', { hour: '2-digit', minute: '2-digit', hour12: false });
+                const iconClass = weatherIconMap[hour.weather.code] || "wi-na";
+                const pop = Math.round(hour.pop); // Yağıntı ehtimalı
+                hourlyForecastGrid.innerHTML += `
+                    <div class="forecast-item">
+                        <p>${time}</p>
+                        <i class="wi ${iconClass} icon"></i>
+                        <p class="temp">${Math.round(hour.temp)}°C</p>
+                        <p class="pop">${translations.precipitation_probability}: ${pop}%</p>
+                    </div>
+                `;
+            });
+        }
+
+        function displayDailyForecast(data) {
+            dailyForecastGrid.innerHTML = ''; // Əvvəlki proqnozları təmizlə
+            if (!data || data.length === 0) {
+                dailyForecastGrid.innerHTML = `<div class="empty-state">Günlük proqnoz mövcud deyil.</div>`;
+                return;
+            }
+
+            // Növbəti 7 gün üçün (Bugün daxil olmaqla)
+            data.slice(0, 7).forEach((day, index) => {
+                const date = new Date(day.ts * 1000);
+                const dayName = index === 0 ? translations.today : date.toLocaleDateString('az-AZ', { weekday: 'short' });
+                const iconClass = weatherIconMap[day.weather.code] || "wi-na";
+                const description = weatherDescriptions[day.weather.description] || day.weather.description;
+                const pop = Math.round(day.pop); // Yağıntı ehtimalı
+
+                dailyForecastGrid.innerHTML += `
+                    <div class="forecast-item">
+                        <p>${dayName}</p>
+                        <i class="wi ${iconClass} icon"></i>
+                        <p class="temp">
+                            <span>${Math.round(day.high_temp)}°C</span> / 
+                            <span>${Math.round(day.low_temp)}°C</span>
+                        </p>
+                        <p>${description}</p>
+                        <p class="pop">${translations.precipitation_probability}: ${pop}%</p>
+                    </div>
+                `;
+            });
+        }
+
+        function displayWeatherAlerts(alerts) {
+            const alertsContainer = document.getElementById('weatherAlertsContainer');
+            if (!alertsContainer) return;
+
+            if (alerts && alerts.length > 0) {
+                let alertsHtml = `<div class="alerts"><h3>${translations.weather_alerts_title}</h3><ul>`;
+                alerts.forEach(alert => {
+                    alertsHtml += `<li><strong>${alert.title}</strong>: ${alert.description}</li>`;
+                });
+                alertsHtml += `</ul></div>`;
+                alertsContainer.innerHTML = alertsHtml;
+            } else {
+                alertsContainer.innerHTML = `<div class="alerts no-alerts"><p>${translations.no_alerts}</p></div>`;
+            }
+        }
+
+        function updateMapLocation(lat, lon, name) {
+            if (currentMarker) {
+                map.removeLayer(currentMarker);
+            }
+            map.setView([lat, lon], 9); // Xəritəni yeni yerə fokusla
+            currentMarker = L.marker([lat, lon]).addTo(map)
+                .bindPopup(`<b>${name}</b>`).openPopup();
+        }
+
+        function loadFavoriteLocations() {
+            const storedFavorites = localStorage.getItem('favoriteLocations');
+            if (storedFavorites) {
+                favoriteLocations = JSON.parse(storedFavorites);
+            }
+            renderFavoriteLocations();
+        }
+
+        function saveFavoriteLocations() {
+            localStorage.setItem('favoriteLocations', JSON.stringify(favoriteLocations));
+        }
+
+        function renderFavoriteLocations() {
+            favoriteLocationsList.innerHTML = '';
+            if (favoriteLocations.length === 0) {
+                favoriteLocationsList.innerHTML = `<li class="empty-state">${translations.no_favorite_locations}</li>`;
+                return;
+            }
+
+            favoriteLocations.forEach((location, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span>${location.name}</span>
+                    <button data-index="${index}">Sil</button>
+                `;
+                li.querySelector('span').addEventListener('click', () => {
+                    fetchWeatherDataByCoordinates(location.lat, location.lon, location.name);
+                });
+                li.querySelector('button').addEventListener('click', (event) => {
+                    event.stopPropagation(); // Ümumi li klikləməsini dayandır
+                    removeFavoriteLocation(event.target.dataset.index);
+                });
+                favoriteLocationsList.appendChild(li);
+            });
+        }
+
+        function toggleFavorite() {
+            if (!currentLocationData) return;
+
+            const isFavorite = favoriteLocations.some(fav => fav.name === currentLocationData.name);
+            if (isFavorite) {
+                favoriteLocations = favoriteLocations.filter(fav => fav.name !== currentLocationData.name);
+            } else {
+                favoriteLocations.push(currentLocationData);
+            }
+            saveFavoriteLocations();
+            renderFavoriteLocations();
+            // Favorit düyməsinin mətnini yenilə
+            const addFavoriteBtn = document.getElementById('addFavoriteBtn');
+            if (addFavoriteBtn) {
+                addFavoriteBtn.textContent = isFavorite ? translations.add_to_favorites : translations.remove_from_favorites;
+                addFavoriteBtn.classList.toggle('add-favorite-btn', isFavorite);
+                addFavoriteBtn.classList.toggle('remove-favorite-btn', !isFavorite);
+            }
+        }
+
+        function removeFavoriteLocation(index) {
+            favoriteLocations.splice(index, 1);
+            saveFavoriteLocations();
+            renderFavoriteLocations();
+            // Əgər cari yer favoritlərdən silinibsə, düyməni yenilə
+            if (currentLocationData && !favoriteLocations.some(fav => fav.name === currentLocationData.name)) {
+                const addFavoriteBtn = document.getElementById('addFavoriteBtn');
+                if (addFavoriteBtn) {
+                    addFavoriteBtn.textContent = translations.add_to_favorites;
+                    addFavoriteBtn.classList.remove('remove-favorite-btn');
+                    addFavoriteBtn.classList.add('add-favorite-btn');
+                }
+            }
+        }
+
+        async function searchCities(query) {
+            try {
+                const response = await fetch(`https://api.weatherapi.com/v1/search.json?key=${WEATHERAPI_SEARCH_KEY}&q=${encodeURIComponent(query)}`);
+                if (!response.ok) {
+                    throw new Error(`Axtarış xətası: ${response.statusText}`);
+                }
+                const data = await response.json();
+                
+                searchResultsDiv.innerHTML = '';
+                if (data.length > 0) {
+                    const ul = document.createElement('ul');
+                    data.forEach(result => {
+                        const li = document.createElement('li');
+                        li.textContent = `${result.name}, ${result.country}`;
+                        li.addEventListener('click', () => {
+                            cityInput.value = `${result.name}, ${result.country}`; // Inputu doldur
+                            searchResultsDiv.style.display = 'none'; // Nəticələri gizlət
+                            fetchWeatherDataByCoordinates(result.lat, result.lon, `${result.name}, ${result.country}`);
+                        });
+                        ul.appendChild(li);
+                    });
+                    searchResultsDiv.appendChild(ul);
+                    searchResultsDiv.style.display = 'block';
+                } else {
+                    searchResultsDiv.style.display = 'none';
+                }
+            } catch (error) {
+                console.error("Şəhər axtarışı zamanı xəta:", error);
+                searchResultsDiv.innerHTML = '';
+                searchResultsDiv.style.display = 'none';
+            }
+        }
+
+        function switchForecastTab(tab) {
+            forecastTabButtons.forEach(button => {
+                button.classList.remove('active');
+            });
+            document.querySelector(`.forecast-tab-button[data-tab="${tab}"]`).classList.add('active');
+
+            if (tab === 'hourly') {
+                hourlyForecastGrid.style.display = 'grid';
+                dailyForecastGrid.style.display = 'none';
+            } else {
+                hourlyForecastGrid.style.display = 'none';
+                dailyForecastGrid.style.display = 'grid';
+            }
+        }
+
+        function formatTime(timestamp) {
+            const date = new Date(timestamp * 1000);
+            return date.toLocaleTimeString('az-AZ', { hour: '2-digit', minute: '2-digit', hour12: false });
+        }
+
+        // Bildiriş funksiyaları
+        function checkNotificationPermissionStatus() {
+            if (!("Notification" in window)) {
+                console.warn("Bu brauzer bildirişləri dəstəkləmir.");
+                requestNotificationPermissionBtn.disabled = true;
+                requestNotificationPermissionBtn.textContent = "Bildirişlər dəstəklənmir";
+                return;
+            }
+
+            if (Notification.permission === "granted") {
+                requestNotificationPermissionBtn.textContent = translations.permission_granted;
+                requestNotificationPermissionBtn.disabled = true;
+            } else if (Notification.permission === "denied") {
+                requestNotificationPermissionBtn.textContent = translations.permission_denied;
+                requestNotificationPermissionBtn.disabled = true;
+            } else {
+                requestNotificationPermissionBtn.textContent = translations.permission_default;
+                requestNotificationPermissionBtn.disabled = false;
+            }
+        }
+
+        function requestNotificationPermission() {
+            if ("Notification" in window) {
+                Notification.requestPermission().then(permission => {
+                    checkNotificationPermissionStatus();
+                    if (permission === "granted") {
+                        console.log("Bildiriş icazəsi verildi.");
+                    } else {
+                        console.warn("Bildiriş icazəsi rədd edildi.");
+                    }
+                });
+            }
+        }
+
+        function sendRainNotification(pop) {
+            if (Notification.permission === "granted") {
+                new Notification(translations.notification_title, {
+                    body: translations.rain_alert_message.replace('{pop}', pop),
+                    icon: 'https://www.weatherbit.io/static/img/icons/r01d.png' // Yağış ikonu
+                });
+            }
+        }
+
+        function checkRainNotification(hourlyData) {
+            if (notificationInterval) {
+                clearInterval(notificationInterval); // Əvvəlki intervalı təmizlə
+            }
+
+            if (!hourlyData || hourlyData.length === 0) return;
+
+            // Hər saat başı yoxla
+            notificationInterval = setInterval(() => {
+                const now = new Date();
+                // Cari saat və ya növbəti saat üçün yağıntı ehtimalını yoxla
+                const relevantHour = hourlyData.find(item => {
+                    const itemDate = new Date(item.ts * 1000);
+                    // İndiki saatdan ən çox 1 saat sonra olan proqnozu götür
+                    return itemDate.getHours() === now.getHours() || itemDate.getHours() === (now.getHours() + 1) % 24;
+                });
+
+                if (relevantHour && relevantHour.pop >= 70) {
+                    sendRainNotification(relevantHour.pop);
+                }
+            }, 3600000); // Hər saat (3600000 ms)
+        }
+    </script>
+</body>
+</html>
