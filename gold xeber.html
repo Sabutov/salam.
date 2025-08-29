@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gold Xəbər — Admin + GitHub</title>
+<style>
+body{font-family:sans-serif;background:#0d0e12;color:#e9edf3;margin:0;padding:0;}
+header{padding:12px;background:#14161d;display:flex;justify-content:space-between;align-items:center;}
+button{cursor:pointer;padding:6px 12px;border:none;border-radius:6px;background:#f1c40f;color:#000;font-weight:600;}
+#adminPanel{position:fixed;right:20px;bottom:20px;padding:16px;background:#14161d;border:1px solid #f1c40f;border-radius:12px;display:none;width:300px;}
+#adminPanel input,#adminPanel textarea,select{width:100%;margin:6px 0;padding:6px;border-radius:6px;border:1px solid #888;background:#0d0e12;color:#e9edf3;}
+.card{background:#14161d;border:1px solid #1f2330;border-radius:12px;padding:12px;margin:12px;}
+#cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div>Gold Xəbər</div>
+  <button id="adminBtn">Admin Panel</button>
+</header>
+
+<div id="cards"></div>
+
+<!-- Admin Panel -->
+<div id="adminPanel">
+  <h3>Yeni Xəbər Əlavə Et</h3>
+  <input type="text" id="newsTitle" placeholder="Başlıq">
+  <select id="newsCategory">
+    <option value="premyer-liqa">Premyer Liqa</option>
+    <option value="çempionlar-liqası">Çempionlar Liqası</option>
+    <option value="transfer">Transferlər</option>
+    <option value="millilər">Millilər</option>
+    <option value="qarabağ">Qarabağ FK</option>
+  </select>
+  <input type="text" id="newsImg" placeholder="Şəkil URL">
+  <input type="text" id="newsExcerpt" placeholder="Qısa mətn">
+  <textarea id="newsBody" placeholder="Ətraflı mətn"></textarea>
+  <button id="addNewsBtn">Əlavə et</button>
+</div>
+
+<script>
+// ==== Demo state ====
+let NEWS = [
+  {id:1,title:'Test Xəbər',category:'premyer-liqa',img:'https://picsum.photos/seed/1/400/200',excerpt:'Qısa',body:'Tam mətn'}
+];
+
+// ==== Render funksiyası ====
+function renderList(){
+  const container=document.getElementById('cards');
+  container.innerHTML='';
+  NEWS.forEach(n=>{
+    const c=document.createElement('div');
+    c.className='card';
+    c.innerHTML=`<h4>${n.title}</h4><p>${n.excerpt}</p><img src="${n.img}" style="width:100%;margin-top:6px;"><p>${n.body}</p><small>${n.category}</small>`;
+    container.appendChild(c);
+  });
+}
+
+// ==== Admin login ====
+const adminPassword='1234';
+document.addEventListener('DOMContentLoaded',()=>{
+  const pass=prompt('Admin parolunu daxil edin:');
+  if(pass===adminPassword) document.getElementById('adminPanel').style.display='block';
+  else document.getElementById('adminBtn').style.display='none';
+  renderList();
+});
+
+// ==== Admin panel toggle ====
+document.getElementById('adminBtn').onclick=()=>{
+  const p=document.getElementById('adminPanel');
+  p.style.display=p.style.display==='none'?'block':'none';
+}
+
+// ==== Yeni xəbər əlavə et ====
+document.getElementById('addNewsBtn').onclick=async()=>{
+  const newItem={
+    id:Date.now(),
+    title:document.getElementById('newsTitle').value,
+    category:document.getElementById('newsCategory').value,
+    img:document.getElementById('newsImg').value,
+    excerpt:document.getElementById('newsExcerpt').value,
+    body:document.getElementById('newsBody').value
+  };
+  NEWS.push(newItem);
+  renderList();
+  await pushToGitHub(newItem);
+  alert('Xəbər əlavə olundu və GitHub-da yeniləndi!');
+  document.getElementById('newsTitle').value='';
+  document.getElementById('newsImg').value='';
+  document.getElementById('newsExcerpt').value='';
+  document.getElementById('newsBody').value='';
+}
+
+// ==== GitHub API funksiyası ====
+async function pushToGitHub(newItem){
+  const token = "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"; // <=== buraya token
+  const repo = "istifadeci/repo";      // <=== buraya repo
+  const path = "news.json";            // <=== buraya fayl yolu
+  try{
+    // Mövcud faylı götür
+    const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`);
+    const data = await res.json();
+    const content = JSON.parse(atob(data.content));
+
+    // Yeni xəbəri əlavə et
+    content.push(newItem);
+
+    // GitHub-a göndər
+    await fetch(`https://api.github.com/repos/${repo}/contents/${path}`,{
+      method:'PUT',
+      headers:{
+        "Authorization":`Bearer ${token}`,
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        message:"Yeni xəbər əlavə olundu",
+        content:btoa(JSON.stringify(content)),
+        sha:data.sha
+      })
+    });
+  }catch(e){console.error(e);}
+}
+</script>
+
+</body>
+</html>
