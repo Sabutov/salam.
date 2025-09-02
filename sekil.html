@@ -1,391 +1,363 @@
-\<!DOCTYPE html>
+<!doctype html>
 <html lang="az">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Elektron Lövhə</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Şəkil Ölçüsü Dəyişdirici</title>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      overflow: hidden;
+    :root{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --accent:#0f172a;
+      --muted:#6b7280;
+      --radius:14px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
     }
-
-    .container {
-      max-width: 1000px;
-      margin: auto;
-      padding: 20px;
-      text-align: center;
-    }
-
-    canvas {
-      border: 2px solid #ccc;
-      border-radius: 10px;
-      width: 100%;
-      height: 400px;
-      touch-action: none;
-      background-color: white;
-    }
-
-    input, select, button {
-      margin-top: 10px;
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-
-    #add-text-btn, #save-btn {
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    .hamburger, .tools-toggle {
-      position: absolute;
-      top: 10px;
-      width: 30px;
-      height: 30px;
-      z-index: 1000;
-      cursor: pointer;
-    }
-
-    .hamburger {
-      left: 10px;
-    }
-
-    .tools-toggle {
-      right: 10px;
-    }
-
-    .hamburger div, .tools-toggle div {
-      width: 30px;
-      height: 4px;
-      margin: 5px 0;
-      background-color: #333;
-    }
-
-    #settings-panel, #tools-panel {
-      position: fixed;
-      top: 0;
-      background-color: #fff;
-      height: 100%;
-      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
-      z-index: 999;
-      padding: 20px;
-      transition: transform 0.3s ease;
-    }
-
-    #settings-panel {
-      left: 0;
-      width: 260px;
-      transform: translateX(-100%);
-    }
-
-    #settings-panel.show {
-      transform: translateX(0);
-    }
-
-    #tools-panel {
-      right: 0;
-      width: 240px;
-      transform: translateX(100%);
-    }
-
-    #tools-panel.show {
-      transform: translateX(0);
-    }
-
-    .draggable-text {
-      position: absolute;
-      cursor: move;
-      user-select: none;
-      font-weight: bold;
-    }
-
-    .button-container {
-      margin-top: 20px;
-    }
-
-    .action-btn {
-      margin: 5px;
-      padding: 10px;
-      background-color: #2196F3;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .action-btn:hover {
-      background-color: #0b7dda;
-    }
-
-    #tools-panel h3 {
-      font-size: 18px;
-      margin-bottom: 20px;
-      color: #333;
-      text-align: center;
-    }
-
-    .tools-panel-section {
-      margin-bottom: 20px;
-    }
-
-    .tools-panel-section label {
-      display: block;
-      font-size: 16px;
-      color: #333;
-      margin-bottom: 5px;
-    }
-
-    .tools-panel-section select, .tools-panel-section input {
-      width: 100%;
-      padding: 8px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-
-    .tools-panel-section button {
-      width: 100%;
-      padding: 12px;
-      border-radius: 5px;
-      background-color: #f44336;
-      color: white;
-      border: none;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-
-    .tools-panel-section button:hover {
-      background-color: #e57373;
-    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,var(--bg),#fff);color:var(--accent);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px}
+    .container{width:100%;max-width:980px}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    h1{font-size:20px;margin:0}
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:0 6px 20px rgba(12,16,26,0.06);padding:18px;border:1px solid rgba(15,23,42,0.04)}
+    .drop{border:2px dashed rgba(15,23,42,0.08);padding:20px;border-radius:12px;display:grid;gap:12px}
+    .center{display:flex;align-items:center;justify-content:center}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .col{flex:1;min-width:240px}
+    .preview{background:#f9fafb;border:1px solid rgba(15,23,42,0.04);border-radius:10px;padding:12px;max-height:420px;overflow:auto}
+    img.preview-img{max-width:100%;height:auto;display:block;margin:0 auto}
+    label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+    input[type="number"], select, input[type="text"]{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(15,23,42,0.06);font-size:14px}
+    .btn{padding:10px 14px;border-radius:10px;border:0;background:var(--accent);color:#fff;cursor:pointer}
+    .btn.ghost{background:transparent;color:var(--accent);border:1px solid rgba(15,23,42,0.06)}
+    .small{font-size:13px;color:var(--muted)}
+    .controls{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .full{grid-column:1/3}
+    .flex{display:flex;gap:8px;align-items:center}
+    input[type="range"]{width:100%}
+    footer{margin-top:14px;text-align:center;color:var(--muted);font-size:13px}
+    @media (max-width:720px){.controls{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
-  <!-- Hamburger menyusu -->
-  <div class="hamburger" id="hamburger"><div></div><div></div><div></div></div>
-
-  <!-- Alətlər paneli düyməsi -->
-  <div class="tools-toggle" id="tools-toggle"><div></div><div></div><div></div></div>
-
-  <!-- Ayarlar paneli -->
-  <div id="settings-panel">
-    <h3>Ayarlar</h3>
-    <label for="language-select">Dil seçin:</label>
-    <select id="language-select">
-      <option value="az">Azərbaycan</option>
-      <option value="en">English</option>
-      <option value="tr">Türkçe</option>
-    </select>
-  </div>
-
-  <!-- Alətlər paneli -->
-  <div id="tools-panel">
-    <h3>Alətlər</h3>
-
-    <div class="tools-panel-section">
-      <label id="brush-label" for="brush-size">Fırça qalınlığı:</label>
-      <select id="brush-size">
-        <option value="2">İncə</option>
-        <option value="5">Orta</option>
-        <option value="10">Qalın</option>
-      </select>
-    </div>
-
-    <div class="tools-panel-section">
-      <label id="font-label" for="font-size">Yazı ölçüsü:</label>
-      <select id="font-size">
-        <option value="14">Kiçik</option>
-        <option value="20" selected>Orta</option>
-        <option value="30">Böyük</option>
-      </select>
-    </div>
-
-    <div class="tools-panel-section">
-      <label id="color-label" for="color-picker-palette">Palitra:</label>
-      <input type="color" id="color-picker-palette" value="#000000">
-    </div>
-
-    <div class="tools-panel-section">
-      <button class="action-btn" id="eraser-btn">Silgi</button>
-      <button class="action-btn" id="undo-btn">Geri Al</button>
-      <button class="action-btn" id="clear-btn">Təmizlə</button>
-      <button class="action-btn" id="save-btn">Yüklə</button>
-    </div>
-  </div>
-
   <div class="container">
-    <h1 id="header-title">Elektron Lövhə</h1>
-    <canvas id="board"></canvas>
-    <div>
-      <input type="text" id="text-input" placeholder="Lövhəyə yazın...">
-      <button id="add-text-btn">Daxil et</button>
+    <header>
+      <h1>Şəkil Ölçüsü Dəyişdirici</h1>
+      <div class="small">Sadə və sürətli — faylı seç, ölçünü təyin et, yüklə.</div>
+    </header>
+
+    <div class="card drop" id="dropzone">
+      <div id="dropContent" class="center" style="flex-direction:column;gap:8px;padding:18px">
+        <div style="font-size:48px">📷</div>
+        <div style="text-align:center">
+          <div style="font-weight:600">Şəkli bura atın və ya seçin</div>
+          <div class="small" style="margin-top:6px">PNG, JPG, WEBP və s. dəstəklənir</div>
+        </div>
+        <div class="row center" style="margin-top:6px">
+          <button class="btn" id="chooseBtn">Fayl seç</button>
+          <button class="btn ghost" id="clearBtn">Sıfırla</button>
+        </div>
+        <input type="file" id="fileInput" accept="image/*" style="display:none">
+      </div>
+
+      <div id="editingArea" style="display:none;gap:14px">
+        <div class="row">
+          <div class="col preview card">
+            <div class="small" id="origInfo">Orijinal: —</div>
+            <div style="margin-top:10px" class="center">
+              <img id="imgPreview" class="preview-img" alt="preview">
+            </div>
+          </div>
+
+          <div class="col card" style="padding:12px">
+            <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <div class="small">Hədəf ölçü</div>
+              <div class="small" id="targetInfo">— × — px</div>
+            </div>
+
+            <div class="controls">
+              <div>
+                <label>Fayl adı</label>
+                <input type="text" id="fileName" value="resized">
+              </div>
+
+              <div>
+                <label>Ölçü vahidi</label>
+                <select id="unit">
+                  <option value="px">Piksel (px)</option>
+                  <option value="%">Faiz (%)</option>
+                </select>
+              </div>
+
+              <div>
+                <label>En (<span id="unitLabelW">px</span>)</label>
+                <input type="number" id="widthInput" min="1" value="800">
+              </div>
+
+              <div>
+                <label>Hündürlük (<span id="unitLabelH">px</span>)</label>
+                <input type="number" id="heightInput" min="1" value="600">
+              </div>
+
+              <div style="display:flex;align-items:center;gap:8px">
+                <input type="checkbox" id="lockRatio" checked>
+                <label style="margin:0">Nisbəti qoru</label>
+              </div>
+
+              <div>
+                <label>Format</label>
+                <select id="format">
+                  <option value="png">PNG (şəffaf)</option>
+                  <option value="jpeg">JPG / JPEG</option>
+                  <option value="webp">WEBP</option>
+                </select>
+              </div>
+
+              <div>
+                <label>Keyfiyyət (JPEG/WEBP)</label>
+                <input type="range" id="quality" min="1" max="100" value="92">
+                <div class="small" style="text-align:right" id="qualityVal">92%</div>
+              </div>
+
+              <div class="full">
+                <label>Arxa fon rəngi (JPEG üçün və ya şəffaflıq yoxdur)</label>
+                <input type="color" id="bgColor" value="#ffffff" style="height:44px;padding:4px">
+              </div>
+
+            </div>
+
+            <div style="margin-top:12px;display:flex;gap:10px;align-items:center;justify-content:space-between">
+              <div class="small">Hədəf ölçü: <strong id="finalSize">— × — px</strong></div>
+              <div style="display:flex;gap:8px">
+                <button class="btn ghost" id="previewBtn">Canvas önizlə</button>
+                <button class="btn" id="downloadBtn">Yüklə</button>
+              </div>
+            </div>
+
+            <canvas id="canvas" style="display:none;margin-top:10px;width:100%"></canvas>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <footer class="small" style="margin-top:12px">
+      Hazırlandı — Şəkil ölçüsü dəyişdirən sadə veb tətbiq.
+    </footer>
   </div>
 
   <script>
-    const canvas = document.getElementById("board");
-    const ctx = canvas.getContext("2d");
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+    // Elementlər
+    const dropzone = document.getElementById('dropzone');
+    const dropContent = document.getElementById('dropContent');
+    const fileInput = document.getElementById('fileInput');
+    const chooseBtn = document.getElementById('chooseBtn');
+    const clearBtn = document.getElementById('clearBtn');
 
-    let drawing = false;
-    let eraserMode = false;
-    let currentColor = "#000000";
-    let currentBrushSize = 2;
-    let currentFontSize = 20;
-    let drawnPaths = [];
+    const editingArea = document.getElementById('editingArea');
+    const imgPreview = document.getElementById('imgPreview');
+    const origInfo = document.getElementById('origInfo');
+    const widthInput = document.getElementById('widthInput');
+    const heightInput = document.getElementById('heightInput');
+    const unitSelect = document.getElementById('unit');
+    const unitLabelW = document.getElementById('unitLabelW');
+    const unitLabelH = document.getElementById('unitLabelH');
+    const lockRatio = document.getElementById('lockRatio');
+    const formatSelect = document.getElementById('format');
+    const qualityRange = document.getElementById('quality');
+    const qualityVal = document.getElementById('qualityVal');
+    const bgColor = document.getElementById('bgColor');
+    const finalSize = document.getElementById('finalSize');
+    const targetInfo = document.getElementById('targetInfo');
+    const fileNameInput = document.getElementById('fileName');
+    const previewBtn = document.getElementById('previewBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const canvas = document.getElementById('canvas');
 
-    // Dəstək üçün funksiyalar
-    function getXY(e) {
-      if (e.touches && e.touches.length > 0) {
-        return { x: e.touches[0].clientX - canvas.getBoundingClientRect().left,
-                 y: e.touches[0].clientY - canvas.getBoundingClientRect().top };
+    let originalImage = new Image();
+    let origW = 0, origH = 0;
+    let objectUrl = null;
+
+    // Helpers
+    function resetAll(){
+      if(objectUrl){ URL.revokeObjectURL(objectUrl); objectUrl = null; }
+      originalImage = new Image();
+      origW = origH = 0;
+      imgPreview.src = '';
+      editingArea.style.display = 'none';
+      dropContent.style.display = 'flex';
+      widthInput.value = 800;
+      heightInput.value = 600;
+      fileNameInput.value = 'resized';
+      finalSize.textContent = '— × — px';
+      targetInfo.textContent = '— × — px';
+    }
+
+    function clamp(n,min,max){ return Math.max(min,Math.min(max,n)); }
+
+    // File handling
+    function handleFile(file){
+      if(!file || !file.type.startsWith('image/')){ alert('Zəhmət olmasa şəkil faylı seçin.'); return; }
+      if(objectUrl){ URL.revokeObjectURL(objectUrl); objectUrl = null; }
+      objectUrl = URL.createObjectURL(file);
+      originalImage = new Image();
+      originalImage.onload = () => {
+        origW = originalImage.naturalWidth;
+        origH = originalImage.naturalHeight;
+        imgPreview.src = objectUrl;
+        origInfo.textContent = `Orijinal: ${origW} × ${origH}px`;
+        // initial inputs
+        widthInput.value = origW;
+        heightInput.value = origH;
+        editingArea.style.display = 'grid';
+        dropContent.style.display = 'none';
+        updateTargetInfo();
+      };
+      originalImage.onerror = () => { alert('Şəkili yükləmək mümkün olmadı.'); };
+      originalImage.src = objectUrl;
+      // set default filename
+      const name = file.name ? file.name.replace(/\.[^/.]+$/, '') : 'resized';
+      fileNameInput.value = name;
+    }
+
+    // Drag & drop
+    ['dragenter','dragover'].forEach(ev => {
+      dropzone.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); dropzone.style.borderColor = '#c7cbe0'; });
+    });
+    ['dragleave','drop'].forEach(ev => {
+      dropzone.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); dropzone.style.borderColor = 'rgba(15,23,42,0.08)'; });
+    });
+    dropzone.addEventListener('drop', (e) => {
+      const f = e.dataTransfer.files && e.dataTransfer.files[0];
+      if(f) handleFile(f);
+    });
+
+    chooseBtn.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => handleFile(e.target.files && e.target.files[0]));
+    clearBtn.addEventListener('click', resetAll);
+
+    // Units and ratio
+    unitSelect.addEventListener('change', () => {
+      const u = unitSelect.value;
+      unitLabelW.textContent = u;
+      unitLabelH.textContent = u;
+      // if switching to percent, convert current px to percent roughly
+      if(origW && origH){
+        if(u === '%'){
+          widthInput.value = Math.round((Number(widthInput.value)/origW)*100) || 100;
+          heightInput.value = Math.round((Number(heightInput.value)/origH)*100) || 100;
+        } else {
+          // percent -> px
+          widthInput.value = Math.round((Number(widthInput.value)/100)*origW) || origW;
+          heightInput.value = Math.round((Number(heightInput.value)/100)*origH) || origH;
+        }
       }
-      return { x: e.offsetX, y: e.offsetY };
-    }
+      updateTargetInfo();
+    });
 
-    function startDraw(e) {
-      drawing = true;
-      const pos = getXY(e);
-      ctx.beginPath();
-      ctx.moveTo(pos.x, pos.y);
-    }
+    function aspect(){ return origW && origH ? origW / origH : 1; }
 
-    function draw(e) {
-      if (!drawing) return;
-      const pos = getXY(e);
-      ctx.lineWidth = eraserMode ? 20 : currentBrushSize;
-      ctx.lineCap = "round";
-      ctx.strokeStyle = eraserMode ? "#fff" : currentColor;
-      ctx.lineTo(pos.x, pos.y);
-      ctx.stroke();
-      drawnPaths.push({
-        x: pos.x, y: pos.y,
-        size: currentBrushSize,
-        color: eraserMode ? "#fff" : currentColor
-      });
-    }
-
-    function endDraw() {
-      drawing = false;
-    }
-
-    // Mouse eventləri
-    canvas.addEventListener("mousedown", startDraw);
-    canvas.addEventListener("mousemove", draw);
-    canvas.addEventListener("mouseup", endDraw);
-    canvas.addEventListener("mouseout", endDraw);
-
-    // Touch eventləri
-    canvas.addEventListener("touchstart", startDraw);
-    canvas.addEventListener("touchmove", draw);
-    canvas.addEventListener("touchend", endDraw);
-
-    // Ayar və alətlər
-    document.getElementById("language-select").addEventListener("change", (e) => {
-      const lang = e.target.value;
-      const strings = {
-        az: {
-          title: "Elektron Lövhə", addText: "Daxil et", brush: "Fırça qalınlığı:",
-          font: "Yazı ölçüsü:", color: "Palitra:", eraser: "Silgi",
-          undo: "Geri Al", clear: "Təmizlə", input: "Lövhəyə yazın...", save: "Yüklə"
-        },
-        en: {
-          title: "Digital Board", addText: "Add", brush: "Brush Size:",
-          font: "Font Size:", color: "Color:", eraser: "Eraser",
-          undo: "Undo", clear: "Clear", input: "Type on board...", save: "Download"
-        },
-        tr: {
-          title: "Dijital Tahta", addText: "Ekle", brush: "Fırça kalınlığı:",
-          font: "Yazı boyutu:", color: "Renk:", eraser: "Silgi",
-          undo: "Geri Al", clear: "Temizle", input: "Tahtaya yazın...", save: "İndir"
+    widthInput.addEventListener('input', () => {
+      const u = unitSelect.value;
+      const w = Number(widthInput.value) || 1;
+      if(lockRatio.checked && aspect()){
+        if(u === '%'){
+          // keep same percent scaling for height
+          const hPct = Math.round(w / aspect());
+          heightInput.value = hPct;
+        } else {
+          const h = Math.round(w / aspect());
+          heightInput.value = h;
         }
-      };
-      const s = strings[lang];
-      document.getElementById("header-title").innerText = s.title;
-      document.getElementById("add-text-btn").innerText = s.addText;
-      document.getElementById("brush-label").innerText = s.brush;
-      document.getElementById("font-label").innerText = s.font;
-      document.getElementById("color-label").innerText = s.color;
-      document.getElementById("eraser-btn").innerText = s.eraser;
-      document.getElementById("undo-btn").innerText = s.undo;
-      document.getElementById("clear-btn").innerText = s.clear;
-      document.getElementById("save-btn").innerText = s.save;
-      document.getElementById("text-input").placeholder = s.input;
+      }
+      updateTargetInfo();
     });
 
-    document.getElementById("hamburger").addEventListener("click", () => {
-      document.getElementById("settings-panel").classList.toggle("show");
-    });
-
-    document.getElementById("tools-toggle").addEventListener("click", () => {
-      document.getElementById("tools-panel").classList.toggle("show");
-    });
-
-    document.getElementById("color-picker-palette").addEventListener("input", e => currentColor = e.target.value);
-    document.getElementById("brush-size").addEventListener("change", e => currentBrushSize = parseInt(e.target.value));
-    document.getElementById("font-size").addEventListener("change", e => currentFontSize = parseInt(e.target.value));
-    document.getElementById("eraser-btn").addEventListener("click", () => eraserMode = !eraserMode);
-    document.getElementById("undo-btn").addEventListener("click", () => {
-      drawnPaths.pop();
-      redrawCanvas();
-    });
-
-    document.getElementById("clear-btn").addEventListener("click", () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawnPaths = [];
-    });
-
-    document.getElementById("save-btn").addEventListener("click", () => {
-      const link = document.createElement("a");
-      link.download = "cəkdiyin-sekil.png";
-      link.href = canvas.toDataURL("image/png");
-      link.click();
-    });
-
-    document.getElementById("add-text-btn").addEventListener("click", () => {
-      const text = document.getElementById("text-input").value;
-      if (!text) return;
-      const span = document.createElement("span");
-      span.textContent = text;
-      span.style.color = currentColor;
-      span.style.fontSize = currentFontSize + "px";
-      span.className = "draggable-text";
-      span.style.top = "200px";
-      span.style.left = "200px";
-      document.body.appendChild(span);
-      span.onmousedown = function (e) {
-        let offsetX = e.clientX - span.offsetLeft;
-        let offsetY = e.clientY - span.offsetTop;
-        function onMouseMove(e) {
-          span.style.left = `${e.clientX - offsetX}px`;
-          span.style.top = `${e.clientY - offsetY}px`;
+    heightInput.addEventListener('input', () => {
+      const u = unitSelect.value;
+      const h = Number(heightInput.value) || 1;
+      if(lockRatio.checked && aspect()){
+        if(u === '%'){
+          const wPct = Math.round(h * aspect());
+          widthInput.value = wPct;
+        } else {
+          const w = Math.round(h * aspect());
+          widthInput.value = w;
         }
-        document.addEventListener("mousemove", onMouseMove);
-        document.onmouseup = () => {
-          document.removeEventListener("mousemove", onMouseMove);
-          document.onmouseup = null;
-        };
-      };
-      document.getElementById("text-input").value = "";
+      }
+      updateTargetInfo();
     });
 
-    function redrawCanvas() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.beginPath();
-      for (let p of drawnPaths) {
-        ctx.lineWidth = p.size;
-        ctx.strokeStyle = p.color;
-        ctx.lineTo(p.x, p.y);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(p.x, p.y);
+    qualityRange.addEventListener('input', ()=> { qualityVal.textContent = qualityRange.value + '%'; });
+
+    function computeTarget(){
+      if(!origW || !origH) return {w:0,h:0};
+      const u = unitSelect.value;
+      if(u === '%'){
+        const w = clamp(Math.round((Number(widthInput.value)||100)/100 * origW), 1, 10000);
+        const h = clamp(Math.round((Number(heightInput.value)||100)/100 * origH), 1, 10000);
+        return {w,h};
+      } else {
+        const w = clamp(Math.round(Number(widthInput.value)||origW), 1, 20000);
+        const h = clamp(Math.round(Number(heightInput.value)||origH), 1, 20000);
+        return {w,h};
       }
     }
+
+    function updateTargetInfo(){
+      const t = computeTarget();
+      finalSize.textContent = `${t.w} × ${t.h} px`;
+      targetInfo.textContent = `${t.w} × ${t.h} px`;
+    }
+
+    // Draw to canvas & preview
+    function drawToCanvas(){
+      const t = computeTarget();
+      if(!t.w || !t.h) return null;
+      canvas.width = t.w;
+      canvas.height = t.h;
+      const ctx = canvas.getContext('2d');
+      // fill bg
+      ctx.fillStyle = bgColor.value || '#ffffff';
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      // draw image
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(originalImage, 0, 0, canvas.width, canvas.height);
+      return canvas;
+    }
+
+    previewBtn.addEventListener('click', () => {
+      if(!originalImage.src){ alert('Əvvəlcə şəkil seçin.'); return; }
+      drawToCanvas();
+      // show small preview popup (open image in new tab)
+      canvas.toBlob((blob) => {
+        if(!blob) return;
+        const u = URL.createObjectURL(blob);
+        window.open(u, '_blank');
+        setTimeout(()=>URL.revokeObjectURL(u), 15000);
+      }, formatSelect.value === 'png' ? 'image/png' : formatSelect.value === 'jpeg' ? 'image/jpeg' : 'image/webp', formatSelect.value === 'png' ? undefined : (Number(qualityRange.value)/100));
+    });
+
+    // Download
+    downloadBtn.addEventListener('click', () => {
+      if(!originalImage.src){ alert('Əvvəlcə şəkil seçin.'); return; }
+      const c = drawToCanvas();
+      if(!c) return;
+      const fmt = formatSelect.value;
+      const mime = fmt === 'png' ? 'image/png' : fmt === 'jpeg' ? 'image/jpeg' : 'image/webp';
+      const q = fmt === 'png' ? undefined : (Number(qualityRange.value)/100);
+      c.toBlob((blob) => {
+        if(!blob) { alert('Fayl yaratmaq alınmadı.'); return; }
+        const name = (fileNameInput.value || 'resized').replace(/[\\/:*?"<>|]+/g,'') + `_${c.width}x${c.height}.${fmt === 'jpeg' ? 'jpg' : fmt}`;
+        const a = document.createElement('a');
+        const u = URL.createObjectURL(blob);
+        a.href = u; a.download = name;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(()=>URL.revokeObjectURL(u), 2000);
+      }, mime, q);
+    });
+
+    // init
+    resetAll();
   </script>
 </body>
 </html>
