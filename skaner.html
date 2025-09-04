@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vizit Kart QR Generator</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<style>
+* {
+  box-sizing: border-box;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body {
+  background: linear-gradient(135deg, #121212, #1f2937, #374151);
+  font-family: 'Poppins', sans-serif;
+  color: #e4e6eb;
+  margin: 0;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  user-select: none;
+}
+
+.header {
+  background: #111827;
+  padding: 18px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.7);
+  position: sticky;
+  top: 0;
+  z-index: 1001;
+}
+
+.header h2 {
+  font-weight: 700;
+  font-size: 1.6rem;
+  color: #facc15;
+  user-select: text;
+}
+
+.menu-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 24px;
+  width: 32px;
+  filter: drop-shadow(0 0 1px rgba(250, 204, 21, 0.9));
+  transition: transform 0.3s ease;
+}
+
+.menu-btn:hover {
+  transform: scale(1.1);
+}
+
+.menu-icon span {
+  display: block;
+  width: 32px;
+  height: 4px;
+  background-color: #facc15;
+  border-radius: 3px;
+  margin-bottom: 6px;
+  box-shadow: 0 0 4px #facc15;
+}
+
+.menu-icon span:last-child {
+  margin-bottom: 0;
+}
+
+.menu {
+  background: #1f2937;
+  position: fixed;
+  top: 0;
+  right: -320px;
+  width: 320px;
+  height: 100vh;
+  padding: 40px 30px 30px 30px;
+  transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: -8px 0 40px rgba(0, 0, 0, 0.85);
+  overflow-y: auto;
+  z-index: 1100;
+  border-radius: 8px 0 0 8px;
+}
+
+.menu.active {
+  right: 0;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #facc15;
+  cursor: pointer;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  user-select: none;
+  transition: color 0.3s ease;
+}
+
+.close-btn:hover {
+  color: #fde68a;
+}
+
+.menu h2 {
+  color: #facc15;
+  font-weight: 700;
+  margin-bottom: 15px;
+  border-bottom: 2px solid #facc15;
+  padding-bottom: 8px;
+  user-select: text;
+}
+
+#langSelect {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 1rem;
+  border-radius: 12px;
+  border: 2px solid #facc15;
+  background: #374151;
+  color: #facc15;
+  margin-bottom: 25px;
+  outline-offset: 2px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#langSelect:hover, #langSelect:focus {
+  background-color: #4b5563;
+  outline: none;
+}
+
+.saved-item {
+  background: #374151;
+  padding: 18px 20px;
+  margin-bottom: 18px;
+  border-radius: 14px;
+  box-shadow: inset 0 0 8px #facc15aa;
+  user-select: none;
+  transition: background-color 0.3s ease;
+}
+
+.saved-item:hover {
+  background: #4b5563;
+}
+
+.saved-item strong {
+  font-size: 1.1rem;
+  color: #fde68a;
+}
+
+.saved-item small {
+  display: block;
+  margin-top: 3px;
+  color: #e0e0e0aa;
+  font-style: italic;
+}
+
+.saved-item img {
+  width: 100%;
+  max-width: 180px;
+  margin: 12px 0;
+  border-radius: 14px;
+  box-shadow: 0 4px 10px #facc15bb;
+  user-select: none;
+}
+
+.saved-item button {
+  background: #dc2626;
+  border: none;
+  color: #fff;
+  padding: 12px 0;
+  border-radius: 12px;
+  margin-top: 10px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1rem;
+  box-shadow: 0 2px 10px #dc2626cc;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  width: 100%;
+}
+
+.saved-item button:hover {
+  background: #ef4444;
+  box-shadow: 0 4px 15px #ef4444cc;
+}
+
+.container {
+  padding: 50px 24px;
+  max-width: 580px;
+  margin: 40px auto 60px;
+  background: #111827dd;
+  border-radius: 20px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.9);
+  user-select: none;
+}
+
+h1 {
+  text-align: center;
+  color: #facc15;
+  margin-bottom: 40px;
+  font-weight: 700;
+  font-size: 2.2rem;
+  user-select: text;
+  text-shadow: 0 0 10px #facc15bb;
+}
+
+input, button, select {
+  width: 100%;
+  padding: 16px 18px;
+  margin-bottom: 20px;
+  border: none;
+  border-radius: 16px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  outline-offset: 2px;
+  transition: box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+input {
+  background: #374151;
+  color: #f9fafb;
+  box-shadow: inset 0 2px 6px #000000aa;
+}
+
+input:focus {
+  box-shadow: 0 0 10px #facc15;
+  background: #4b5563;
+  color: #fff;
+}
+
+button {
+  background: #facc15;
+  color: #1f2937;
+  cursor: pointer;
+  box-shadow: 0 4px 12px #facc1533;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  user-select: none;
+  text-shadow: 0 0 6px #b45309cc;
+  transition: background-color 0.35s ease, box-shadow 0.35s ease, color 0.3s ease;
+}
+
+button:hover {
+  background: #d97706;
+  box-shadow: 0 6px 20px #d9770633;
+  color: #fff;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+#saveBtn {
+  background: #0ea5e9;
+  color: #fff;
+  box-shadow: 0 4px 15px #0ea5e933;
+  transition: background-color 0.4s ease;
+}
+
+#saveBtn:hover {
+  background: #0284c7;
+  box-shadow: 0 6px 25px #0284c733;
+}
+
+#qrcode {
+  text-align: center;
+  margin-top: 45px;
+  user-select: none;
+}
+
+#qrcode img {
+  width: 260px;
+  height: 260px;
+  border-radius: 22px;
+  box-shadow: 0 8px 25px #facc15aa;
+  user-select: none;
+}
+
+.editable-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-weight: 700;
+  color: #fde68a;
+  user-select: text;
+}
+
+.editable-label span {
+  cursor: pointer;
+  margin-left: 12px;
+  font-size: 1.1rem;
+  user-select: none;
+  transition: color 0.3s ease;
+}
+
+.editable-label span:hover {
+  color: #facc15;
+  text-shadow: 0 0 6px #facc15bb;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h2 id="headerTitle">VisitCard</h2>
+  <button class="menu-btn" onclick="openMenu()">
+    <div class="menu-icon">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </button>
+</div>
+
+<div class="menu" id="menu">
+  <button class="close-btn" onclick="closeMenu()">&times;</button>
+  <h2 id="menuLangLabel">Dil Seçimi</h2>
+  <select id="langSelect" aria-label="Language selector">
+    <option value="az">Azərbaycan</option>
+    <option value="en">English</option>
+    <option value="ru">Русский</option>
+  </select>
+  <h2 id="menuTitle">Yadda saxlanılanlar</h2>
+  <div id="savedList"></div>
+</div>
+
+<div class="container">
+  <h1 id="mainTitle">Vizit Kart QR Generator</h1>
+  <label id="labelName" for="name">Ad Soyad *</label>
+  <input id="name" placeholder="Ad Soyad" />
+  <label id="labelPhone" for="phone">Telefon *</label>
+  <input id="phone" placeholder="Telefon" />
+  <div id="extraFields"></div>
+  <button onclick="addExtraField()" style="background:#00adb5;color:#fff;" id="btnAddExtra">+ Yeni Məlumat Əlavə Et</button>
+  <button onclick="generateQRCode()" id="generateBtn">QR Kod Yarat</button>
+  <button id="saveBtn" onclick="saveQRCode()" style="display:none;">Yadda saxla</button>
+  <div id="qrcode"></div>
+</div>
+
+<script>
+const translations = {
+  az: {
+    mainTitle: "Vizit Kart QR Generator",
+    labelName: "Ad Soyad *",
+    labelPhone: "Telefon *",
+    placeholderName: "Ad Soyad",
+    placeholderPhone: "Telefon",
+    btnAddExtra: "+ Yeni Məlumat Əlavə Et",
+    generateBtn: "QR Kod Yarat",
+    saveBtn: "Yadda saxla",
+    menuTitle: "Yadda saxlanılanlar",
+    menuLangLabel: "Dil Seçimi",
+    headerTitle: "QR Generator",
+    deleteBtn: "Silmək",
+    emptyText: "Boşdur",
+    alertFillFields: "Zəhmət olmasa əsas məlumatları daxil edin!",
+    promptName: "QR kod üçün ad daxil edin:",
+    confirmDelete: "Silmək istədiyinizdən əminsiniz?",
+    labelTitlePlaceholder: "Başlıq (məs: Email)",
+    labelValuePlaceholder: "Məlumatı daxil edin"
+  },
+  en: {
+    mainTitle: "Business Card QR Generator",
+    labelName: "Full Name *",
+    labelPhone: "Phone *",
+    placeholderName: "Full Name",
+    placeholderPhone: "Phone",
+    btnAddExtra: "+ Add New Info",
+    generateBtn: "Generate QR Code",
+    saveBtn: "Save",
+    menuTitle: "Saved QR Codes",
+    menuLangLabel: "Language",
+    headerTitle: "QR Generator",
+    deleteBtn: "Delete",
+    emptyText: "Empty",
+    alertFillFields: "Please fill in all required fields!",
+    promptName: "Enter a name for the QR code:",
+    confirmDelete: "Are you sure you want to delete?",
+    labelTitlePlaceholder: "Title (e.g. Email)",
+    labelValuePlaceholder: "Enter info"
+  },
+  ru: {
+    mainTitle: "Генератор QR Визитки",
+    labelName: "ФИО *",
+    labelPhone: "Телефон *",
+    placeholderName: "ФИО",
+    placeholderPhone: "Телефон",
+    btnAddExtra: "+ Добавить информацию",
+    generateBtn: "Создать QR код",
+    saveBtn: "Сохранить",
+    menuTitle: "Сохранённые QR коды",
+    menuLangLabel: "Язык",
+    headerTitle: "QR Генератор",
+    deleteBtn: "Удалить",
+    emptyText: "Пусто",
+    alertFillFields: "Пожалуйста, заполните все обязательные поля!",
+    promptName: "Введите имя для QR кода:",
+    confirmDelete: "Вы уверены, что хотите удалить?",
+    labelTitlePlaceholder: "Заголовок (напр. Email)",
+    labelValuePlaceholder: "Введите информацию"
+  }
+};
+
+let currentLang = localStorage.getItem("lang") || "az";
+
+function applyTranslations() {
+  const t = translations[currentLang];
+  document.getElementById("mainTitle").textContent = t.mainTitle;
+  document.getElementById("labelName").textContent = t.labelName;
+  document.getElementById("labelPhone").textContent = t.labelPhone;
+  document.getElementById("name").placeholder = t.placeholderName;
+  document.getElementById("phone").placeholder = t.placeholderPhone;
+  document.getElementById("btnAddExtra").textContent = t.btnAddExtra;
+  document.getElementById("generateBtn").textContent = t.generateBtn;
+  document.getElementById("saveBtn").textContent = t.saveBtn;
+  document.getElementById("menuTitle").textContent = t.menuTitle;
+  document.getElementById("menuLangLabel").textContent = t.menuLangLabel;
+  document.getElementById("headerTitle").textContent = t.headerTitle;
+
+  // Yenilənmiş əlavə sahələrin başlıq və placeholder-larını dəyişək
+  document.querySelectorAll("#extraFields div").forEach(field => {
+    const labelElem = field.querySelector("label");
+    const inputElem = field.querySelector("input.extra-value");
+    if (labelElem && !labelElem.dataset.userEdited) {
+      labelElem.textContent = t.labelTitlePlaceholder;
+    }
+    if (inputElem) {
+      inputElem.placeholder = t.labelValuePlaceholder;
+    }
+  });
+}
+
+document.getElementById("langSelect").value = currentLang;
+applyTranslations();
+
+document.getElementById("langSelect").addEventListener("change", e => {
+  currentLang = e.target.value;
+  localStorage.setItem("lang", currentLang);
+  applyTranslations();
+  loadSavedQRCodes();
+});
+
+function openMenu() {
+  document.getElementById("menu").classList.add("active");
+  loadSavedQRCodes();
+}
+function closeMenu() {
+  document.getElementById("menu").classList.remove("active");
+}
+
+let extraFieldCount = 0;
+
+function addExtraField() {
+  extraFieldCount++;
+  const t = translations[currentLang];
+
+  const div = document.createElement("div");
+  div.style.marginBottom = "15px";
+
+  const labelWrapper = document.createElement("div");
+  labelWrapper.className = "editable-label";
+
+  const label = document.createElement("label");
+  label.textContent = `${t.labelTitlePlaceholder} ${extraFieldCount}`;
+  label.style.marginBottom = "0";
+  label.dataset.userEdited = false;
+
+  const editBtn = document.createElement("span");
+  editBtn.textContent = "✏️";
+  editBtn.title = "Başlığı dəyiş";
+  editBtn.onclick = function () {
+    const newLabel = prompt(t.labelTitlePlaceholder, label.textContent);
+    if (newLabel) {
+      label.textContent = newLabel;
+      label.dataset.userEdited = true;
+    }
+  };
+
+  labelWrapper.appendChild(label);
+  labelWrapper.appendChild(editBtn);
+
+  const input = document.createElement("input");
+  input.className = "extra-value";
+  input.placeholder = t.labelValuePlaceholder;
+
+  div.appendChild(labelWrapper);
+  div.appendChild(input);
+  document.getElementById("extraFields").appendChild(div);
+}
+
+function generateQRCode() {
+  const t = translations[currentLang];
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  if (!name || !phone) {
+    alert(t.alertFillFields);
+    return;
+  }
+
+  let vcard = `BEGIN:VCARD
+VERSION:3.0
+FN:${name}
+TEL;TYPE=CELL:${phone}
+`;
+
+  document.querySelectorAll("#extraFields div").forEach(field => {
+    const labelElem = field.querySelector("label");
+    const inputElem = field.querySelector(".extra-value");
+    if (!labelElem || !inputElem) return;
+
+    let label = labelElem.textContent.trim().toLowerCase();
+    label = label.replace(/✏️/g, '').trim();
+    const value = inputElem.value.trim();
+    if (!value) return;
+
+    if (label.includes("email")) {
+      vcard += `EMAIL:${value}\n`;
+    } else if (label.includes("adres") || label.includes("ünvan") || label.includes("address")) {
+      vcard += `ADR:${value}\n`;
+    } else if (label.includes("url") || label.includes("website") || label.includes("sayt")) {
+      vcard += `URL:${value}\n`;
+    } else {
+      vcard += `X-${label.toUpperCase()}:${value}\n`;
+    }
+  });
+
+  vcard += "END:VCARD";
+
+  QRCode.toDataURL(vcard)
+    .then(url => {
+      document.getElementById("qrcode").innerHTML = `<img src="${url}" alt="QR Code" />`;
+      document.getElementById("saveBtn").style.display = "block";
+      // Save current QR data in a global variable for later saving
+      window.currentQR = { data: vcard, img: url };
+    })
+    .catch(err => {
+      alert("QR kod yaradılarkən xəta baş verdi!");
+      console.error(err);
+    });
+}
+
+function saveQRCode() {
+  const t = translations[currentLang];
+  if (!window.currentQR) return alert("QR kod yaradılmayıb!");
+  let qrName = prompt(t.promptName);
+  if (!qrName) return;
+
+  const saved = JSON.parse(localStorage.getItem("savedQRCodes") || "[]");
+  saved.push({
+    id: Date.now(),
+    name: qrName,
+    data: window.currentQR.data,
+    img: window.currentQR.img,
+    timestamp: new Date().toLocaleString()
+  });
+  localStorage.setItem("savedQRCodes", JSON.stringify(saved));
+  alert("QR kod yadda saxlanıldı!");
+  document.getElementById("saveBtn").style.display = "none";
+  window.currentQR = null;
+}
+
+function loadSavedQRCodes() {
+  const t = translations[currentLang];
+  const saved = JSON.parse(localStorage.getItem("savedQRCodes") || "[]");
+  const container = document.getElementById("savedList");
+  container.innerHTML = "";
+
+  if (saved.length === 0) {
+    container.textContent = t.emptyText;
+    container.style.color = "#ccc";
+    return;
+  }
+
+  saved.slice().reverse().forEach(item => {
+    const div = document.createElement("div");
+    div.className = "saved-item";
+
+    const strong = document.createElement("strong");
+    strong.textContent = item.name;
+
+    const small = document.createElement("small");
+    small.textContent = item.timestamp;
+
+    const img = document.createElement("img");
+    img.src = item.img;
+    img.alt = item.name + " QR kod";
+
+    const btn = document.createElement("button");
+    btn.textContent = t.deleteBtn;
+    btn.onclick = () => {
+      if (confirm(t.confirmDelete)) {
+        deleteQRCode(item.id);
+      }
+    };
+
+    div.appendChild(strong);
+    div.appendChild(small);
+    div.appendChild(img);
+    div.appendChild(btn);
+
+    container.appendChild(div);
+  });
+}
+
+function deleteQRCode(id) {
+  let saved = JSON.parse(localStorage.getItem("savedQRCodes") || "[]");
+  saved = saved.filter(item => item.id !== id);
+  localStorage.setItem("savedQRCodes", JSON.stringify(saved));
+  loadSavedQRCodes();
+}
+
+window.onload = () => {
+  loadSavedQRCodes();
+};
+// İnternet yoxlanışı funksiyası
+function checkInternet() {
+  if (!navigator.onLine) {
+    alert("❌ İnternet bağlantısı yoxdur! Zəhmət olmasa interneti yoxlayın.");
+  }
+}
+
+// Səhifə yüklənəndə yoxla
+window.addEventListener("load", checkInternet);
+
+// İnternet kəsiləndə xəbərdarlıq et
+window.addEventListener("offline", () => {
+  alert("⚠️ İnternet bağlantısı kəsildi!");
+});
+
+// İnternet geri gələndə xəbərdarlıq et
+window.addEventListener("online", () => {
+  alert("✅ İnternet bağlantısı bərpa olundu!");
+});
+</script>
+
+
+</script>
+
+</body>
+</html>
