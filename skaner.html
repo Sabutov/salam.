@@ -6,6 +6,41 @@
 <title>Vizit Kart QR Generator</title>
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 <style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #111827;
+    color: #facc15;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+  #appContent {
+    display: none; /* İlk öncə gizli olsun */
+    width: 100%;
+  }
+  #offlineMessage {
+    display: none;
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #ff4d4d;
+  }
+</style>
+</head>
+<body>
+
+<!-- Əsas sayt -->
+<div id="appContent">
+  <!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vizit Kart QR Generator</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<style>
 * {
   box-sizing: border-box;
   transition: background-color 0.3s ease, color 0.3s ease;
@@ -643,6 +678,46 @@ window.addEventListener("online", () => {
 </script>
 
 
+</script>
+
+</body>
+</html>
+  <p>Yenidən Onlayn oldunuz ✅</p>
+</div>
+
+<!-- İnternet yox mesajı -->
+<div id="offlineMessage">
+  ❌ İnternet bağlantısı yoxdur! Zəhmət olmasa interneti yoxlayın.
+</div>
+
+<script>
+function checkInternet() {
+  const app = document.getElementById("appContent");
+  const offline = document.getElementById("offlineMessage");
+
+  if (navigator.onLine) {
+    app.style.display = "block";
+    offline.style.display = "none";
+  } else {
+    app.style.display = "none";
+    offline.style.display = "flex";
+  }
+}
+
+// Səhifə açılarkən yoxla
+window.addEventListener("load", checkInternet);
+
+// İnternet kəsiləndə
+window.addEventListener("offline", () => {
+  document.getElementById("appContent").style.display = "none";
+  document.getElementById("offlineMessage").style.display = "flex";
+});
+
+// İnternet geri gələndə
+window.addEventListener("online", () => {
+  alert("✅ Onlayn oldunuz!");
+  location.reload(); // avtomatik səhifəni açır
+});
 </script>
 
 </body>
