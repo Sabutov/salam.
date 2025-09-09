@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <title>Google Translate Tərcümə</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      width: 500px;
+      text-align: center;
+      animation: fadeIn 0.6s ease;
+    }
+    h2 {
+      margin-bottom: 20px;
+      background: linear-gradient(90deg, #2575fc, #6a11cb);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 26px;
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      padding: 12px;
+      margin-bottom: 15px;
+      resize: none;
+      font-size: 15px;
+      transition: border 0.3s;
+    }
+    textarea:focus {
+      border: 1px solid #2575fc;
+      outline: none;
+      box-shadow: 0 0 8px rgba(37,117,252,0.3);
+    }
+    select {
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+      margin-bottom: 15px;
+      width: 100%;
+      transition: border 0.3s;
+    }
+    select:focus {
+      border: 1px solid #6a11cb;
+      outline: none;
+      box-shadow: 0 0 8px rgba(106,17,203,0.3);
+    }
+    button {
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      font-size: 16px;
+      background: linear-gradient(90deg, #2575fc, #6a11cb);
+      color: white;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 12px;
+      border: 1px solid #ddd;
+      background: #f9f9f9;
+      min-height: 90px;
+      text-align: left;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🌐 Tərcüməçi.az</h2>
+    <textarea id="inputText" placeholder="Mətni buraya yaz..."></textarea>
+    
+    <select id="language">
+      <option value="en">İngilis dili</option>
+      <option value="tr">Türk dili</option>
+      <option value="ru">Rus dili</option>
+      <option value="de">Alman dili</option>
+      <option value="fr">Fransız dili</option>
+    </select>
+    
+    <button onclick="translateText()">Tərcümə et</button>
+    
+    <div class="result" id="result">➡️ Burada tərcümə nəticəsi görünəcək...</div>
+  </div>
+
+  <script>
+    async function translateText() {
+      const text = document.getElementById("inputText").value;
+      const lang = document.getElementById("language").value;
+      const resultDiv = document.getElementById("result");
+
+      if (!text.trim()) {
+        resultDiv.innerText = "⚠️ Zəhmət olmasa mətni yaz!";
+        return;
+      }
+
+      try {
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=az&tl=${lang}&dt=t&q=${encodeURIComponent(text)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        resultDiv.innerText = data[0].map(item => item[0]).join(" ");
+      } catch (error) {
+        resultDiv.innerText = "❌ Xəta baş verdi!";
+      }
+    }
+  </script>
+</body>
+</html>
