@@ -1,128 +1,147 @@
 <!DOCTYPE html>
 <html lang="az">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Gold Xəbər — Admin + GitHub</title>
-<style>
-body{font-family:sans-serif;background:#0d0e12;color:#e9edf3;margin:0;padding:0;}
-header{padding:12px;background:#14161d;display:flex;justify-content:space-between;align-items:center;}
-button{cursor:pointer;padding:6px 12px;border:none;border-radius:6px;background:#f1c40f;color:#000;font-weight:600;}
-#adminPanel{position:fixed;right:20px;bottom:20px;padding:16px;background:#14161d;border:1px solid #f1c40f;border-radius:12px;display:none;width:300px;}
-#adminPanel input,#adminPanel textarea,select{width:100%;margin:6px 0;padding:6px;border-radius:6px;border:1px solid #888;background:#0d0e12;color:#e9edf3;}
-.card{background:#14161d;border:1px solid #1f2330;border-radius:12px;padding:12px;margin:12px;}
-#cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Translate Tərcümə</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      width: 90%;
+      max-width: 500px;
+      text-align: center;
+      animation: fadeIn 0.6s ease;
+    }
+    h2 {
+      margin-bottom: 20px;
+      background: linear-gradient(90deg, #2575fc, #6a11cb);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 24px;
+    }
+    textarea, select, button {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      padding: 12px;
+      font-size: 15px;
+      margin-bottom: 15px;
+    }
+    textarea {
+      height: 120px;
+      resize: none;
+      transition: border 0.3s;
+    }
+    textarea:focus {
+      border: 1px solid #2575fc;
+      outline: none;
+      box-shadow: 0 0 8px rgba(37,117,252,0.3);
+    }
+    select:focus {
+      border: 1px solid #6a11cb;
+      outline: none;
+      box-shadow: 0 0 8px rgba(106,17,203,0.3);
+    }
+    button {
+      border: none;
+      font-size: 16px;
+      background: linear-gradient(90deg, #2575fc, #6a11cb);
+      color: white;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .result {
+      margin-top: 20px;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #ddd;
+      background: #f9f9f9;
+      min-height: 90px;
+      text-align: left;
+      font-size: 15px;
+      line-height: 1.5;
+      word-wrap: break-word;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Mobil üçün əlavə tənzimləmələr */
+    @media (max-width: 480px) {
+      .container {
+        padding: 15px;
+        border-radius: 12px;
+      }
+      h2 {
+        font-size: 20px;
+      }
+      textarea {
+        height: 100px;
+        font-size: 14px;
+      }
+      button {
+        font-size: 14px;
+        padding: 10px;
+      }
+    }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <h2>🌐 Tərcüməçi.az</h2>
+    <textarea id="inputText" placeholder="Mətni buraya yaz..."></textarea>
+    <select id="language">
+      <option value="en">İngilis dili</option>
+      <option value="tr">Türk dili</option>
+      <option value="ru">Rus dili</option>
+      <option value="de">Alman dili</option>
+      <option value="fr">Fransız dili</option>
+    </select>
+    <button onclick="translateText()">Tərcümə et</button>
+    <div class="result" id="result">➡️ Burada tərcümə nəticəsi görünəcək...</div>
+  </div>
 
-<header>
-  <div>Gold Xəbər</div>
-  <button id="adminBtn">Admin Panel</button>
-</header>
+  <script>
+    async function translateText() {
+      const text = document.getElementById("inputText").value;
+      const lang = document.getElementById("language").value;
+      const resultDiv = document.getElementById("result");
 
-<div id="cards"></div>
+      if (!text.trim()) {
+        resultDiv.innerText = "⚠️ Zəhmət olmasa mətni yaz!";
+        return;
+      }
 
-<!-- Admin Panel -->
-<div id="adminPanel">
-  <h3>Yeni Xəbər Əlavə Et</h3>
-  <input type="text" id="newsTitle" placeholder="Başlıq">
-  <select id="newsCategory">
-    <option value="premyer-liqa">Premyer Liqa</option>
-    <option value="çempionlar-liqası">Çempionlar Liqası</option>
-    <option value="transfer">Transferlər</option>
-    <option value="millilər">Millilər</option>
-    <option value="qarabağ">Qarabağ FK</option>
-  </select>
-  <input type="text" id="newsImg" placeholder="Şəkil URL">
-  <input type="text" id="newsExcerpt" placeholder="Qısa mətn">
-  <textarea id="newsBody" placeholder="Ətraflı mətn"></textarea>
-  <button id="addNewsBtn">Əlavə et</button>
-</div>
-
-<script>
-// ==== Demo state ====
-let NEWS = [
-  {id:1,title:'Test Xəbər',category:'premyer-liqa',img:'https://picsum.photos/seed/1/400/200',excerpt:'Qısa',body:'Tam mətn'}
-];
-
-// ==== Render funksiyası ====
-function renderList(){
-  const container=document.getElementById('cards');
-  container.innerHTML='';
-  NEWS.forEach(n=>{
-    const c=document.createElement('div');
-    c.className='card';
-    c.innerHTML=`<h4>${n.title}</h4><p>${n.excerpt}</p><img src="${n.img}" style="width:100%;margin-top:6px;"><p>${n.body}</p><small>${n.category}</small>`;
-    container.appendChild(c);
-  });
-}
-
-// ==== Admin login ====
-const adminPassword='1234';
-document.addEventListener('DOMContentLoaded',()=>{
-  const pass=prompt('Admin parolunu daxil edin:');
-  if(pass===adminPassword) document.getElementById('adminPanel').style.display='block';
-  else document.getElementById('adminBtn').style.display='none';
-  renderList();
-});
-
-// ==== Admin panel toggle ====
-document.getElementById('adminBtn').onclick=()=>{
-  const p=document.getElementById('adminPanel');
-  p.style.display=p.style.display==='none'?'block':'none';
-}
-
-// ==== Yeni xəbər əlavə et ====
-document.getElementById('addNewsBtn').onclick=async()=>{
-  const newItem={
-    id:Date.now(),
-    title:document.getElementById('newsTitle').value,
-    category:document.getElementById('newsCategory').value,
-    img:document.getElementById('newsImg').value,
-    excerpt:document.getElementById('newsExcerpt').value,
-    body:document.getElementById('newsBody').value
-  };
-  NEWS.push(newItem);
-  renderList();
-  await pushToGitHub(newItem);
-  alert('Xəbər əlavə olundu və GitHub-da yeniləndi!');
-  document.getElementById('newsTitle').value='';
-  document.getElementById('newsImg').value='';
-  document.getElementById('newsExcerpt').value='';
-  document.getElementById('newsBody').value='';
-}
-
-// ==== GitHub API funksiyası ====
-async function pushToGitHub(newItem){
-  const token = "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"; // <=== buraya token
-  const repo = "istifadeci/repo";      // <=== buraya repo
-  const path = "news.json";            // <=== buraya fayl yolu
-  try{
-    // Mövcud faylı götür
-    const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`);
-    const data = await res.json();
-    const content = JSON.parse(atob(data.content));
-
-    // Yeni xəbəri əlavə et
-    content.push(newItem);
-
-    // GitHub-a göndər
-    await fetch(`https://api.github.com/repos/${repo}/contents/${path}`,{
-      method:'PUT',
-      headers:{
-        "Authorization":`Bearer ${token}`,
-        "Content-Type":"application/json"
-      },
-      body:JSON.stringify({
-        message:"Yeni xəbər əlavə olundu",
-        content:btoa(JSON.stringify(content)),
-        sha:data.sha
-      })
-    });
-  }catch(e){console.error(e);}
-}
-</script>
-
+      try {
+        const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=az&tl=${lang}&dt=t&q=${encodeURIComponent(text)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        resultDiv.innerText = data[0].map(item => item[0]).join(" ");
+      } catch (error) {
+        resultDiv.innerText = "❌ Xəta baş verdi!";
+      }
+    }
+  </script>
 </body>
 </html>
