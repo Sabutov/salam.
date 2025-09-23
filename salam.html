@@ -1,218 +1,311 @@
-a<header>
-    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
-    <h1 id="pageTitle">Futbol Oyunları</h1>
-  </header>
+<!doctype html>
+<html lang="az">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Söz Yazma Təcrübəsi — Super Dizayn</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg1:#0f172a;--bg2:#07103a;--card:#0b1220;--accent:#7c3aed;--glass:rgba(255,255,255,0.04);--muted:rgba(255,255,255,0.6)}
+    *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial}
+    html,body{height:100%;margin:0}
+    body{
+      background:linear-gradient(135deg,var(--bg1),var(--bg2));
+      color:#e6eef8;display:flex;align-items:center;justify-content:center;padding:32px;
+    }
+    .container{width:100%;max-width:980px}
 
-  <div class="side-menu" id="sideMenu">
-    <a href="https://mccleaurg-glionts-twaency.yolasite.com/" target="_blank" id="localNewsLink">🏠 Yerli Futbol Xəbərləri</a>
-    <a href="https://mccleaurg-glionts-twaency.yolasite.com/xarici-futbol-x%C9%99b%C9%99rl%C9%99ri/" target="_blank" id="internationalNewsLink">🌍 Xarici Futbol Xəbərləri</a>
-    <label><input type="checkbox" id="darkToggle"> 🌙 Qaranlıq rejim</label>
-    <label for="langSelect" id="langLabel">🌐 Dil seçimi:</label>
-    <select id="langSelect">
-      <option value="az">Azərbaycan</option>
-      <option value="en">English</option>
-      <option value="tr">Türkçe</option>
-    </select>
+    .card{
+      background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));
+      border-radius:18px;padding:28px;box-shadow:0 10px 30px rgba(2,6,23,0.7);backdrop-filter: blur(6px);
+    }
+
+    header{display:flex;align-items:center;gap:18px;margin-bottom:18px}
+    .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#3b82f6);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px}
+    h1{font-size:20px;margin:0}
+    p.lead{margin:0;color:var(--muted);font-size:13px}
+
+    .top-row{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-top:16px}
+    .stats{display:flex;gap:12px;align-items:center}
+    .stat{background:var(--glass);padding:10px 12px;border-radius:10px;font-weight:600;font-size:13px}
+
+    .stage{display:grid;grid-template-columns:1fr 320px;gap:18px;margin-top:18px}
+
+    /* main typing area */
+    .typing-area{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:20px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+    .word-stream{min-height:140px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    .word{padding:6px 10px;border-radius:8px;background:transparent;color:var(--muted);font-weight:600}
+    .word.past{opacity:0.5}
+    .word.current{background:linear-gradient(90deg, rgba(124,58,237,0.14), rgba(59,130,246,0.06));border:1px solid rgba(124,58,237,0.18);color:#fff}
+    .word.correct{background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.18);color:#bbf7d0}
+    .word.wrong{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.16);color:#ffd6d6}
+
+    .input-row{display:flex;gap:12px;margin-top:16px;align-items:center}
+    input[type=text]{flex:1;padding:14px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit;font-size:16px;outline:none}
+    .controls{display:flex;gap:8px}
+    button{background:var(--accent);border:none;color:white;padding:10px 14px;border-radius:10px;font-weight:700;cursor:pointer}
+    button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06)}
+
+    /* right panel */
+    .panel{background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+    .panel h3{margin:0 0 8px 0}
+    .list{max-height:240px;overflow:auto;padding-right:8px}
+    .list-item{display:flex;justify-content:space-between;padding:8px;border-radius:8px;margin-bottom:6px}
+    .list-item.correct{background:rgba(34,197,94,0.04)}
+    .list-item.wrong{background:rgba(239,68,68,0.04)}
+
+    /* results modal */
+    .modal{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,rgba(2,6,23,0.6),rgba(2,6,23,0.8));backdrop-filter:blur(4px);}
+    .modal-card{background:linear-gradient(180deg,#071127,#051028);padding:28px;border-radius:14px;max-width:720px;width:92%;color:#eaf2ff}
+    .results-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}
+    .result-box{background:rgba(255,255,255,0.03);padding:12px;border-radius:10px;text-align:center}
+
+    footer{margin-top:14px;color:var(--muted);font-size:13px}
+
+    @media(max-width:880px){
+      .stage{grid-template-columns:1fr}
+      .panel{order:2}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <header>
+        <div class="logo">SÖZ</div>
+        <div>
+          <h1>Söz Yazma Təcrübəsi</h1>
+          
+        </div>
+      </header>
+
+      <div class="top-row">
+        <div class="stats">
+          <div class="stat">Sözlər: <span id="totalWords">0</span></div>
+          <div class="stat">Qəti: <span id="correctCount">0</span></div>
+          <div class="stat">Səhv: <span id="wrongCount">0</span></div>
+          <div class="stat">Vaxt: <span id="timer">00:00</span></div>
+        </div>
+        <div>
+          <label style="font-size:13px;color:var(--muted)">Söz sayı:</label>
+          <select id="wordCount" style="padding:8px;border-radius:8px;background:transparent;color:inherit;border:1px solid rgba(255,255,255,0.04)">
+            <option value="20">20</option>
+            <option value="40" selected>40</option>
+            <option value="80">80</option>
+            <option value="120">120</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="typing-area">
+          <div class="word-stream" id="wordStream" aria-hidden="false"></div>
+
+          <div class="input-row">
+            <input type="text" id="typingInput" placeholder="İndi yazmağa başla..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+            <div class="controls">
+              <button id="startBtn">Başla</button>
+              <button class="ghost" id="resetBtn">Sıfırla</button>
+            </div>
+          </div>
+
+          <footer>
+            İstifadə qaydası: Sözləri yazıb arada boşluq (space) ilə irəlilə. Hər söz üçün hərf-ə-hərf yoxlanacaq. Sonda nəticələr çıxacaq.
+          </footer>
+        </div>
+
+        <aside class="panel">
+          <h3>Nəticələr (canlı)</h3>
+          <div class="list" id="resultList"></div>
+          <hr style="opacity:0.06;border:none;height:1px;margin:12px 0;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.03),transparent)">
+          <div style="display:flex;gap:8px;align-items:center;justify-content:space-between">
+            <small style="color:var(--muted)">Sürət hesabatı</small>
+            <strong id="wpm">0 WPM</strong>
+          </div>
+        </aside>
+      </div>
+    </div>
   </div>
 
-  <div class="controls">
-    <input type="date" id="dateInput">
-    <input type="text" id="searchInput" placeholder="Komanda axtar...">
-    <select id="countryFilter"><option value="">🌍 Bütün ölkələr</option></select>
-    <select id="leagueFilter"><option value="">🏆 Bütün turnirlər</option></select>
-    <button onclick="fetchMatches()">🔄 Yenilə</button>
+  <!-- modal template -->
+  <div id="modal" style="display:none" class="modal" role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <h2>Nəticələr</h2>
+      <p style="margin:4px 0 0 0;color:var(--muted)">Aşağıda sənin performansın göstərilir.</p>
+      <div class="results-grid" id="resultsGrid"></div>
+      <div style="margin-top:14px;overflow:auto;max-height:260px;padding-right:8px" id="detailedResults"></div>
+      <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end">
+        <button id="closeModal">Yenidən</button>
+        <button class="ghost" id="downloadBtn">CSV kimi yüklə</button>
+      </div>
+    </div>
   </div>
-
-  <h2 style="text-align:center;" id="matchesTitle">📅 Bugünkü Oyunlar</h2>
-  <div id="past-matches">Yüklənir...</div>
-  <div id="upcoming-matches"></div>
 
   <script>
-    const pageTitle = document.getElementById('pageTitle');
-    const dateInput = document.getElementById('dateInput');
-    const searchInput = document.getElementById('searchInput');
-    const countryFilter = document.getElementById('countryFilter');
-    const leagueFilter = document.getElementById('leagueFilter');
-    const menu = document.getElementById('sideMenu');
-    const darkToggle = document.getElementById('darkToggle');
-    const langSelect = document.getElementById('langSelect');
-    const localNewsLink = document.getElementById('localNewsLink');
-    const internationalNewsLink = document.getElementById('internationalNewsLink');
-    const langLabel = document.getElementById('langLabel');
-    const matchesTitle = document.getElementById('matchesTitle');
+    // Word list
+    const WORDS = (`salam salamlar komputer kitab internet proqramlaşdırma javascript html css dizayn sürət təcrübə yazmaq düzgün səhv oyun funksiya dəyişən massiv düzbucaqlı tənlik riyaziyyat tarix coğrafiya elm musiqi film sosial media kitabxana universitet`).split(' ');
 
-    dateInput.value = new Date().toISOString().split('T')[0];
+    const el = id => document.getElementById(id);
 
-    langSelect.addEventListener('change', () => {
-      changeLanguage(langSelect.value);
-    });
+    let settings = {count: parseInt(el('wordCount')?.value || 40)};
+    let state = {words:[],index:0,correct:0,wrong:0,startTime:null,finished:false,perWord:[]};
+    let timerInterval = null;
 
-    function changeLanguage(lang) {
-      const translations = {
-        az: {
-          pageTitle: "Futbol Oyunları",
-          matchesTitle: "Bugünkü Oyunlar",
-          localNews: "Yerli Futbol Xəbərləri",
-          internationalNews: "Xarici Futbol Xəbərləri",
-          langLabel: "Dil seçimi:",
-          searchPlaceholder: "Komanda axtar...",
-          refreshBtn: "Yenilə",
-          countryFilterPlaceholder: "Bütün ölkələr",
-          leagueFilterPlaceholder: "Bütün turnirlər",
-          darkMode: "Qaranlıq rejim",
-        },
-        en: {
-          pageTitle: "Football Matches",
-          matchesTitle: "Today's Matches",
-          localNews: "Local Football News",
-          internationalNews: "International Football News",
-          langLabel: "Language Selection:",
-          searchPlaceholder: "Search for team...",
-          refreshBtn: "Refresh",
-          countryFilterPlaceholder: "All countries",
-          leagueFilterPlaceholder: "All tournaments",
-          darkMode: "Dark mode",
-        },
-        tr: {
-          pageTitle: "Futbol Maçları",
-          matchesTitle: "Bugünkü Maçlar",
-          localNews: "Yerli Futbol Haberleri",
-          internationalNews: "Uluslararası Futbol Haberleri",
-          langLabel: "Dil Seçimi:",
-          searchPlaceholder: "Takım ara...",
-          refreshBtn: "Yenile",
-          countryFilterPlaceholder: "Tüm ülkeler",
-          leagueFilterPlaceholder: "Tüm turnuvalar",
-          darkMode: "Karanlık mod",
+    // --- düzəliş: təkrarsız seçim ---
+    function pickWords(n){
+      let pool = [...WORDS];
+      if(n > pool.length) n = pool.length;
+      for(let i = pool.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+      return pool.slice(0, n);
+    }
+
+    function renderStream(){
+      const stream = el('wordStream');stream.innerHTML='';
+      state.words.forEach((w,i)=>{
+        const span = document.createElement('div');span.className='word';span.textContent=w;
+        if(i < state.index) span.classList.add('past');
+        if(i === state.index) span.classList.add('current');
+        if(state.perWord[i]) span.classList.add(state.perWord[i].correct ? 'correct' : 'wrong');
+        if(i===state.index){
+          span.innerHTML = '';
+          const typed = el('typingInput').value;
+          for(let k=0;k<w.length;k++){
+            const ch = document.createElement('span');ch.textContent=w[k];
+            if(k < typed.length){
+              if(typed[k] === w[k]) ch.style.opacity = 1; else ch.style.color = '#ffb4b4';
+            } else ch.style.opacity = 0.7;
+            span.appendChild(ch);
+          }
         }
-      };
-
-      const t = translations[lang];
-      pageTitle.innerText = t.pageTitle;
-      matchesTitle.innerText = t.matchesTitle;
-      localNewsLink.innerText = t.localNews;
-      internationalNewsLink.innerText = t.internationalNews;
-      langLabel.innerText = t.langLabel;
-      searchInput.placeholder = t.searchPlaceholder;
-      countryFilter.innerHTML = `<option value="">${t.countryFilterPlaceholder}</option>`;
-      leagueFilter.innerHTML = `<option value="">${t.leagueFilterPlaceholder}</option>`;
-      document.querySelector('button').innerText = t.refreshBtn;
-      darkToggle.parentElement.querySelector('label').innerText = t.darkMode;
+        stream.appendChild(span);
+      })
     }
 
-    function toggleMenu() {
-      menu.classList.toggle('open');
+    function updateStats(){
+      el('totalWords').textContent = state.words.length;
+      el('correctCount').textContent = state.correct;
+      el('wrongCount').textContent = state.wrong;
+      el('wpm').textContent = calcWPM()+ ' WPM';
     }
 
-    darkToggle.addEventListener('change', () => {
-      document.body.classList.toggle('dark', darkToggle.checked);
-      localStorage.setItem('darkMode', darkToggle.checked);
-    });
-
-    if (localStorage.getItem('darkMode') === 'true') {
-      darkToggle.checked = true;
-      document.body.classList.add('dark');
+    function calcWPM(){
+      if(!state.startTime) return 0;
+      const seconds = (Date.now()-state.startTime)/1000;
+      if(seconds < 1) return 0;
+      const minutes = seconds/60;
+      const wordsTyped = state.index;
+      return Math.max(0, Math.round(wordsTyped / minutes));
     }
 
-    async function fetchMatches() {
-      const date = dateInput.value;
-      const search = searchInput.value.toLowerCase();
-      const selectedCountry = countryFilter.value;
-      const selectedLeague = leagueFilter.value;
+    function startTimer(){
+      if(timerInterval) clearInterval(timerInterval);
+      state.startTime = Date.now();
+      timerInterval = setInterval(()=>{
+        const sec = Math.floor((Date.now()-state.startTime)/1000);
+        const m = String(Math.floor(sec/60)).padStart(2,'0');
+        const s = String(sec%60).padStart(2,'0');
+        el('timer').textContent = `${m}:${s}`;
+        el('wpm').textContent = calcWPM()+ ' WPM';
+      },500)
+    }
 
-      try {
-        const res = await fetch(`https://api.sofascore.com/api/v1/sport/football/scheduled-events/${date}`);
-        const data = await res.json();
-        const events = data.events;
+    function stopTimer(){ if(timerInterval) clearInterval(timerInterval); timerInterval=null }
 
-        const countries = [...new Set(events.map(e => e.tournament.category.country.name))];
-        const leagues = [...new Set(events.map(e => e.tournament.name))];
-        countryFilter.innerHTML = '<option value="">🌍 Bütün ölkələr</option>' + countries.map(c => `<option value="${c}">${c}</option>`).join('');
-        leagueFilter.innerHTML = '<option value="">🏆 Bütün turnirlər</option>' + leagues.map(l => `<option value="${l}">${l}</option>`).join('');
+    function startTest(){
+      settings.count = parseInt(el('wordCount').value);
+      state.words = pickWords(settings.count);
+      state.index = 0;state.correct=0;state.wrong=0;state.perWord = Array(state.words.length).fill(null);
+      state.finished=false;
+      el('typingInput').value='';
+      el('typingInput').disabled=false;el('typingInput').focus();
+      renderStream();updateStats();startTimer();renderResultList();
+    }
 
-        const filtered = events.filter(e =>
-          (e.homeTeam.name.toLowerCase().includes(search) || e.awayTeam.name.toLowerCase().includes(search)) &&
-          (selectedCountry === '' || e.tournament.category.country.name === selectedCountry) &&
-          (selectedLeague === '' || e.tournament.name === selectedLeague)
-        );
+    function finishTest(){
+      state.finished=true;el('typingInput').disabled=true;stopTimer();showModal();
+    }
 
-        filtered.sort((a, b) => a.startTimestamp - b.startTimestamp);
-        displayGroupedMatches(filtered);
-      } catch (err) {
-        document.getElementById('past-matches').innerText = '❌ Xəta baş verdi.';
-        document.getElementById('upcoming-matches').innerText = '';
+    function handleInput(e){
+      if(state.finished) return;
+      const input = e.target.value;
+      const current = state.words[state.index] || '';
+      renderStream();
+      if(input.endsWith(' ')){
+        const trimmed = input.trim();
+        const correct = trimmed === current;
+        if(correct) state.correct++; else state.wrong++;
+        state.perWord[state.index] = {word:current,typed:trimmed,correct};
+        state.index++;
+        el('typingInput').value='';
+        if(state.index >= state.words.length){ finishTest(); }
+        renderStream();updateStats();renderResultList();
       }
     }
 
-    function displayGroupedMatches(matches) {
-      const containerPast = document.getElementById('past-matches');
-      const containerUpcoming = document.getElementById('upcoming-matches');
-      containerPast.innerHTML = '';
-      containerUpcoming.innerHTML = '';
-
-      const now = Math.floor(Date.now() / 1000);
-      const groups = {};
-
-      for (const match of matches) {
-        const id = match.tournament.id;
-        if (!groups[id]) groups[id] = { tournament: match.tournament, matches: [] };
-        groups[id].matches.push(match);
-      }
-
-      for (const groupId in groups) {
-        const group = groups[groupId];
-        const groupBox = document.createElement('div');
-        const logoUrl = `https://api.sofascore.app/api/v1/unique-tournament/${group.tournament.uniqueTournament.id}/image`;
-
-        groupBox.innerHTML = `
-          <h3 style="display:flex; align-items:center; gap:10px; margin-top:30px;">
-            <img src="${logoUrl}" alt="logo" style="width:32px;height:32px;"> ${group.tournament.name}
-          </h3>
-        `;
-
-        for (const match of group.matches) {
-          const isLive = match.status.type === "inprogress";
-          const timestamp = match.startTimestamp;
-          const logo1 = `https://api.sofascore.app/api/v1/team/${match.homeTeam.id}/image`;
-          const logo2 = `https://api.sofascore.app/api/v1/team/${match.awayTeam.id}/image`;
-          const goals = (match.goals || []).map(g => `⚽ ${g.player.name} (${g.home ? match.homeTeam.name : match.awayTeam.name})`).join('<br>');
-          const minute = isLive && match.time ? `${match.time.current ? match.time.current : 'N/A'}’` : '';
-          let statusLabel = isLive ? `<span style="color:green; font-weight:bold;">🟢 Canlı ${minute}</span>` : '';
-          if (match.status.type === "pause") statusLabel = `<span style="color:orange;">⏸️ Fasilə</span>`;
-          if (match.status.type === "finished") statusLabel = `<span style="color:red;">🔚 Bitdi</span>`;
-
-          const div = document.createElement('div');
-          div.className = 'match';
-          div.innerHTML = `
-            <div class="teams">
-              <img class="team-logo" src="${logo1}" alt="logo">
-              <strong>${match.homeTeam.name}</strong>
-              <span>${match.homeScore.current ?? ''} - ${match.awayScore.current ?? ''}</span>
-              <strong>${match.awayTeam.name}</strong>
-              <img class="team-logo" src="${logo2}" alt="logo">
-            </div>
-            <div>
-              ${statusLabel}<br>
-              🗓️ ${new Date(timestamp * 1000).toLocaleString()}<br>
-              🗺️ ${match.tournament.category.country.name}<br>
-              🏟️ ${match.venue?.name || 'N/A'}
-              <div class="stats">${goals ? `<br><br><strong>Qollar:</strong><br>${goals}` : 'Statistika mövcud deyil.'}</div>
-            </div>
-          `;
-          div.addEventListener("click", () => {
-            const stats = div.querySelector(".stats");
-            stats.style.display = stats.style.display === "block" ? "none" : "block";
-          });
-
-          groupBox.appendChild(div);
-        }
-
-        const earliest = group.matches[0].startTimestamp;
-        if (earliest < now) containerPast.appendChild(groupBox);
-        else containerUpcoming.appendChild(groupBox);
-      }
+    function renderResultList(){
+      const list = el('resultList');list.innerHTML='';
+      state.words.forEach((w,i)=>{
+        const div = document.createElement('div');div.className='list-item';
+        const info = state.perWord[i];
+        if(info){ div.classList.add(info.correct? 'correct':'wrong'); }
+        div.innerHTML = `<div style="font-weight:700">${i+1}. ${w}</div><div style="opacity:0.7">${info? (info.correct? '✔':'✖') : '—'}</div>`;
+        list.appendChild(div);
+      })
     }
 
-    fetchMatches();
-    setInterval(fetchMatches, 60000);
+    function showModal(){
+      const modal = el('modal');modal.style.display='flex';
+      const grid = el('resultsGrid');grid.innerHTML='';
+      const total = state.words.length;const correct = state.correct;const wrong = state.wrong;
+      const accuracy = total? Math.round((correct/total)*100) : 0;
+      const timeSec = Math.floor((Date.now()-state.startTime)/1000);
+      const wpm = Math.round(state.index/(timeSec/60)||0);
+
+      const boxes = [
+        {t:'Söz',v:total},
+        {t:'Doğru',v:correct},
+        {t:'Səhv',v:wrong},
+        {t:'Dəqiqlik',v:accuracy+'%'},
+      ];
+      boxes.forEach(b=>{
+        const box = document.createElement('div');box.className='result-box';box.innerHTML=`<div style="font-size:14px;color:var(--muted)">${b.t}</div><div style="font-weight:800;font-size:20px;margin-top:6px">${b.v}</div>`;grid.appendChild(box);
+      })
+
+      const details = el('detailedResults');details.innerHTML='';
+      state.perWord.forEach((p,i)=>{
+        const row = document.createElement('div');row.style.display='flex';row.style.justifyContent='space-between';row.style.padding='8px 4px';
+        row.style.borderBottom='1px dashed rgba(255,255,255,0.02)';
+        const left = document.createElement('div');left.innerHTML=`<strong>${i+1}. ${state.words[i]}</strong> <span style="opacity:0.7;margin-left:8px">→ ${p? p.typed : '—'}</span>`;
+        const right = document.createElement('div');right.textContent = p? (p.correct? '✔' : '✖') : '—';
+        row.appendChild(left);row.appendChild(right);details.appendChild(row);
+      })
+    }
+
+    function closeModal(){
+      el('modal').style.display='none';
+      startTest();
+    }
+
+    function downloadCSV(){
+      const header = 'index,word,typed,correct\n';
+      const lines = state.perWord.map((p,i)=>`${i+1},"${state.words[i]}","${p? p.typed : ''}",${p? (p.correct? '1':'0') : ''}`)
+      const csv = header + lines.join('\n');
+      const blob = new Blob([csv],{type:'text/csv'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');a.href=url;a.download='results.csv';a.click();URL.revokeObjectURL(url);
+    }
+
+    el('typingInput').addEventListener('input',handleInput);
+    el('startBtn').addEventListener('click',startTest);
+    el('resetBtn').addEventListener('click',startTest);
+    el('wordCount').addEventListener('change',startTest);
+    el('closeModal').addEventListener('click',closeModal);
+    el('downloadBtn').addEventListener('click',downloadCSV);
+
+    startTest();
   </script>
+</body>
+</html>
