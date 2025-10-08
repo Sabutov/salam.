@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="az">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AppCreator — Mobil və Veb Tətbiqlərin Hazırlanması</title>
+<link rel="icon" type="image/png" href="https://p16-sign-sg.tiktokcdn.com/tos-alisg-avt-0068/cddc71e545f91f2e79b2e1623a289822~tplv-tiktokx-cropcenter:1080:1080.jpeg">
+
+<style>
+:root{
+  --bg:#0b132b; --card:#0f1724; --accent:#00cfff; --muted:#9aa4b2;
+  --maxw:1100px; --radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:Arial,sans-serif;color:#e6eef6;background:linear-gradient(180deg,#071024 0%, #0d1a2b 100%);-webkit-font-smoothing:antialiased;}
+
+.container{max-width:var(--maxw);margin:0 auto;padding:20px;}
+
+/* header */
+header{display:flex;align-items:center;justify-content:space-between;padding:16px 0;position:relative;}
+.brand{display:flex;align-items:center;gap:12px;}
+.logo{width:52px;height:52px;border-radius:10px;overflow:hidden;}
+.logo img{width:100%;height:100%;object-fit:cover;display:block;}
+.brand div{display:flex;flex-direction:column;}
+.brand .small{font-size:12px;color:var(--muted);}
+
+/* Desktop nav */
+nav.desktop-nav{display:flex;gap:18px;align-items:center;}
+nav.desktop-nav a{color:var(--muted);text-decoration:none;font-weight:600;position:relative;transition:0.3s;}
+nav.desktop-nav a::after{content:"";position:absolute;bottom:-5px;left:0;width:0;height:3px;background-color:var(--accent);transition:width 0.3s;border-radius:2px;}
+nav.desktop-nav a:hover{color:var(--accent);}
+nav.desktop-nav a:hover::after{width:100%;}
+nav.desktop-nav a.active{color:var(--accent);}
+nav.desktop-nav a.active::after{width:100%;}
+.cta{background:var(--accent);color:#022;padding:10px 14px;border-radius:10px;font-weight:700;text-decoration:none;transition:all 0.3s;}
+.cta:hover{transform:scale(1.05);}
+
+/* Hamburger menu */
+.mobile-menu{display:none;position:relative;}
+#menuBtn{font-size:28px;background:none;border:none;color:white;cursor:pointer;}
+#mobileNav{display:none;flex-direction:column;gap:10px;background:var(--card);padding:12px;border-radius:10px;position:absolute;top:60px;right:0;min-width:180px;z-index:1000;}
+#mobileNav a{color:white;text-decoration:none;font-weight:600;padding:6px 0;}
+#mobileNav a.cta{color:#022;background:var(--accent);padding:10px 14px;border-radius:10px;text-align:center;}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1fr 420px;gap:28px;align-items:center;padding:36px 0;}
+.hero h1{font-size:clamp(26px,4vw,40px);margin-bottom:12px;}
+.hero p{color:var(--muted);margin-bottom:20px;line-height:1.5;}
+.features{display:flex;gap:12px;flex-wrap:wrap;}
+.feature{background:var(--card);padding:12px;border-radius:12px;min-width:160px;}
+.card{background:var(--card);padding:18px;border-radius:16px;box-shadow:0 6px 20px rgba(2,6,23,0.6);}
+
+/* services */
+.services{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:18px;}
+.service h3{margin:6px 0 8px;}
+.service p{color:var(--muted);margin:0;}
+
+/* portfolio */
+.portfolio{margin-top:26px;}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.proj{overflow:hidden;border-radius:21px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:20px;}
+.proj img{width:100%;height:140px;object-fit:cover;border-radius:8px;}
+.muted{color:var(--muted);}
+.small{font-size:13px;}
+
+/* contact */
+.contact{display:grid;grid-template-columns:1fr 420px;gap:18px;margin:28px 0;}
+input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;margin-bottom:10px;}
+button{padding:10px 14px;border-radius:10px;border:0;font-weight:700;background:var(--accent);color:#022;cursor:pointer;}
+footer{text-align:center;color:var(--muted);padding:24px 0;}
+
+/* responsive */
+@media(max-width:980px){
+  .hero,.contact{grid-template-columns:1fr;}
+  .services{grid-template-columns:repeat(2,1fr);}
+  .grid{grid-template-columns:repeat(2,1fr);}
+  nav.desktop-nav{display:none;}
+  .mobile-menu{display:block;}
+}
+@media(max-width:560px){
+  .services{grid-template-columns:1fr;}
+  .grid{grid-template-columns:1fr;}
+  .logo{width:44px;height:44px;}
+}
+a{
+  text-decoration: none;
+  color: red;
+  
+  
+}
+
+
+
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <div class="brand">
+    <div class="logo">
+      <img src="https://p16-sign-sg.tiktokcdn.com/tos-alisg-avt-0068/cddc71e545f91f2e79b2e1623a289822~tplv-tiktokx-cropcenter:1080:1080.jpeg?dr=14579&refresh_token=e00119d6&x-expires=1760076000&x-signature=zIUiyC1HyAtCac03YsVaRJ2mpRU%3D&t=4d5b0474&ps=13740610&shp=a5d48078&shcp=81f88b70&idc=my" alt="Logo">
+    </div>
+    <div>
+      <div style="font-weight:800">AppCreator</div>
+      <div class="small muted">Mobil & Veb Tətbiqlər — UI/UX & İnkişaf</div>
+    </div>
+  </div>
+  <nav class="desktop-nav">
+    <a href="#services">Xidmətlər</a>
+    <a href="#portfolio">Portfel</a>
+    <a href="https://sabutov.github.io/salam./elaqemiz.html">Əlaqə</a>
+    <a class="cta" href="#contact">Layihəni Başla</a>
+  </nav>
+  <div class="mobile-menu">
+    <button id="menuBtn">☰</button>
+    <nav id="mobileNav">
+      <a href="#services">Xidmətlər</a>
+      <a href="#portfolio">Portfel</a>
+      <a href="https://sabutov.github.io/salam./elaqemiz.html">Əlaqə</a>
+      <a class="cta" href="#contact">Layihəni Başla</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero">
+  <div>
+    <h1>Fikirdən Tam İşlək Tətbiqə — Sürətli və Etibarlı</h1>
+    <p>AppCreator olaraq ideyanızı mobil və ya veb tətbiqə çeviririk. Analiz, dizayn, inkişaf, test və bazara çıxarma — hamısını biz edirik.</p>
+    <div class="card">
+      <a class="cta" href="https://wa.me/994709000723?text=Salam.Mən Web Sayt hazırlatmaq istəyirəm" target="_blank" onclick="autoReply()">Müraciət et</a>
+      <div class="features" style="margin-top:10px">
+        <div class="feature small">UI/UX Dizayn</div>
+        <div class="feature small">Mobil (iOS & Android)</div>
+        <div class="feature small">Backend & API</div>
+      </div>
+    </div>
+    <div class="services" id="services">
+      <div class="card service">
+        <div style="font-size:24px">📱</div>
+        <h3>Mobil Tətbiqlər</h3>
+        <p>Native və cross-platform (React Native, Flutter) tətbiq inkişafı.</p>
+      </div>
+      <div class="card service">
+        <div style="font-size:24px">💻</div>
+        <h3>Veb Tətbiqlər</h3>
+        <p>Performant və təhlükəsiz veb tətbiqlər — SPA, PWA və server tərəfli həllər.</p>
+      </div>
+      <div class="card service">
+        <div style="font-size:24px">🎨</div>
+        <h3>UI/UX Dizayn</h3>
+        <p>İstifadəçi yönümlü interfeyslər, prototiplər və istifadəçi testləri.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="portfolio card" id="portfolio">
+  <h2 style="margin-bottom:12px">Son layihələrimiz</h2>
+  <div class="grid">
+    <div class="proj">
+      <img src="https://i.postimg.cc/cC4LMX6V/1000249424.jpg" alt="layihe 1">
+      <div style="font-weight:700;margin-top:8px">Tərcüməçi tətbiq</div>
+      <div class="muted small">Artıq tərcüməçi tətbiqi ilə dillər arasında rahat keçid edə bilərsiniz
+        <a href="https://www.mediafire.com/file/tl5kebpuyxdit1l/tercumeciaz.apk/file">Buradan yüklə</a>
+      </div>
+    </div>
+    <div class="proj">
+      <img src="https://i.postimg.cc/qMwZ5Qqg/1000251731.jpg" alt="layihe 2">
+      <div style="font-weight:700;margin-top:8px">QrData Tətbiqi</div>
+      <div class="muted small">Məlumatlarınızı yazaraq onları qr cod halına çevirin.
+        <a href="https://www.mediafire.com/file/0l1i00602994zkw/Qrdata.apk/file">Buradan Yüklə</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="contact" id="contact">
+  <div class="card">
+    <h2>Layihənizdən danışın</h2>
+    <p class="muted small">Qısa bir təsvir yazın — nə etmək istəyirsiniz, hansı platformalar önəmlidir, büdcə və zaman çərçivəsi.</p>
+    <form action="https://formspree.io/f/mldpwbrw" method="POST">
+      <input type="text" name="name" placeholder="Ad" required>
+      <input type="email" name="email" placeholder="E-poçt" required>
+      <textarea name="message" placeholder="Mesaj" required></textarea>
+      <button type="submit">Göndər</button>
+    </form>
+  </div>
+
+  <aside class="card">
+    <div style="font-weight:800">Əlaqə</div>
+    <div class="muted small" style="margin-top:8px">Bakı, Azərbaycan</div>
+    <div style="margin-top:6px">Telefon: +994 70 900 07 23</div>
+    <div style="margin-top:6px">E-poçt: apppcreator@gmail.com</div>
+    <div style="margin-top:14px">
+      <div style="font-weight:700">Qiymət planları</div>
+      <div class="small muted" style="margin-top:8px">Start — prototip və MVP<br>Business — tam məhsul<br>Enterprise — xüsusi həllər</div>
+    </div>
+  </aside>
+</section>
+
+<footer>© <span id="year"></span> AppCreator. Bütün hüquqlar qorunur.</footer>
+</div>
+
+<script>
+// WhatsApp alert
+function autoReply() { alert("WhatsApp açılır... Bizim bot sizə avtomatik cavab verəcək ✅"); }
+
+// Hamburger toggle
+const menuBtn = document.getElementById('menuBtn');
+const mobileNav = document.getElementById('mobileNav');
+menuBtn.addEventListener('click', ()=> {
+  mobileNav.style.display = mobileNav.style.display==="flex" ? "none":"flex";
+});
+
+// İl göstəricisi
+document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
