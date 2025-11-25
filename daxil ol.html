@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>giris parol</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background-color: #f0f0f0;
+    
+}
+.email {
+    background-color: yellowgreen;
+    width: 600px;
+    margin: 150px auto;
+    padding: 40px;
+    border-radius: 40px;
+    color: white;
+    text-align: center;
+}
+textarea, #codeInput {
+    border-radius: 20px;
+    width: 80%;
+    padding: 10px;
+    font-size: 16px;
+    border: 3px solid brown;
+    margin-top: 20px;
+    resize: none;
+    font-family: 'Poppins';
+    height: 30px;
+}
+button {
+    margin-top: 20px;
+    height: 50px;
+    width: 150px;
+    border-radius: 23px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+button:hover {
+    background-color: green;
+    color: white;
+    transform: translateY(5px);
+}
+#otpMessage {
+    margin-top: 50px;
+    font-size: 20px;
+    font-weight: 600;
+    display: none;
+}
+#codeSection {
+    display: none;
+}
+#verifyBtn {
+    margin-top: 15px;
+    width: 150px;
+    height: 45px;
+    border-radius: 20px;
+    font-size: 18px;
+    cursor: pointer;
+}
+h3{
+    font-style: italic;
+}
+</style>
+</head>
+<body>
+
+<div class="email">
+    <h3>TypinMaster</h3>
+    <h1>Emailinizi Daxil edin:</h1>
+
+    <!-- Email bölməsi -->
+    <div id="emailSection">
+        <textarea id="emailInput" placeholder="Emailinizi daxil edin"></textarea>
+        <br>
+        <button id="sendCodeBtn">Davam et</button>
+    </div>
+
+    <!-- OTP mesajı -->
+    <div id="otpMessage">OTP kod göndərildi ✔</div>
+
+    <!-- OTP bölməsi -->
+    <div id="codeSection">
+        <h2>OTP Kodunu daxil edin:</h2>
+        <input type="text" id="codeInput" placeholder="Kod">
+        <br>
+        <button id="verifyBtn">Daxil ol</button>
+    </div>
+</div>
+
+
+<script>
+// ======================================================
+// 1) LOGIN SƏHİFƏSİ — QEYDİYYAT YOXLAMASI BURADA EDİLİR
+// ======================================================
+
+// "Davam et" düyməsi klik olunduqda:
+document.getElementById("sendCodeBtn").onclick = function () {
+    const email = document.getElementById("emailInput").value.trim();
+
+    if (email === "") {
+        alert("Email daxil edin!");
+        return;
+    }
+
+    // Qeydiyyatdan keçən istifadəçiləri götür
+    let users = JSON.parse(localStorage.getItem("users")) || {};
+
+    // Email mövcud DEYİLSƏ:
+    if (!users[email]) {
+        alert("Bu email qeydiyyatdan keçməyib! Zəhmət olmasa qeydiyyatdan keçin.");
+        window.location.href = "qeydiyyat.html"; // Qeydiyyat səhifəsinə göndər
+        return;
+    }
+
+    // Email varsa → OTP mərhələsinə keç
+    document.getElementById("otpMessage").style.display = "block";
+    document.getElementById("codeSection").style.display = "block";
+    document.getElementById("emailSection").style.display = "none";
+
+    // OTP yaradılır (sadə nümunə)
+    const otp = Math.floor(100000 + Math.random() * 900000);
+    localStorage.setItem("currentOTP", otp);
+    localStorage.setItem("loginEmail", email);
+
+    console.log("OTP:", otp); // <> burada ekrana yazılır (test üçün)
+};
+
+
+// OTP YOXLAMA
+document.getElementById("verifyBtn").onclick = function () {
+    const enteredOTP = document.getElementById("codeInput").value.trim();
+    const realOTP = localStorage.getItem("currentOTP");
+    const email = localStorage.getItem("loginEmail");
+
+    if (enteredOTP === realOTP) {
+        alert("UGURLU GİRİŞ ✔");
+        window.location.href = "salam.html?email=" + email;
+    } else {
+        alert("OTP kod səhvdir!");
+    }
+};
+
+</script>
+
+</body>
+</html>
