@@ -23,12 +23,15 @@ body {
     text-align: center;
 }
 textarea, #codeInput {
-    border-radius: 40px;
+    border-radius: 20px;
     width: 80%;
     padding: 10px;
     font-size: 16px;
     border: 3px solid brown;
     margin-top: 20px;
+    resize: none;
+    font-family: 'Poppins';
+    height: 30px;
 }
 button {
     margin-top: 20px;
@@ -44,7 +47,7 @@ button:hover {
     transform: translateY(15px);
 }
 #otpMessage {
-    margin-top: 20px;
+    margin-top: 50px;
     font-size: 20px;
     font-weight: 600;
     display: none;
@@ -105,6 +108,8 @@ document.getElementById("sendCodeBtn").addEventListener("click", function() {
         alert("Email daxil edin!");
         return;
     }
+    document.querySelector("h1").style.display = "none";
+
 
     generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
 
