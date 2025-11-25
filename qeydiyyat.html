@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <title>Qeydiyyat</title>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <style>
+        body {
+            font-family: Arial;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f0f0f0;
+        }
+        .card {
+            background: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            width: 350px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        input {
+            width: 90%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 8px;
+            border: 1px solid #aaa;
+        }
+        button {
+            margin-top: 15px;
+            width: 52%;
+            padding: 12px;
+            border: none;
+            background: #1E88E5;
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        #googleBtn {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        h5 a{
+            text-decoration: none;
+            color: crimson;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Qeydiyyat</h2>
+
+    <!-- Email və şifrə -->
+    <input type="text" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Şifrə">
+    <button onclick="qeydiyyatEt()">Qeydiyyat</button>
+
+    <hr>
+
+    <!-- Google login -->
+    <div id="googleBtn"></div>
+
+    <h5>Hesabın var? <a href="https://sabutov.github.io/salam./daxil%20ol.html">Daxil ol</a></h5>
+</div>
+
+<script>
+    // =========================
+    //   GOOGLE CALLBACK
+    // =========================
+    function handleGoogleResponse(response) {
+        const token = response.credential;
+        window.location.href = "salam.html?token=" + token;
+    }
+
+    // GOOGLE INIT
+    window.onload = function() {
+        google.accounts.id.initialize({
+            client_id: "470115185584-q848dhslvvdarobgbaqh3ne6promfi3a.apps.googleusercontent.com",
+            callback: handleGoogleResponse
+        });
+
+        google.accounts.id.renderButton(
+            document.getElementById("googleBtn"),
+            { theme: "outline", size: "large" }
+        );
+    };
+
+    // =========================
+    //     QEYDİYYAT FUNKSIYASI
+    // =========================
+    function qeydiyyatEt() {
+        const email = document.getElementById("email").value.trim();
+        const pass  = document.getElementById("password").value.trim();
+
+        if (email === "" || pass === "") {
+            alert("Məlumatları doldur!");
+            return;
+        }
+
+        // Mövcud istifadəçiləri götür
+        let users = JSON.parse(localStorage.getItem("users")) || {};
+
+        // Eyni email artıq varsa
+        if (users[email]) {
+            alert("Bu email ilə artıq qeydiyyatdan keçmisiniz!");
+            return;
+        }
+
+        // Yeni istifadəçini əlavə et
+        users[email] = pass;
+
+        // LocalStorage-a yaz
+        localStorage.setItem("users", JSON.stringify(users));
+
+        // Emaili ayrıca saxlayaq
+        localStorage.setItem("registeredEmail", email);
+
+        // salam.html-ə yönləndir
+        window.location.href = "salam.html?email=" + encodeURIComponent(email);
+    }
+</script>
+
+</body>
+</html>
