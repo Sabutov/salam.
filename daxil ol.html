@@ -11,7 +11,6 @@ body {
     margin: 0;
     font-family: 'Poppins', sans-serif;
     background-color: #f0f0f0;
-    
 }
 .email {
     background-color: yellowgreen;
@@ -75,17 +74,14 @@ h3{
     <h3>TypinMaster</h3>
     <h1>Emailinizi Daxil edin:</h1>
 
-    <!-- Email bölməsi -->
     <div id="emailSection">
         <textarea id="emailInput" placeholder="Emailinizi daxil edin"></textarea>
         <br>
         <button id="sendCodeBtn">Davam et</button>
     </div>
 
-    <!-- OTP mesajı -->
     <div id="otpMessage">OTP kod göndərildi ✔</div>
 
-    <!-- OTP bölməsi -->
     <div id="codeSection">
         <h2>OTP Kodunu daxil edin:</h2>
         <input type="text" id="codeInput" placeholder="Kod">
@@ -94,59 +90,57 @@ h3{
     </div>
 </div>
 
-
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
-// ======================================================
-// 1) LOGIN SƏHİFƏSİ — QEYDİYYAT YOXLAMASI BURADA EDİLİR
-// ======================================================
+emailjs.init("xEfr4FxWCyZag9EgB");
+const serviceID = "service_4jeponl";
+const templateID = "template_03qfkuv";
 
-// "Davam et" düyməsi klik olunduqda:
-document.getElementById("sendCodeBtn").onclick = function () {
+let generatedCode = "";
+
+document.getElementById("sendCodeBtn").addEventListener("click", function() {
     const email = document.getElementById("emailInput").value.trim();
-
-    if (email === "") {
+    if (!email) {
         alert("Email daxil edin!");
         return;
     }
 
-    // Qeydiyyatdan keçən istifadəçiləri götür
     let users = JSON.parse(localStorage.getItem("users")) || {};
-
-    // Email mövcud DEYİLSƏ:
     if (!users[email]) {
-        alert("Bu email qeydiyyatdan keçməyib! Zəhmət olmasa qeydiyyatdan keçin.");
-        window.location.href = "qeydiyyat.html"; // Qeydiyyat səhifəsinə göndər
+        alert("Bu email qeydiyyatda deyil! Qeydiyyatdan keçin!");
+        window.location.href = "qeydiyyat.html";
         return;
     }
 
-    // Email varsa → OTP mərhələsinə keç
-    document.getElementById("otpMessage").style.display = "block";
-    document.getElementById("codeSection").style.display = "block";
-    document.getElementById("emailSection").style.display = "none";
+    document.querySelector("h1").style.display = "none";
 
-    // OTP yaradılır (sadə nümunə)
-    const otp = Math.floor(100000 + Math.random() * 900000);
-    localStorage.setItem("currentOTP", otp);
-    localStorage.setItem("loginEmail", email);
+    generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-    console.log("OTP:", otp); // <> burada ekrana yazılır (test üçün)
-};
+    emailjs.send(serviceID, templateID, {
+        email: email,
+        passcode: generatedCode,
+        time: "15 dəq"
+    })
+    .then(() => {
+        document.getElementById("emailSection").style.display = "none";
+        document.getElementById("otpMessage").style.display = "block";
+        document.getElementById("codeSection").style.display = "block";
+    })
+    .catch(err => {
+        alert("Email göndərilə bilmədi!");
+        console.log(err);
+    });
+});
 
-
-// OTP YOXLAMA
-document.getElementById("verifyBtn").onclick = function () {
-    const enteredOTP = document.getElementById("codeInput").value.trim();
-    const realOTP = localStorage.getItem("currentOTP");
-    const email = localStorage.getItem("loginEmail");
-
-    if (enteredOTP === realOTP) {
-        alert("UGURLU GİRİŞ ✔");
-        window.location.href = "salam.html?email=" + email;
+document.getElementById("verifyBtn").addEventListener("click", function() {
+    const entered = document.getElementById("codeInput").value.trim();
+    if (entered === generatedCode) {
+        alert("Doğrulama uğurla tamamlandı!");
+        window.location.href="https://typingmasteraz.github.io/salam./salam.html";
     } else {
-        alert("OTP kod səhvdir!");
+        alert("Kod səhvdir!");
     }
-};
-
+});
 </script>
 
 </body>
