@@ -2,132 +2,73 @@
 <html lang="az">
 <head>
     <meta charset="UTF-8">
-    <title>Qeydiyyat</title>
-
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-
-    <style>
-        body {
-            font-family: Arial;
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #f0f0f0;
-        }
-        .card {
-            background: #fff;
-            padding: 30px;
-            border-radius: 15px;
-            width: 350px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        input {
-            width: 90%;
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 8px;
-            border: 1px solid #aaa;
-        }
-        button {
-            margin-top: 15px;
-            width: 52%;
-            padding: 12px;
-            border: none;
-            background: #1E88E5;
-            color: #fff;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        #googleBtn {
-            margin-top: 20px;
-            display: flex;
-            justify-content: center;
-        }
-        h5 a{
-            text-decoration: none;
-            color: crimson;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
 </head>
 <body>
 
-<div class="card">
-    <h2>Qeydiyyat</h2>
+<h2>Login System</h2>
 
-    <!-- Email və şifrə -->
-    <input type="text" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Şifrə">
-    <button onclick="qeydiyyatEt()">Qeydiyyat</button>
+<input type="email" id="email" placeholder="Email daxil et"><br><br>
+<input type="password" id="password" placeholder="Şifrə daxil et"><br><br>
 
-    <hr>
+<button onclick="signUp()">Qeydiyyat</button>
+<button onclick="signIn()">Daxil ol</button>
+<br><br>
+<button onclick="googleLogin()">Google ilə daxil ol</button>
 
-    <!-- Google login -->
-    <div id="googleBtn"></div>
+<p id="status"></p>
 
-    <h5>Hesabın var? <a href="https://typingmasteraz.github.io/salam./daxil%20ol.html">Daxil ol</a></h5>
-</div>
-
-<script>
-    // =========================
-    //   GOOGLE CALLBACK
-    // =========================
-    function handleGoogleResponse(response) {
-        const token = response.credential;
-        window.location.href = "salam.html?token=" + token;
-    }
-
-    // GOOGLE INIT
-    window.onload = function() {
-        google.accounts.id.initialize({
-            client_id: "470115185584-q848dhslvvdarobgbaqh3ne6promfi3a.apps.googleusercontent.com",
-            callback: handleGoogleResponse
-        });
-
-        google.accounts.id.renderButton(
-            document.getElementById("googleBtn"),
-            { theme: "outline", size: "large" }
-        );
+<script type="module">
+    // ===================== Firebase Config =====================
+    const firebaseConfig = {
+        apiKey: "AIzaSyBwwjICwUwctff195pPDJeldRa0Z8ho21k",
+        authDomain: "ayeyee-510c1.firebaseapp.com",
+        projectId: "ayeyee-510c1",
+        storageBucket: "ayeyee-510c1.firebasestorage.app",
+        messagingSenderId: "670367789282",
+        appId: "1:670367789282:web:8e7d5d988eee3b93296ebb"
     };
 
-    // =========================
-    //     QEYDİYYAT FUNKSIYASI
-    // =========================
-    function qeydiyyatEt() {
-        const email = document.getElementById("email").value.trim();
-        const pass  = document.getElementById("password").value.trim();
+    // Firebase SDK
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
+    import { 
+        getAuth, 
+        createUserWithEmailAndPassword,
+        signInWithEmailAndPassword,
+        GoogleAuthProvider,
+        signInWithPopup 
+    } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
 
-        if (email === "" || pass === "") {
-            alert("Məlumatları doldur!");
-            return;
-        }
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+    
+    // Emaillə qeydiyyat
+    window.signUp = function () {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        createUserWithEmailAndPassword(auth, email, password)
+            .then(() => document.getElementById("status").innerText = "Qeydiyyat uğurlu oldu! ✔")
+            .catch(error => document.getElementById("status").innerText = error.message);
+    }
 
-        // Mövcud istifadəçiləri götür
-        let users = JSON.parse(localStorage.getItem("users")) || {};
+    // Email ilə daxil olma
+    window.signIn = function () {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        signInWithEmailAndPassword(auth, email, password)
+            .then(() => document.getElementById("status").innerText = "Daxil oldun! ✔")
+            .catch(error => document.getElementById("status").innerText = error.message);
+    }
 
-        // Eyni email artıq varsa
-        if (users[email]) {
-            alert("Bu email ilə artıq qeydiyyatdan keçmisiniz!");
-            return;
-        }
-
-        // Yeni istifadəçini əlavə et
-        users[email] = pass;
-
-        // LocalStorage-a yaz
-        localStorage.setItem("users", JSON.stringify(users));
-
-        // Emaili ayrıca saxlayaq
-        localStorage.setItem("registeredEmail", email);
-
-        // salam.html-ə yönləndir
-        window.location.href = "salam.html?email=" + encodeURIComponent(email);
+    // Google ilə login
+    window.googleLogin = function () {
+        signInWithPopup(auth, provider)
+            .then(() => document.getElementById("status").innerText = "Google ilə daxil oldun! ✔")
+            .catch(error => document.getElementById("status").innerText = error.message);
     }
 </script>
 
 </body>
 </html>
-
-
