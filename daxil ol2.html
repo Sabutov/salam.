@@ -1,0 +1,148 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>giris parol</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background-color: #f0f0f0;
+}
+.email {
+    background-color: yellowgreen;
+    width: 600px;
+    margin: 150px auto;
+    padding: 40px;
+    border-radius: 40px;
+    color: white;
+    text-align: center;
+}
+textarea, #codeInput {
+    border-radius: 20px;
+    width: 80%;
+    padding: 10px;
+    font-size: 16px;
+    border: 3px solid brown;
+    margin-top: 20px;
+    resize: none;
+    font-family: 'Poppins';
+    height: 30px;
+}
+button {
+    margin-top: 20px;
+    height: 50px;
+    width: 150px;
+    border-radius: 23px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+button:hover {
+    background-color: green;
+    color: white;
+    transform: translateY(5px);
+}
+#otpMessage {
+    margin-top: 50px;
+    font-size: 20px;
+    font-weight: 600;
+    display: none;
+}
+#codeSection {
+    display: none;
+}
+#verifyBtn {
+    margin-top: 15px;
+    width: 150px;
+    height: 45px;
+    border-radius: 20px;
+    font-size: 18px;
+    cursor: pointer;
+}
+h3{
+    font-style: italic;
+}
+</style>
+</head>
+<body>
+
+<div class="email">
+    <h3>TypinMaster</h3>
+    <h1>Emailinizi Daxil edin:</h1>
+
+    <div id="emailSection">
+        <textarea id="emailInput" placeholder="Emailinizi daxil edin"></textarea>
+        <br>
+        <button id="sendCodeBtn">Davam et</button>
+    </div>
+
+    <div id="otpMessage">OTP kod göndərildi ✔</div>
+
+    <div id="codeSection">
+        <h2>OTP Kodunu daxil edin:</h2>
+        <input type="text" id="codeInput" placeholder="Kod">
+        <br>
+        <button id="verifyBtn">Daxil ol</button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+emailjs.init("xEfr4FxWCyZag9EgB");
+const serviceID = "service_4jeponl";
+const templateID = "template_03qfkuv";
+
+let generatedCode = "";
+
+document.getElementById("sendCodeBtn").addEventListener("click", function() {
+    const email = document.getElementById("emailInput").value.trim();
+    if (!email) {
+        alert("Email daxil edin!");
+        return;
+    }
+
+    let users = JSON.parse(localStorage.getItem("users")) || {};
+    if (!users[email]) {
+        alert("Bu email qeydiyyatda deyil! Qeydiyyatdan keçin!");
+        window.location.href = "qeydiyyat.html";
+        return;
+    }
+
+    document.querySelector("h1").style.display = "none";
+
+    generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    emailjs.send(serviceID, templateID, {
+        email: email,
+        passcode: generatedCode,
+        time: "15 dəq"
+    })
+    .then(() => {
+        document.getElementById("emailSection").style.display = "none";
+        document.getElementById("otpMessage").style.display = "block";
+        document.getElementById("codeSection").style.display = "block";
+    })
+    .catch(err => {
+        alert("Email göndərilə bilmədi!");
+        console.log(err);
+    });
+});
+
+document.getElementById("verifyBtn").addEventListener("click", function() {
+    const entered = document.getElementById("codeInput").value.trim();
+    if (entered === generatedCode) {
+        alert("Doğrulama uğurla tamamlandı!");
+        window.location.href="https://typingmasteraz.github.io/salam./salam.html";
+    } else {
+        alert("Kod səhvdir!");
+    }
+});
+</script>
+
+</body>
+</html>
