@@ -1,8 +1,32 @@
+
 <!DOCTYPE html>
 <html lang="az">
 <head>
   <meta charset="UTF-8">
   <title>Google ilə giriş</title>
+  <style>
+    body{
+        display: flex;
+        flex-direction: column;
+        gap: 10px
+
+    }
+    .salam{
+      height: 50px;
+      width: 174px;
+      border-radius: 20px;
+      font-size: 15px;
+    }
+    button{
+      border-radius: 20px;
+    }
+    .salam:hover{
+      background-color: aquamarine;
+    }
+    button:hover{
+      background-color: aquamarine;
+    }
+  </style>
 
   <!-- Firebase CDN -->
   <script type="module">
@@ -44,6 +68,10 @@
 
   <button onclick="googleLogin()" style="padding:15px 25px; font-size:18px;">
     Google ilə giriş
+  </button>
+  <button class="salam" onclick="window.location.href='https://typingmasteraz.github.io/ayda/daxil%20ol.html'">
+    Emaille giris
+    
   </button>
 
 </body>
